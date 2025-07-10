@@ -68,7 +68,7 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
                   Expanded(
                     child: Container(
                       width: 100,
-                      height: 210.36,
+                      height: 210.65,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
@@ -97,7 +97,7 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
                                         0, 0, 0, 10),
                                     child: Container(
                                       width: 300,
-                                      height: 140,
+                                      height: 160.05,
                                       decoration: BoxDecoration(
                                         color: FlutterFlowTheme.of(context)
                                             .secondaryBackground,
@@ -317,7 +317,7 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
                                               Expanded(
                                                 child: Container(
                                                   width: 100,
-                                                  height: 70,
+                                                  height: 77.55,
                                                   decoration: BoxDecoration(),
                                                   child: Padding(
                                                     padding:
@@ -345,6 +345,9 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
                                                               mainAxisSize:
                                                                   MainAxisSize
                                                                       .max,
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceEvenly,
                                                               children: [
                                                                 Column(
                                                                   mainAxisSize:
@@ -364,6 +367,8 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
                                                                             Column(
                                                                           mainAxisSize:
                                                                               MainAxisSize.max,
+                                                                          mainAxisAlignment:
+                                                                              MainAxisAlignment.center,
                                                                           children: [
                                                                             Row(
                                                                               mainAxisSize: MainAxisSize.max,

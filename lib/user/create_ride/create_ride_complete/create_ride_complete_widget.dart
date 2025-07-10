@@ -6,6 +6,7 @@ import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+
 import 'create_ride_complete_model.dart';
 export 'create_ride_complete_model.dart';
 
@@ -47,11 +48,11 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
         body: SafeArea(
           top: true,
           child: Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(1.0, 0.0, 0.0, 0.0),
+            padding: EdgeInsetsDirectional.fromSTEB(1, 0, 0, 0),
             child: Column(
               mainAxisSize: MainAxisSize.max,
               children: [
@@ -60,11 +61,10 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
                   children: [
                     Expanded(
                       child: Padding(
-                        padding:
-                            EdgeInsetsDirectional.fromSTEB(1.0, 0.0, 0.0, 0.0),
+                        padding: EdgeInsetsDirectional.fromSTEB(1, 0, 0, 0),
                         child: Container(
-                          width: 393.0,
-                          height: 100.0,
+                          width: 393,
+                          height: 100,
                           decoration: BoxDecoration(
                             color: FlutterFlowTheme.of(context)
                                 .secondaryBackground,
@@ -80,14 +80,13 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
                     Expanded(
                       child: Container(
                         width: 394.5,
-                        height: 541.0,
+                        height: 541,
                         decoration: BoxDecoration(
                           color:
                               FlutterFlowTheme.of(context).secondaryBackground,
                         ),
                         child: Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
-                              10.0, 0.0, 10.0, 0.0),
+                          padding: EdgeInsetsDirectional.fromSTEB(10, 0, 10, 0),
                           child: Column(
                             mainAxisSize: MainAxisSize.max,
                             children: [
@@ -96,7 +95,7 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
                                 children: [
                                   Expanded(
                                     child: Container(
-                                      width: 373.0,
+                                      width: 373,
                                       height: 63.9,
                                       decoration: BoxDecoration(
                                         color: FlutterFlowTheme.of(context)
@@ -108,7 +107,7 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
                                           Padding(
                                             padding:
                                                 EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 0.0, 0.0, 5.0),
+                                                    0, 0, 0, 5),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.max,
                                               children: [
@@ -198,8 +197,8 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
                                 children: [
                                   Expanded(
                                     child: Container(
-                                      width: 100.0,
-                                      height: 53.0,
+                                      width: 100,
+                                      height: 53,
                                       decoration: BoxDecoration(
                                         color: FlutterFlowTheme.of(context)
                                             .secondaryBackground,
@@ -345,15 +344,14 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
                                 children: [
                                   Expanded(
                                     child: Container(
-                                      width: 100.0,
+                                      width: 100,
                                       height: 118.7,
                                       decoration: BoxDecoration(
                                         color: FlutterFlowTheme.of(context)
                                             .secondaryBackground,
                                       ),
                                       child: Align(
-                                        alignment:
-                                            AlignmentDirectional(0.0, 0.0),
+                                        alignment: AlignmentDirectional(0, 0),
                                         child: Column(
                                           mainAxisSize: MainAxisSize.max,
                                           mainAxisAlignment:
@@ -365,7 +363,7 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
                                                 Flexible(
                                                   child: Container(
                                                     width: 372.2,
-                                                    height: 108.0,
+                                                    height: 108,
                                                     decoration: BoxDecoration(
                                                       color: FlutterFlowTheme
                                                               .of(context)
@@ -381,7 +379,7 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
                                                           children: [
                                                             Container(
                                                               width: 23.7,
-                                                              height: 108.0,
+                                                              height: 108,
                                                               decoration:
                                                                   BoxDecoration(
                                                                 color: FlutterFlowTheme.of(
@@ -425,7 +423,7 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
                                                                             color:
                                                                                 Color(0xFF00275C),
                                                                             size:
-                                                                                16.0,
+                                                                                16,
                                                                           ),
                                                                         ),
                                                                       ),
@@ -445,11 +443,11 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
                                                                       children: [
                                                                         SizedBox(
                                                                           height:
-                                                                              45.0,
+                                                                              45,
                                                                           child:
                                                                               VerticalDivider(
                                                                             thickness:
-                                                                                2.0,
+                                                                                2,
                                                                             color:
                                                                                 Color(0xFF00275C),
                                                                           ),
@@ -483,7 +481,7 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
                                                                             color:
                                                                                 Color(0xFF00275C),
                                                                             size:
-                                                                                16.0,
+                                                                                16,
                                                                           ),
                                                                         ),
                                                                       ),
@@ -501,7 +499,7 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
                                                             Expanded(
                                                               child: Container(
                                                                 width: 249.7,
-                                                                height: 108.0,
+                                                                height: 108,
                                                                 decoration:
                                                                     BoxDecoration(
                                                                   color: FlutterFlowTheme.of(
@@ -511,10 +509,10 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
                                                                 child: Padding(
                                                                   padding: EdgeInsetsDirectional
                                                                       .fromSTEB(
-                                                                          10.0,
-                                                                          0.0,
-                                                                          0.0,
-                                                                          0.0),
+                                                                          10,
+                                                                          0,
+                                                                          0,
+                                                                          0),
                                                                   child: Column(
                                                                     mainAxisSize:
                                                                         MainAxisSize
@@ -598,36 +596,50 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
                 Row(
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    Container(
-                      width: 391.81,
-                      height: 116.0,
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).secondaryBackground,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Expanded(
-                            child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                  10.0, 0.0, 10.0, 0.0),
-                              child: FFButtonWidget(
-                                onPressed: () async {
-                                  context.pushNamed(
-                                      CreateRideHomeWidget.routeName);
-                                },
-                                text: 'Complete',
-                                options: FFButtonOptions(
-                                  height: 46.7,
-                                  padding: EdgeInsetsDirectional.fromSTEB(
-                                      16.0, 0.0, 16.0, 0.0),
-                                  iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 0.0, 0.0, 0.0),
-                                  color: Color(0xFF00275C),
-                                  textStyle: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .override(
-                                        font: GoogleFonts.interTight(
+                    Expanded(
+                      child: Container(
+                        width: 391.81,
+                        height: 116,
+                        decoration: BoxDecoration(
+                          color:
+                              FlutterFlowTheme.of(context).secondaryBackground,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(
+                                    10, 0, 10, 0),
+                                child: FFButtonWidget(
+                                  onPressed: () async {
+                                    context.pushNamed(
+                                        CreateRideHomeWidget.routeName);
+                                  },
+                                  text: 'Complete',
+                                  options: FFButtonOptions(
+                                    height: 46.7,
+                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                        16, 0, 16, 0),
+                                    iconPadding: EdgeInsetsDirectional.fromSTEB(
+                                        0, 0, 0, 0),
+                                    color: Color(0xFF00275C),
+                                    textStyle: FlutterFlowTheme.of(context)
+                                        .titleSmall
+                                        .override(
+                                          font: GoogleFonts.interTight(
+                                            fontWeight:
+                                                FlutterFlowTheme.of(context)
+                                                    .titleSmall
+                                                    .fontWeight,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .titleSmall
+                                                    .fontStyle,
+                                          ),
+                                          color: Colors.white,
+                                          letterSpacing: 0.0,
                                           fontWeight:
                                               FlutterFlowTheme.of(context)
                                                   .titleSmall
@@ -637,22 +649,14 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
                                                   .titleSmall
                                                   .fontStyle,
                                         ),
-                                        color: Colors.white,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .titleSmall
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .titleSmall
-                                            .fontStyle,
-                                      ),
-                                  elevation: 0.0,
-                                  borderRadius: BorderRadius.circular(24.0),
+                                    elevation: 0,
+                                    borderRadius: BorderRadius.circular(24),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ],

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+
 import 'search_ride_details_model.dart';
 export 'search_ride_details_model.dart';
 
@@ -49,7 +50,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
         body: SafeArea(
           top: true,
           child: Column(
@@ -65,14 +66,12 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(10.0, 0.0, 10.0, 0.0),
+                      padding: EdgeInsetsDirectional.fromSTEB(10, 0, 10, 0),
                       child: Row(
                         mainAxisSize: MainAxisSize.max,
                         children: [
                           Container(
-                            width: 406.6,
-                            height: 100.0,
+                            height: 100,
                             decoration: BoxDecoration(
                               color: FlutterFlowTheme.of(context)
                                   .secondaryBackground,
@@ -84,15 +83,15 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                   mainAxisSize: MainAxisSize.max,
                                   children: [
                                     Container(
-                                      width: 42.16,
-                                      height: 100.0,
+                                      width: 108.5,
+                                      height: 100,
                                       decoration: BoxDecoration(
                                         color: FlutterFlowTheme.of(context)
                                             .secondaryBackground,
                                       ),
                                       child: Padding(
                                         padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 0.0, 1.0, 0.0),
+                                            0, 0, 1, 0),
                                         child: Column(
                                           mainAxisSize: MainAxisSize.max,
                                           mainAxisAlignment:
@@ -101,13 +100,13 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             FlutterFlowIconButton(
-                                              borderRadius: 8.0,
-                                              buttonSize: 40.0,
+                                              borderRadius: 8,
+                                              buttonSize: 40,
                                               fillColor: Color(0xFFE5E5E5),
                                               icon: Icon(
                                                 Icons.arrow_back_ios_new,
                                                 color: Color(0xFF00275C),
-                                                size: 24.0,
+                                                size: 24,
                                               ),
                                               onPressed: () async {
                                                 context.safePop();
@@ -131,38 +130,50 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                         mainAxisSize: MainAxisSize.max,
                         children: [
                           Container(
-                            width: 394.5,
-                            height: 562.0,
+                            width: 390,
+                            height: 562,
                             decoration: BoxDecoration(
                               color: FlutterFlowTheme.of(context)
                                   .secondaryBackground,
                             ),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                  10.0, 0.0, 10.0, 0.0),
+                              padding:
+                                  EdgeInsetsDirectional.fromSTEB(10, 0, 10, 0),
                               child: Column(
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Row(
                                     mainAxisSize: MainAxisSize.max,
                                     children: [
-                                      Container(
-                                        width: 375.5,
-                                        height: 73.43,
-                                        decoration: BoxDecoration(
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryBackground,
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.max,
-                                          children: [
-                                            Text(
-                                              'Sun, 8 Jun',
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        font: GoogleFonts.inter(
+                                      Expanded(
+                                        child: Container(
+                                          width: 375.5,
+                                          height: 73.43,
+                                          decoration: BoxDecoration(
+                                            color: FlutterFlowTheme.of(context)
+                                                .secondaryBackground,
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.max,
+                                            children: [
+                                              Text(
+                                                'Sun, 8 Jun',
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .bodyMedium
+                                                        .override(
+                                                          font:
+                                                              GoogleFonts.inter(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontStyle:
+                                                                FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .bodyMedium
+                                                                    .fontStyle,
+                                                          ),
+                                                          fontSize: 24,
+                                                          letterSpacing: 0.0,
                                                           fontWeight:
                                                               FontWeight.bold,
                                                           fontStyle:
@@ -171,31 +182,24 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                   .bodyMedium
                                                                   .fontStyle,
                                                         ),
-                                                        fontSize: 24.0,
-                                                        letterSpacing: 0.0,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontStyle:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .bodyMedium
-                                                                .fontStyle,
-                                                      ),
-                                            ),
-                                          ],
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ],
                                   ),
                                   Row(
                                     mainAxisSize: MainAxisSize.max,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Column(
                                         mainAxisSize: MainAxisSize.max,
                                         children: [
                                           Container(
-                                            width: 276.7,
-                                            height: 32.48,
+                                            width: 234.1,
+                                            height: 32.5,
                                             decoration: BoxDecoration(
                                               color:
                                                   FlutterFlowTheme.of(context)
@@ -232,7 +236,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                 color: FlutterFlowTheme.of(
                                                                         context)
                                                                     .secondaryText,
-                                                                fontSize: 16.0,
+                                                                fontSize: 16,
                                                                 letterSpacing:
                                                                     0.0,
                                                                 fontWeight: FlutterFlowTheme.of(
@@ -275,7 +279,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                 color: FlutterFlowTheme.of(
                                                                         context)
                                                                     .secondaryText,
-                                                                fontSize: 16.0,
+                                                                fontSize: 16,
                                                                 letterSpacing:
                                                                     0.0,
                                                                 fontWeight: FlutterFlowTheme.of(
@@ -318,7 +322,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                 color: FlutterFlowTheme.of(
                                                                         context)
                                                                     .secondaryText,
-                                                                fontSize: 16.0,
+                                                                fontSize: 16,
                                                                 letterSpacing:
                                                                     0.0,
                                                                 fontWeight: FlutterFlowTheme.of(
@@ -342,8 +346,8 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                         mainAxisSize: MainAxisSize.max,
                                         children: [
                                           Container(
-                                            width: 100.0,
-                                            height: 31.38,
+                                            width: 100.05,
+                                            height: 31.4,
                                             decoration: BoxDecoration(
                                               color:
                                                   FlutterFlowTheme.of(context)
@@ -371,7 +375,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                         ),
                                                         color:
                                                             Color(0xFF00275C),
-                                                        fontSize: 18.0,
+                                                        fontSize: 18,
                                                         letterSpacing: 0.0,
                                                         fontWeight:
                                                             FontWeight.bold,
@@ -394,7 +398,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                     children: [
                                       Expanded(
                                         child: Container(
-                                          width: 100.0,
+                                          width: 100,
                                           height: 118.7,
                                           decoration: BoxDecoration(
                                             color: FlutterFlowTheme.of(context)
@@ -402,7 +406,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                           ),
                                           child: Align(
                                             alignment:
-                                                AlignmentDirectional(0.0, 0.0),
+                                                AlignmentDirectional(0, 0),
                                             child: Column(
                                               mainAxisSize: MainAxisSize.max,
                                               mainAxisAlignment:
@@ -415,7 +419,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                     Flexible(
                                                       child: Container(
                                                         width: 372.2,
-                                                        height: 108.0,
+                                                        height: 108,
                                                         decoration:
                                                             BoxDecoration(
                                                           color: FlutterFlowTheme
@@ -433,7 +437,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                               children: [
                                                                 Container(
                                                                   width: 97.9,
-                                                                  height: 108.0,
+                                                                  height: 108,
                                                                   decoration:
                                                                       BoxDecoration(
                                                                     color: FlutterFlowTheme.of(
@@ -468,26 +472,6 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                           ),
                                                                         ],
                                                                       ),
-                                                                      Row(
-                                                                        mainAxisSize:
-                                                                            MainAxisSize.max,
-                                                                        mainAxisAlignment:
-                                                                            MainAxisAlignment.center,
-                                                                        children: [
-                                                                          Text(
-                                                                            '06:00 PM',
-                                                                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                                                  font: GoogleFonts.inter(
-                                                                                    fontWeight: FontWeight.w600,
-                                                                                    fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                                                                  ),
-                                                                                  letterSpacing: 0.0,
-                                                                                  fontWeight: FontWeight.w600,
-                                                                                  fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                                                                ),
-                                                                          ),
-                                                                        ],
-                                                                      ),
                                                                     ],
                                                                   ),
                                                                 ),
@@ -500,7 +484,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                               children: [
                                                                 Container(
                                                                   width: 23.7,
-                                                                  height: 108.0,
+                                                                  height: 108,
                                                                   decoration:
                                                                       BoxDecoration(
                                                                     color: FlutterFlowTheme.of(
@@ -534,7 +518,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                               child: Icon(
                                                                                 Icons.circle_outlined,
                                                                                 color: Color(0xFF00275C),
-                                                                                size: 16.0,
+                                                                                size: 16,
                                                                               ),
                                                                             ),
                                                                           ),
@@ -551,9 +535,9 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                               CrossAxisAlignment.center,
                                                                           children: [
                                                                             SizedBox(
-                                                                              height: 45.0,
+                                                                              height: 45,
                                                                               child: VerticalDivider(
-                                                                                thickness: 2.0,
+                                                                                thickness: 2,
                                                                                 color: Color(0xFF00275C),
                                                                               ),
                                                                             ),
@@ -577,7 +561,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                               child: Icon(
                                                                                 Icons.circle_outlined,
                                                                                 color: Color(0xFF00275C),
-                                                                                size: 16.0,
+                                                                                size: 16,
                                                                               ),
                                                                             ),
                                                                           ),
@@ -593,79 +577,78 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                   MainAxisSize
                                                                       .max,
                                                               children: [
-                                                                Expanded(
+                                                                Container(
+                                                                  width: 238.4,
+                                                                  height: 108,
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    color: FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .secondaryBackground,
+                                                                  ),
                                                                   child:
-                                                                      Container(
-                                                                    width:
-                                                                        249.7,
-                                                                    height:
-                                                                        108.0,
-                                                                    decoration:
-                                                                        BoxDecoration(
-                                                                      color: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .secondaryBackground,
-                                                                    ),
+                                                                      Padding(
+                                                                    padding: EdgeInsetsDirectional
+                                                                        .fromSTEB(
+                                                                            10,
+                                                                            0,
+                                                                            0,
+                                                                            0),
                                                                     child:
-                                                                        Padding(
-                                                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                                                          10.0,
-                                                                          0.0,
-                                                                          0.0,
-                                                                          0.0),
-                                                                      child:
-                                                                          Column(
-                                                                        mainAxisSize:
-                                                                            MainAxisSize.max,
-                                                                        mainAxisAlignment:
-                                                                            MainAxisAlignment.spaceAround,
-                                                                        crossAxisAlignment:
-                                                                            CrossAxisAlignment.center,
-                                                                        children: [
-                                                                          Row(
-                                                                            mainAxisSize:
-                                                                                MainAxisSize.max,
-                                                                            mainAxisAlignment:
-                                                                                MainAxisAlignment.start,
-                                                                            crossAxisAlignment:
-                                                                                CrossAxisAlignment.center,
-                                                                            children: [
-                                                                              Text(
-                                                                                'APU',
-                                                                                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                                                      font: GoogleFonts.inter(
-                                                                                        fontWeight: FontWeight.w600,
-                                                                                        fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                                                                      ),
-                                                                                      letterSpacing: 0.0,
+                                                                        Column(
+                                                                      mainAxisSize:
+                                                                          MainAxisSize
+                                                                              .max,
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .spaceAround,
+                                                                      crossAxisAlignment:
+                                                                          CrossAxisAlignment
+                                                                              .center,
+                                                                      children: [
+                                                                        Row(
+                                                                          mainAxisSize:
+                                                                              MainAxisSize.max,
+                                                                          mainAxisAlignment:
+                                                                              MainAxisAlignment.start,
+                                                                          crossAxisAlignment:
+                                                                              CrossAxisAlignment.center,
+                                                                          children: [
+                                                                            Text(
+                                                                              'APU',
+                                                                              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                                                    font: GoogleFonts.inter(
                                                                                       fontWeight: FontWeight.w600,
                                                                                       fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                                                                                     ),
-                                                                              ),
-                                                                            ],
-                                                                          ),
-                                                                          Row(
-                                                                            mainAxisSize:
-                                                                                MainAxisSize.max,
-                                                                            mainAxisAlignment:
-                                                                                MainAxisAlignment.start,
-                                                                            children: [
-                                                                              Text(
-                                                                                'Parkhill Residence',
-                                                                                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                                                      font: GoogleFonts.inter(
-                                                                                        fontWeight: FontWeight.w600,
-                                                                                        fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                                                                      ),
-                                                                                      letterSpacing: 0.0,
+                                                                                    letterSpacing: 0.0,
+                                                                                    fontWeight: FontWeight.w600,
+                                                                                    fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                                                                                  ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                        Row(
+                                                                          mainAxisSize:
+                                                                              MainAxisSize.max,
+                                                                          mainAxisAlignment:
+                                                                              MainAxisAlignment.start,
+                                                                          children: [
+                                                                            Text(
+                                                                              'Parkhill Residence',
+                                                                              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                                                    font: GoogleFonts.inter(
                                                                                       fontWeight: FontWeight.w600,
                                                                                       fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                                                                                     ),
-                                                                              ),
-                                                                            ],
-                                                                          ),
-                                                                        ],
-                                                                      ),
+                                                                                    letterSpacing: 0.0,
+                                                                                    fontWeight: FontWeight.w600,
+                                                                                    fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                                                                                  ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ],
                                                                     ),
                                                                   ),
                                                                 ),
@@ -715,8 +698,8 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                     children: [
                                       Expanded(
                                         child: Container(
-                                          width: 100.0,
-                                          height: 125.0,
+                                          width: 100,
+                                          height: 125,
                                           decoration: BoxDecoration(
                                             color: FlutterFlowTheme.of(context)
                                                 .secondaryBackground,
@@ -729,8 +712,8 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                 children: [
                                                   Expanded(
                                                     child: Container(
-                                                      width: 100.0,
-                                                      height: 85.0,
+                                                      width: 100,
+                                                      height: 85,
                                                       decoration: BoxDecoration(
                                                         color: FlutterFlowTheme
                                                                 .of(context)
@@ -753,7 +736,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                             children: [
                                                               Container(
                                                                 width: 268.7,
-                                                                height: 75.0,
+                                                                height: 75,
                                                                 decoration:
                                                                     BoxDecoration(
                                                                   color: FlutterFlowTheme.of(
@@ -763,10 +746,10 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                 child: Padding(
                                                                   padding: EdgeInsetsDirectional
                                                                       .fromSTEB(
-                                                                          10.0,
-                                                                          0.0,
-                                                                          0.0,
-                                                                          0.0),
+                                                                          10,
+                                                                          0,
+                                                                          0,
+                                                                          0),
                                                                   child: Column(
                                                                     mainAxisSize:
                                                                         MainAxisSize
@@ -793,7 +776,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                                         fontWeight: FontWeight.w500,
                                                                                         fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                                                                                       ),
-                                                                                      fontSize: 18.0,
+                                                                                      fontSize: 18,
                                                                                       letterSpacing: 0.0,
                                                                                       fontWeight: FontWeight.w500,
                                                                                       fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
@@ -806,13 +789,13 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                                 MainAxisSize.max,
                                                                             children: [
                                                                               Align(
-                                                                                alignment: AlignmentDirectional(0.0, 0.0),
+                                                                                alignment: AlignmentDirectional(0, 0),
                                                                                 child: Padding(
-                                                                                  padding: EdgeInsetsDirectional.fromSTEB(10.0, 0.0, 0.0, 0.0),
+                                                                                  padding: EdgeInsetsDirectional.fromSTEB(10, 0, 0, 0),
                                                                                   child: Icon(
                                                                                     Icons.male_sharp,
                                                                                     color: FlutterFlowTheme.of(context).primaryText,
-                                                                                    size: 24.0,
+                                                                                    size: 24,
                                                                                   ),
                                                                                 ),
                                                                               ),
@@ -822,10 +805,10 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                       ),
                                                                       Padding(
                                                                         padding: EdgeInsetsDirectional.fromSTEB(
-                                                                            10.0,
-                                                                            0.0,
-                                                                            0.0,
-                                                                            0.0),
+                                                                            10,
+                                                                            0,
+                                                                            0,
+                                                                            0),
                                                                         child:
                                                                             Row(
                                                                           mainAxisSize:
@@ -836,7 +819,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                               mainAxisAlignment: MainAxisAlignment.center,
                                                                               children: [
                                                                                 Padding(
-                                                                                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 2.0, 0.0, 0.0),
+                                                                                  padding: EdgeInsetsDirectional.fromSTEB(0, 2, 0, 0),
                                                                                   child: Text(
                                                                                     '1.8',
                                                                                     style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -844,7 +827,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                                             fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
                                                                                             fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                                                                                           ),
-                                                                                          fontSize: 14.0,
+                                                                                          fontSize: 14,
                                                                                           letterSpacing: 0.0,
                                                                                           fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
                                                                                           fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
@@ -857,11 +840,11 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                               mainAxisSize: MainAxisSize.max,
                                                                               children: [
                                                                                 Padding(
-                                                                                  padding: EdgeInsetsDirectional.fromSTEB(2.0, 0.0, 0.0, 0.0),
+                                                                                  padding: EdgeInsetsDirectional.fromSTEB(2, 0, 0, 0),
                                                                                   child: Icon(
                                                                                     Icons.star,
                                                                                     color: FlutterFlowTheme.of(context).primaryText,
-                                                                                    size: 20.0,
+                                                                                    size: 20,
                                                                                   ),
                                                                                 ),
                                                                               ],
@@ -870,7 +853,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                               mainAxisSize: MainAxisSize.max,
                                                                               children: [
                                                                                 Padding(
-                                                                                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 2.0, 0.0, 0.0),
+                                                                                  padding: EdgeInsetsDirectional.fromSTEB(0, 2, 0, 0),
                                                                                   child: Text(
                                                                                     '(200)',
                                                                                     style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -903,7 +886,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                               children: [
                                                                 Container(
                                                                   width: 105.4,
-                                                                  height: 75.0,
+                                                                  height: 75,
                                                                   decoration:
                                                                       BoxDecoration(
                                                                     color: FlutterFlowTheme.of(
@@ -926,15 +909,15 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                         children: [
                                                                           Padding(
                                                                             padding: EdgeInsetsDirectional.fromSTEB(
-                                                                                0.0,
-                                                                                0.0,
-                                                                                5.0,
-                                                                                0.0),
+                                                                                0,
+                                                                                0,
+                                                                                5,
+                                                                                0),
                                                                             child:
                                                                                 FaIcon(
                                                                               FontAwesomeIcons.userCircle,
                                                                               color: FlutterFlowTheme.of(context).secondaryText,
-                                                                              size: 44.0,
+                                                                              size: 44,
                                                                             ),
                                                                           ),
                                                                         ],
@@ -950,7 +933,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                             color:
                                                                                 FlutterFlowTheme.of(context).secondaryText,
                                                                             size:
-                                                                                28.0,
+                                                                                28,
                                                                           ),
                                                                         ],
                                                                       ),
@@ -971,8 +954,8 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                 children: [
                                                   Expanded(
                                                     child: Container(
-                                                      width: 100.0,
-                                                      height: 40.0,
+                                                      width: 100,
+                                                      height: 40,
                                                       decoration: BoxDecoration(
                                                         color: FlutterFlowTheme
                                                                 .of(context)
@@ -1001,10 +984,10 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                   Padding(
                                                                     padding: EdgeInsetsDirectional
                                                                         .fromSTEB(
-                                                                            0.0,
-                                                                            0.0,
-                                                                            10.0,
-                                                                            0.0),
+                                                                            0,
+                                                                            0,
+                                                                            10,
+                                                                            0),
                                                                     child:
                                                                         Column(
                                                                       mainAxisSize:
@@ -1020,7 +1003,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                           color:
                                                                               FlutterFlowTheme.of(context).primaryText,
                                                                           size:
-                                                                              40.0,
+                                                                              40,
                                                                         ),
                                                                       ],
                                                                     ),
@@ -1042,7 +1025,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                                 fontWeight: FontWeight.w500,
                                                                                 fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                                                                               ),
-                                                                              fontSize: 18.0,
+                                                                              fontSize: 18,
                                                                               letterSpacing: 0.0,
                                                                               fontWeight: FontWeight.w500,
                                                                               fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
@@ -1067,7 +1050,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                                 fontWeight: FontWeight.w500,
                                                                                 fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                                                                               ),
-                                                                              fontSize: 18.0,
+                                                                              fontSize: 18,
                                                                               letterSpacing: 0.0,
                                                                               fontWeight: FontWeight.w500,
                                                                               fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
@@ -1090,7 +1073,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                 color: FlutterFlowTheme.of(
                                                                         context)
                                                                     .secondaryText,
-                                                                size: 28.0,
+                                                                size: 28,
                                                               ),
                                                             ],
                                                           ),
@@ -1127,77 +1110,94 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                   Row(
                                     mainAxisSize: MainAxisSize.max,
                                     children: [
-                                      Container(
-                                        width: 376.0,
-                                        height: 60.0,
-                                        decoration: BoxDecoration(
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryBackground,
-                                        ),
-                                        child: Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  10.0, 0.0, 0.0, 0.0),
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.max,
-                                            children: [
-                                              Padding(
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
-                                                        0.0, 0.0, 0.0, 3.0),
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.max,
-                                                  children: [
-                                                    Text(
-                                                      'Perodua Kancil',
-                                                      style: FlutterFlowTheme
-                                                              .of(context)
-                                                          .bodyMedium
-                                                          .override(
-                                                            font: GoogleFonts
-                                                                .inter(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                              fontStyle:
-                                                                  FlutterFlowTheme.of(
+                                      Expanded(
+                                        child: Container(
+                                          width: 376,
+                                          height: 60,
+                                          decoration: BoxDecoration(
+                                            color: FlutterFlowTheme.of(context)
+                                                .secondaryBackground,
+                                          ),
+                                          child: Padding(
+                                            padding:
+                                                EdgeInsetsDirectional.fromSTEB(
+                                                    10, 0, 0, 0),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.max,
+                                              children: [
+                                                Padding(
+                                                  padding: EdgeInsetsDirectional
+                                                      .fromSTEB(0, 0, 0, 3),
+                                                  child: Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.max,
+                                                    children: [
+                                                      Text(
+                                                        'Perodua Kancil',
+                                                        style:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .bodyMedium
+                                                                .override(
+                                                                  font:
+                                                                      GoogleFonts
+                                                                          .inter(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w500,
+                                                                    fontStyle: FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .bodyMedium
+                                                                        .fontStyle,
+                                                                  ),
+                                                                  fontSize: 18,
+                                                                  letterSpacing:
+                                                                      0.0,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                  fontStyle: FlutterFlowTheme.of(
                                                                           context)
                                                                       .bodyMedium
                                                                       .fontStyle,
-                                                            ),
-                                                            fontSize: 18.0,
-                                                            letterSpacing: 0.0,
-                                                            fontWeight:
-                                                                FontWeight.w500,
-                                                            fontStyle:
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .bodyMedium
-                                                                    .fontStyle,
-                                                          ),
-                                                    ),
-                                                  ],
+                                                                ),
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
-                                              ),
-                                              Row(
-                                                mainAxisSize: MainAxisSize.max,
-                                                children: [
-                                                  Padding(
-                                                    padding:
-                                                        EdgeInsetsDirectional
-                                                            .fromSTEB(2.0, 0.0,
-                                                                0.0, 0.0),
-                                                    child: Text(
-                                                      'White',
-                                                      style:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .bodyMedium
-                                                              .override(
-                                                                font:
-                                                                    GoogleFonts
-                                                                        .inter(
+                                                Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.max,
+                                                  children: [
+                                                    Padding(
+                                                      padding:
+                                                          EdgeInsetsDirectional
+                                                              .fromSTEB(
+                                                                  2, 0, 0, 0),
+                                                      child: Text(
+                                                        'White',
+                                                        style:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .bodyMedium
+                                                                .override(
+                                                                  font:
+                                                                      GoogleFonts
+                                                                          .inter(
+                                                                    fontWeight: FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .bodyMedium
+                                                                        .fontWeight,
+                                                                    fontStyle: FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .bodyMedium
+                                                                        .fontStyle,
+                                                                  ),
+                                                                  color: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .secondaryText,
+                                                                  letterSpacing:
+                                                                      0.0,
                                                                   fontWeight: FlutterFlowTheme.of(
                                                                           context)
                                                                       .bodyMedium
@@ -1207,25 +1207,12 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                       .bodyMedium
                                                                       .fontStyle,
                                                                 ),
-                                                                color: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .secondaryText,
-                                                                letterSpacing:
-                                                                    0.0,
-                                                                fontWeight: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .bodyMedium
-                                                                    .fontWeight,
-                                                                fontStyle: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .bodyMedium
-                                                                    .fontStyle,
-                                                              ),
+                                                      ),
                                                     ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -1243,8 +1230,8 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                       children: [
                         Expanded(
                           child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                10.0, 0.0, 10.0, 0.0),
+                            padding:
+                                EdgeInsetsDirectional.fromSTEB(10, 0, 10, 0),
                             child: FFButtonWidget(
                               onPressed: () async {
                                 context.pushNamed(
@@ -1254,9 +1241,9 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                               options: FFButtonOptions(
                                 height: 46.7,
                                 padding: EdgeInsetsDirectional.fromSTEB(
-                                    16.0, 0.0, 16.0, 0.0),
-                                iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 0.0, 0.0, 0.0),
+                                    16, 0, 16, 0),
+                                iconPadding:
+                                    EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
                                 color: Color(0xFF00275C),
                                 textStyle: FlutterFlowTheme.of(context)
                                     .titleSmall
@@ -1278,8 +1265,8 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                           .titleSmall
                                           .fontStyle,
                                     ),
-                                elevation: 0.0,
-                                borderRadius: BorderRadius.circular(24.0),
+                                elevation: 0,
+                                borderRadius: BorderRadius.circular(24),
                               ),
                             ),
                           ),

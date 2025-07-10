@@ -67,14 +67,14 @@ class _CreateRideHomeWidgetState extends State<CreateRideHomeWidget> {
             children: [
               Container(
                 width: 406.6,
-                height: 100,
+                height: 55.5,
                 decoration: BoxDecoration(
                   color: FlutterFlowTheme.of(context).secondaryBackground,
                 ),
               ),
               Container(
                 width: 387,
-                height: 536.7,
+                height: 523.4,
                 decoration: BoxDecoration(
                   color: FlutterFlowTheme.of(context).secondaryBackground,
                 ),
@@ -1200,8 +1200,8 @@ class _CreateRideHomeWidgetState extends State<CreateRideHomeWidget> {
                                                                         ),
                                                                         onPressed:
                                                                             () async {
-                                                                          if ((_model.seatNumber! < 4) &&
-                                                                              (_model.seatNumber! > 0)) {
+                                                                          if (_model.seatNumber! >
+                                                                              1) {
                                                                             _model.seatNumber =
                                                                                 _model.seatNumber! + -1;
                                                                             safeSetState(() {});
@@ -1287,8 +1287,8 @@ class _CreateRideHomeWidgetState extends State<CreateRideHomeWidget> {
                                                                         ),
                                                                         onPressed:
                                                                             () async {
-                                                                          if ((_model.seatNumber! < 4) &&
-                                                                              (_model.seatNumber! > 0)) {
+                                                                          if (_model.seatNumber! <
+                                                                              4) {
                                                                             _model.seatNumber =
                                                                                 _model.seatNumber! + 1;
                                                                             safeSetState(() {});

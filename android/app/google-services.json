@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "171171724328",
+    "project_id": "ridelink-carpooling-mobile",
+    "storage_bucket": "ridelink-carpooling-mobile.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:171171724328:android:4a1fcf276de7c698c2c91d",
+        "android_client_info": {
+          "package_name": "com.mycompany.ridelinkcarpooling"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwRtm90cOXOh4-5ch_Sr7YCa8PQ7rinEI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
+import 'package:ride_link_carpooling/models/location.dart';
 
 import '/main.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -62,14 +63,13 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           path: SignUpPageWidget.routePath,
           builder: (context, params) => SignUpPageWidget(),
         ),
-        FFRoute(
+       FFRoute(
           name: VerificationPageWidget.routeName,
           path: VerificationPageWidget.routePath,
           builder: (context, params) => VerificationPageWidget(
-            type: params.getParam(
-              'type',
-              ParamType.String,
-            ),
+            type: params.getParam('type', ParamType.String),
+            email: params.getParam('email', ParamType.String),
+            password: params.getParam('password', ParamType.String),
           ),
         ),
         FFRoute(
@@ -108,7 +108,18 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: SearchRideResultWidget.routeName,
           path: SearchRideResultWidget.routePath,
-          builder: (context, params) => SearchRideResultWidget(),
+          builder: (context, params) {
+            final fromJson = jsonDecode(params.getParam('from', ParamType.String) ?? '{}') as Map<String, dynamic>;
+            final toJson = jsonDecode(params.getParam('to', ParamType.String) ?? '{}') as Map<String, dynamic>;
+
+            return SearchRideResultWidget(
+              from: Location.fromJson(fromJson),
+              to: Location.fromJson(toJson),
+              date: DateTime.parse(params.getParam('date', ParamType.String)!),
+              time: DateTime.parse(params.getParam('time', ParamType.String)!),
+              seats: int.parse(params.getParam('seats', ParamType.String)!),
+            );
+          },
         ),
         FFRoute(
           name: SearchRideDetailsWidget.routeName,
@@ -118,7 +129,9 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: CreateRideWaitingListWidget.routeName,
           path: CreateRideWaitingListWidget.routePath,
-          builder: (context, params) => CreateRideWaitingListWidget(),
+          builder: (context, params) => CreateRideWaitingListWidget(
+            rideId: params.getParam('rideId', ParamType.String) ?? '',
+          ),
         ),
         FFRoute(
           name: CreateRideStartRideWidget.routeName,

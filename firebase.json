@@ -1,0 +1,40 @@
+{
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default"
+    },
+    {
+      "source": "ridelink-firebase",
+      "codebase": "ridelink-firebase",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    }
+  ],
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "ridelink-carpooling-mobile",
+          "appId": "1:171171724328:android:4a1fcf276de7c698c2c91d",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "ridelink-carpooling-mobile",
+          "configurations": {
+            "android": "1:171171724328:android:4a1fcf276de7c698c2c91d",
+            "ios": "1:171171724328:ios:668e460825a5e8cec2c91d",
+            "web": "1:171171724328:web:caba131b547ff364c2c91d"
+          }
+        }
+      }
+    }
+  }
+}

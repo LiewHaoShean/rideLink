@@ -710,26 +710,30 @@ class _DashboardProfileWidgetState extends State<DashboardProfileWidget> {
                             final nic = _model.passwordlTextFieldTextController1?.text.trim() ?? '';
                             final phone = _model.passwordlTextFieldTextController2?.text.trim() ?? '';
                             final gender = _model.dropDownValueController?.value ?? _model.dropDownValue;
+
                             if (firstName.isEmpty || lastName.isEmpty || nic.isEmpty || phone.isEmpty || gender == null) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Please fill in all fields')),
                               );
                               return;
                             }
+
                             try {
                               final user = FirebaseAuth.instance.currentUser;
                               if (user == null) {
                                 throw Exception('User not logged in');
                               }
+
+                              final fullName = '$firstName $lastName'; // Combine them
+
                               final userDoc = FirebaseFirestore.instance.collection('users').doc(user.uid);
                               await userDoc.update({
-                                'firstName': firstName,
-                                'lastName': lastName,
+                                'name': fullName, // ✅ store combined
                                 'nic': nic,
                                 'phone': phone,
                                 'gender': gender,
                               });
-                              // Optional: also update locally if you have a provider
+
                               context.pushNamed(
                                 SuccessPageWidget.routeName,
                                 queryParameters: {

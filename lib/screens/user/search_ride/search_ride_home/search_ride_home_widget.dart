@@ -890,10 +890,8 @@ class _SearchRideHomeWidgetState extends State<SearchRideHomeWidget> {
                                                                         ),
                                                                         onPressed:
                                                                             () async {
-                                                                          if (_model.seatNumber! >
-                                                                              1) {
-                                                                            _model.seatNumber =
-                                                                                _model.seatNumber! + -1;
+                                                                          if (_model.seatNumber! > 1) {
+                                                                            _model.seatNumber = _model.seatNumber! + -1;
                                                                             safeSetState(() {});
                                                                           } else {
                                                                             await showDialog(
@@ -1057,18 +1055,11 @@ class _SearchRideHomeWidgetState extends State<SearchRideHomeWidget> {
                                         context.pushNamed(
                                           SearchRideResultWidget.routeName,
                                           queryParameters: {
-                                            'from': jsonEncode(_model
-                                                .selectedLocation1!
-                                                .toJson()),
-                                            'to': jsonEncode(_model
-                                                .selectedLocation2!
-                                                .toJson()),
-                                            'date': _model.datePicked1!
-                                                .toIso8601String(),
-                                            'time': _model.datePicked2!
-                                                .toIso8601String(),
-                                            'seats':
-                                                _model.seatNumber.toString(),
+                                            'from': jsonEncode(_model.selectedLocation1!.toJson()),
+                                            'to': jsonEncode(_model.selectedLocation2!.toJson()),
+                                            'date': _model.datePicked1!.toIso8601String(),
+                                            'time': _model.datePicked2!.toIso8601String(),
+                                            'seats': _model.seatNumber.toString(),
                                           },
                                         );
                                       } else {

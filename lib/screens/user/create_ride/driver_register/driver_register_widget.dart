@@ -52,7 +52,7 @@ class _DriverRegisterWidgetState extends State<DriverRegisterWidget> {
           top: true,
           child: SingleChildScrollView(
             child: Container(
-              width: 400.0,
+              width: 390.0,
               height: 800.0,
               decoration: BoxDecoration(
                 color: FlutterFlowTheme.of(context).secondaryBackground,

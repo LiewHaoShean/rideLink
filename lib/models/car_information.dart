@@ -1,22 +1,24 @@
 class CarInformation {
   final String carId;
-  final String ownerId; // Rider UID
+  final String ownerId;
   final String brand;
   final String model;
-  final String plateNumber;
-  final int seatsAvailable;
+  final int year;
   final String color;
-  final String? carImage;
+  final String plateNumber;
+  final String vin;
+  final bool isVerified;
 
   CarInformation({
     required this.carId,
     required this.ownerId,
     required this.brand,
     required this.model,
-    required this.plateNumber,
-    required this.seatsAvailable,
+    required this.year,
     required this.color,
-    this.carImage,
+    required this.plateNumber,
+    required this.vin,
+    required this.isVerified,
   });
 
   factory CarInformation.fromJson(Map<String, dynamic> json) {
@@ -25,10 +27,11 @@ class CarInformation {
       ownerId: json['ownerId'],
       brand: json['brand'],
       model: json['model'],
-      plateNumber: json['plateNumber'],
-      seatsAvailable: json['seatsAvailable'],
+      year: json['year'],
       color: json['color'],
-      carImage: json['carImage'],
+      plateNumber: json['plateNumber'],
+      vin: json['vin'],
+      isVerified: json['isVerified'] ?? false,
     );
   }
 
@@ -38,10 +41,11 @@ class CarInformation {
       'ownerId': ownerId,
       'brand': brand,
       'model': model,
-      'plateNumber': plateNumber,
-      'seatsAvailable': seatsAvailable,
+      'year': year,
       'color': color,
-      'carImage': carImage,
+      'plateNumber': plateNumber,
+      'vin': vin,
+      'isVerified': isVerified,
     };
   }
 }

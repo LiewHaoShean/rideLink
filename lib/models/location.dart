@@ -43,6 +43,18 @@ class Location {
     );
   }
 
+  static Location empty() {
+    return Location(
+      addressLine: '',
+      city: '',
+      latitude: 0.0,
+      longitude: 0.0,
+      name: '',
+      postcode: '',
+      state: '',
+    );
+  }
+
   /// String representation
   @override
   String toString() {

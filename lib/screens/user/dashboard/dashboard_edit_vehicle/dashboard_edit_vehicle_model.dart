@@ -15,33 +15,27 @@ class DashboardEditVehicleModel
   // State field(s) for emailTextField widget.
   FocusNode? emailTextFieldFocusNode1;
   TextEditingController? emailTextFieldTextController1;
-  String? Function(BuildContext, String?)?
-      emailTextFieldTextController1Validator;
+  String? Function(BuildContext, String?)? emailTextFieldTextController1Validator;
   // State field(s) for emailTextField widget.
   FocusNode? emailTextFieldFocusNode2;
   TextEditingController? emailTextFieldTextController2;
-  String? Function(BuildContext, String?)?
-      emailTextFieldTextController2Validator;
+  String? Function(BuildContext, String?)? emailTextFieldTextController2Validator;
   // State field(s) for emailTextField widget.
   FocusNode? emailTextFieldFocusNode3;
   TextEditingController? emailTextFieldTextController3;
-  String? Function(BuildContext, String?)?
-      emailTextFieldTextController3Validator;
+  String? Function(BuildContext, String?)? emailTextFieldTextController3Validator;
   // State field(s) for emailTextField widget.
   FocusNode? emailTextFieldFocusNode4;
   TextEditingController? emailTextFieldTextController4;
-  String? Function(BuildContext, String?)?
-      emailTextFieldTextController4Validator;
+  String? Function(BuildContext, String?)? emailTextFieldTextController4Validator;
   // State field(s) for emailTextField widget.
   FocusNode? emailTextFieldFocusNode5;
   TextEditingController? emailTextFieldTextController5;
-  String? Function(BuildContext, String?)?
-      emailTextFieldTextController5Validator;
+  String? Function(BuildContext, String?)? emailTextFieldTextController5Validator;
   // State field(s) for emailTextField widget.
   FocusNode? emailTextFieldFocusNode6;
   TextEditingController? emailTextFieldTextController6;
-  String? Function(BuildContext, String?)?
-      emailTextFieldTextController6Validator;
+  String? Function(BuildContext, String?)? emailTextFieldTextController6Validator;
 
   @override
   void initState(BuildContext context) {}

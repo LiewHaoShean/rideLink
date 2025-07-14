@@ -12,6 +12,9 @@ class RideCard extends StatelessWidget {
   final String driverName;
   final String gender; // e.g. 'male' or 'female'
   final double price;
+  final String creatorId;
+  final String rideId;
+  final int seatNeeded;
 
   const RideCard({
     Key? key,
@@ -21,6 +24,9 @@ class RideCard extends StatelessWidget {
     required this.driverName,
     required this.gender,
     required this.price,
+    required this.creatorId,
+    required this.rideId,
+    required this.seatNeeded,
   }) : super(key: key);
 
   @override
@@ -30,7 +36,14 @@ class RideCard extends StatelessWidget {
       child: InkWell(
         splashColor: Colors.transparent,
         onTap: () async {
-          context.pushNamed(SearchRideDetailsWidget.routeName);
+          context.pushNamed(
+            SearchRideDetailsWidget.routeName,
+            queryParameters: {
+              'rideId': rideId,
+              'creatorId': creatorId,
+              'seatNeeded': seatNeeded.toString(),
+            },
+          );
         },
         child: Container(
           decoration: BoxDecoration(
@@ -169,7 +182,7 @@ class RideCard extends StatelessWidget {
                             gender == 'male'
                                 ? Icons.male_rounded
                                 : Icons.female_rounded,
-                            color: FlutterFlowTheme.of(context).secondary,
+                              color: gender == 'male' ? FlutterFlowTheme.of(context).secondary : Colors.pink,
                             size: 30,
                           ),
                         ],

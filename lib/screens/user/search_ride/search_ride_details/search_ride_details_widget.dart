@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -13,30 +15,139 @@ import 'search_ride_details_model.dart';
 export 'search_ride_details_model.dart';
 
 class SearchRideDetailsWidget extends StatefulWidget {
-  const SearchRideDetailsWidget({super.key});
+  final String? rideId;
+  final String? creatorId;
+  final int? seatNeeded;
+
+  const SearchRideDetailsWidget({
+    super.key,
+    this.rideId,
+    this.creatorId,
+    this.seatNeeded,
+  });
 
   static String routeName = 'searchRideDetails';
   static String routePath = '/searchRideDetails';
 
   @override
-  State<SearchRideDetailsWidget> createState() =>
-      _SearchRideDetailsWidgetState();
+  State<SearchRideDetailsWidget> createState() => _SearchRideDetailsWidgetState();
 }
 
 class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
-  late SearchRideDetailsModel _model;
+  Map<String, dynamic>? rideData; // your main ride details
+  Map<String, dynamic>? creatorData; // optional: separate for driver info
+  Map<String, dynamic>? carData; // optional: separate for car info
+
+  int seatNeeded = 0;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  @override
+   @override
   void initState() {
     super.initState();
-    _model = createModel(context, () => SearchRideDetailsModel());
+    seatNeeded = widget.seatNeeded ?? 0;
+    _loadRideDetails();
+  }
+
+  /// Load the ride + driver + car in one go
+  Future<void> _loadRideDetails() async {
+    if (widget.rideId == null) return;
+
+    try {
+      // Get the ride doc
+      final rideDoc = await FirebaseFirestore.instance
+          .collection('temp_rides')
+          .doc(widget.rideId)
+          .get();
+
+      if (!rideDoc.exists) {
+        print('Ride not found!');
+        return;
+      }
+
+      final ride = rideDoc.data();
+      if (ride == null) return;
+
+      // 2️⃣ Get creator info
+      final creatorUid = ride['creatorId'] as String?;
+      String creatorName = 'Unknown';
+      String creatorGender = 'male';
+
+      if (creatorUid != null) {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(creatorUid)
+            .get();
+
+        if (userDoc.exists) {
+          creatorName = userDoc['name'] ?? 'Unknown';
+          creatorGender = userDoc['gender'] ?? 'male';
+        }
+      }
+
+      // 3️⃣ Get car info
+      Map<String, dynamic>? carInfo;
+      if (creatorUid != null) {
+        final carQuery = await FirebaseFirestore.instance
+            .collection('cars')
+            .where('ownerId', isEqualTo: creatorUid)
+            .where('isVerified', isEqualTo: true)
+            .limit(1)
+            .get();
+
+        if (carQuery.docs.isNotEmpty) {
+          final doc = carQuery.docs.first;
+          carInfo = {
+            'carBrand': doc['brand'] ?? 'Unknown',
+            'carModel': doc['model'] ?? 'Unknown',
+            'carColor': doc['color'] ?? 'Unknown',
+            'carPlate': doc['plateNumber'] ?? 'Unknown',
+            'carVin': doc['vin'] ?? 'Unknown',
+            'carYear': doc['year']?.toString() ?? 'Unknown',
+            'carId': doc.id,
+          };
+        }
+      }
+
+      // 4️⃣ Format timestamps
+      String formattedDate = 'N/A';
+      String formattedTime = 'N/A';
+
+      final date = ride['date'] as Timestamp?;
+      final time = ride['time'] as Timestamp?;
+
+      if (date != null) {
+        formattedDate = DateFormat('EEE, d MMM yyyy').format(date.toDate());
+      }
+
+      if (time != null) {
+        formattedTime = DateFormat('hh:mm a').format(time.toDate());
+      }
+
+      // 5️⃣ Store all in state
+      setState(() {
+        rideData = {
+          'from': ride['from'] ?? '',
+          'to': ride['to'] ?? '',
+          'price': ride['price'] ?? 0,
+          'seats': ride['seats'] ?? 0,
+          'formattedDate': formattedDate,
+          'formattedTime': formattedTime,
+        };
+        creatorData = {
+          'name': creatorName,
+          'gender': creatorGender,
+        };
+        carData = carInfo;
+      });
+    } catch (e) {
+      print('Error loading ride details: $e');
+    }
   }
 
   @override
   void dispose() {
-    _model.dispose();
+    // _model.dispose();
 
     super.dispose();
   }
@@ -51,8 +162,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
-        body: SafeArea(
-          top: true,
+        body: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.max,
             children: [
@@ -157,7 +267,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                             mainAxisSize: MainAxisSize.max,
                                             children: [
                                               Text(
-                                                'Sun, 8 Jun',
+                                                '${rideData?['formattedDate'] ?? 'N/A'}',
                                                 style:
                                                     FlutterFlowTheme.of(context)
                                                         .bodyMedium
@@ -258,7 +368,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                       MainAxisAlignment.center,
                                                   children: [
                                                     Text(
-                                                      ' 1 ',
+                                                      ' ${rideData?['seats'] ?? 0} ',
                                                       style:
                                                           FlutterFlowTheme.of(
                                                                   context)
@@ -359,7 +469,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                   MainAxisAlignment.center,
                                               children: [
                                                 Text(
-                                                  'RM 4',
+                                                  'RM ${rideData?['price'] ?? 0}',
                                                   style: FlutterFlowTheme.of(
                                                           context)
                                                       .bodyMedium
@@ -459,7 +569,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                             MainAxisAlignment.center,
                                                                         children: [
                                                                           Text(
-                                                                            '05:00 PM',
+                                                                            '${rideData?['time'] ?? '-'}',
                                                                             style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                                                   font: GoogleFonts.inter(
                                                                                     fontWeight: FontWeight.w600,

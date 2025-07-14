@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -702,19 +705,53 @@ class _DashboardProfileWidgetState extends State<DashboardProfileWidget> {
                       children: [
                         FFButtonWidget(
                           onPressed: () async {
-                            context.pushNamed(
-                              SuccessPageWidget.routeName,
-                              queryParameters: {
-                                'title': serializeParam(
-                                  'Registered Successfully',
-                                  ParamType.String,
-                                ),
-                                'description': serializeParam(
-                                  'Start to ride with us now!',
-                                  ParamType.String,
-                                ),
-                              }.withoutNulls,
-                            );
+                            final firstName = _model.emailTextFieldTextController1?.text.trim() ?? '';
+                            final lastName = _model.emailTextFieldTextController2?.text.trim() ?? '';
+                            final nic = _model.passwordlTextFieldTextController1?.text.trim() ?? '';
+                            final phone = _model.passwordlTextFieldTextController2?.text.trim() ?? '';
+                            final gender = _model.dropDownValueController?.value ?? _model.dropDownValue;
+
+                            if (firstName.isEmpty || lastName.isEmpty || nic.isEmpty || phone.isEmpty || gender == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Please fill in all fields')),
+                              );
+                              return;
+                            }
+
+                            try {
+                              final user = FirebaseAuth.instance.currentUser;
+                              if (user == null) {
+                                throw Exception('User not logged in');
+                              }
+
+                              final fullName = '$firstName $lastName'; // Combine them
+
+                              final userDoc = FirebaseFirestore.instance.collection('users').doc(user.uid);
+                              await userDoc.update({
+                                'name': fullName, // ✅ store combined
+                                'nic': nic,
+                                'phone': phone,
+                                'gender': gender,
+                              });
+
+                              context.pushNamed(
+                                SuccessPageWidget.routeName,
+                                queryParameters: {
+                                  'title': serializeParam(
+                                    'Profile Updated',
+                                    ParamType.String,
+                                  ),
+                                  'description': serializeParam(
+                                    'Your profile has been updated successfully!',
+                                    ParamType.String,
+                                  ),
+                                }.withoutNulls,
+                              );
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Error: ${e.toString()}')),
+                              );
+                            }
                           },
                           text: 'Update',
                           options: FFButtonOptions(

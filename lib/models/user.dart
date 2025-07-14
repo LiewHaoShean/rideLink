@@ -2,10 +2,11 @@ class UserModel {
   final String uid;
   final String name;
   final String email;
-  final String userRole; // 'default: passenger' or 'rider'
+  final String userRole; // e.g. 'driver' or 'passenger' or 'admin'
   final String nic;
   final String? gender;
   final bool isEmailVerified;
+  final String? phone;
 
   UserModel({
     required this.uid,
@@ -13,6 +14,7 @@ class UserModel {
     required this.email,
     required this.userRole,
     required this.nic,
+    this.phone,
     this.gender,
     this.isEmailVerified = false,
   });
@@ -24,6 +26,7 @@ class UserModel {
       email: json['email'],
       userRole: json['userRole'],
       nic: json['nic'],
+      phone: json['phone'],
       gender: json['gender'],
       isEmailVerified: json['isEmailVerified'] ?? false,
     );
@@ -36,6 +39,7 @@ class UserModel {
       'email': email,
       'userRole': userRole,
       'nic': nic,
+      'phone': phone,
       'gender': gender,
       'isEmailVerified': isEmailVerified,
     };

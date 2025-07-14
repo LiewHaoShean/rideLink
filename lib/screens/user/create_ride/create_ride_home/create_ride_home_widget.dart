@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -1324,8 +1327,31 @@ class _CreateRideHomeWidgetState extends State<CreateRideHomeWidget> {
                                               .isNotEmpty) {
                                         // All valid, create ride
                                         try {
+                                          final user = FirebaseAuth.instance.currentUser;
+
+                                          if (user == null) {
+                                            throw Exception(
+                                                'User not logged in');
+                                          }
+
+                                          final userDoc =
+                                              await FirebaseFirestore.instance
+                                                  .collection('users')
+                                                  .doc(user.uid)
+                                                  .get();
+
+                                          final userRole = userDoc.data()?['userRole'] ?? 'passenger';
+
+                                          if (userRole != 'driver') {
+                                            context.pushNamed(
+                                                DriverRegisterWidget.routeName);
+                                            return; 
+                                          }
+
+                                          // ✅ If driver → create ride
                                           final docRef =
                                               await _model.createRide();
+
                                           if (docRef != null) {
                                             context.pushNamed(
                                               CreateRideWaitingListWidget

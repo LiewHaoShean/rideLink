@@ -51,13 +51,29 @@ class RideService {
     required int seatsNeeded,
     required DateTime time,
   }) async {
-    final querySnapshot = await FirebaseFirestore.instance
+    final firestore = FirebaseFirestore.instance;
+
+    // Step 1: Run the filtered query
+    final querySnapshot = await firestore
         .collection('temp_rides')
         .where('from.name', isEqualTo: from.name)
         .where('to.name', isEqualTo: to.name)
-        .where('date', isEqualTo: Timestamp.fromDate(DateTime(date.year, date.month, date.day)))
+        .where('date',
+            isEqualTo: Timestamp.fromDate(
+                DateTime(date.year, date.month, date.day)))
         .get();
 
-    return querySnapshot.docs.map((doc) => doc.data()).toList();
+    if (querySnapshot.docs.isNotEmpty) {
+      return querySnapshot.docs
+          .map((doc) => doc.data() as Map<String, dynamic>)
+          .toList();
+    }
+
+    // Step 2: Fallback — get ALL rides if no match found
+    final fallbackSnapshot = await firestore.collection('temp_rides').get();
+
+    return fallbackSnapshot.docs
+        .map((doc) => doc.data() as Map<String, dynamic>)
+        .toList();
   }
 }

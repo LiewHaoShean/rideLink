@@ -52,7 +52,7 @@ class _DashboardVehicleWidgetState extends State<DashboardVehicleWidget> {
     _model.emailTextFieldTextController6 ??= TextEditingController();
     _model.emailTextFieldFocusNode6 ??= FocusNode();
 
-    // ✅ Load car info
+    // Load car info
     _loadCarInfo();
   }
 

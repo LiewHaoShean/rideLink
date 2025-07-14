@@ -124,7 +124,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: SearchRideDetailsWidget.routeName,
           path: SearchRideDetailsWidget.routePath,
-          builder: (context, params) => SearchRideDetailsWidget(),
+          builder: (context, params) => SearchRideDetailsWidget(
+            rideId: params.getParam('rideId', ParamType.String),
+            creatorId: params.getParam('creatorId', ParamType.String),
+            seatNeeded: int.tryParse(params.getParam('seatNeeded', ParamType.String) ?? '0'),
+          ),
         ),
         FFRoute(
           name: CreateRideWaitingListWidget.routeName,

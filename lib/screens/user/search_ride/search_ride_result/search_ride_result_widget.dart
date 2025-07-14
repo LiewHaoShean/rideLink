@@ -64,7 +64,6 @@ class _SearchRideResultWidgetState extends State<SearchRideResultWidget> {
 
   Future<void> _fetchRides() async {
     try {
-      // 1️⃣ Try to find matching rides
       final result = await RideService().searchRides(
         from: widget.from,
         to: widget.to,
@@ -73,28 +72,47 @@ class _SearchRideResultWidgetState extends State<SearchRideResultWidget> {
         seatsNeeded: widget.seats,
       );
 
-      if (result.isNotEmpty) {
-        // Found relevant matches!
-        setState(() {
-          rides = result;
-          isLoading = false;
-        });
-      } else {
-        // 2️⃣ Nothing found — fallback: get ALL temp_rides
+      List<Map<String, dynamic>> ridesToShow;
+
+      if (result.isEmpty) {
+        // Fallback: ALL rides
         final allRidesSnapshot =
             await FirebaseFirestore.instance.collection('temp_rides').get();
 
-        final allRides = allRidesSnapshot.docs
-            .map((doc) => doc.data() as Map<String, dynamic>)
-            .toList();
-
-        setState(() {
-          rides = allRides;
-          isLoading = false;
-        });
+        ridesToShow = allRidesSnapshot.docs.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          data['rideId'] = doc.id;
+          return data;
+        }).toList();
+      } else {
+        ridesToShow = result;
       }
+
+      // Enrich each ride with creator info
+      final List<Map<String, dynamic>> enrichedRides = [];
+
+      for (final ride in ridesToShow) {
+        final creatorUid = ride['creatorId'] as String?;
+        if (creatorUid != null) {
+          final userDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(creatorUid)
+              .get();
+          ride['creatorName'] = userDoc.exists ? userDoc['name'] ?? 'Unknown' : 'Unknown';
+          ride['creatorGender'] = userDoc.exists ? userDoc['gender'] ?? 'male' : 'male';
+        } else {
+          ride['creatorName'] = 'Unknown';
+          ride['creatorGender'] = 'male';
+        }
+
+        enrichedRides.add(ride);
+      }
+
+      setState(() {
+        rides = enrichedRides;
+        isLoading = false;
+      });
     } catch (e) {
-      print('Error fetching rides: $e');
       setState(() {
         isLoading = false;
       });
@@ -201,7 +219,7 @@ class _SearchRideResultWidgetState extends State<SearchRideResultWidget> {
                                         ),
                                   ),
                                   Text(
-                                    'to ',
+                                    ' to ',
                                     style: FlutterFlowTheme.of(context)
                                         .bodyMedium
                                         .override(
@@ -259,8 +277,7 @@ class _SearchRideResultWidgetState extends State<SearchRideResultWidget> {
                     color: FlutterFlowTheme.of(context).secondaryBackground,
                   ),
                   child: Padding(
-                    padding:
-                        EdgeInsetsDirectional.fromSTEB(10.0, 0.0, 10.0, 0.0),
+                    padding: EdgeInsetsDirectional.fromSTEB(10.0, 0.0, 10.0, 0.0),
                     child: SingleChildScrollView(
                       child: Column(
                         children: [
@@ -274,21 +291,20 @@ class _SearchRideResultWidgetState extends State<SearchRideResultWidget> {
                               final ride = rides[index];
 
                               // Convert Firestore Timestamp safely
-                              final Timestamp timeStamp =
-                                  ride['time'] as Timestamp;
+                              final Timestamp timeStamp = ride['time'] as Timestamp;
                               final DateTime time = timeStamp.toDate();
-                              final String formattedTime =
-                                  TimeOfDay.fromDateTime(time).format(context);
+                              final String formattedTime = TimeOfDay.fromDateTime(time).format(context);
 
                               return RideCard(
-                                time: formattedTime,
-                                from: Location.fromJson(ride['from']),
-                                to: Location.fromJson(ride['to']),
+                                time: formattedTime ?? 'N/A',
+                                from: ride['from'] != null ? Location.fromJson(ride['from']) : Location.empty(),
+                                to: ride['to'] != null ? Location.fromJson(ride['to']) : Location.empty(),
                                 driverName: ride['creatorName'] ?? 'Unknown',
                                 gender: ride['creatorGender'] ?? 'male',
-                                price: ride['price'] is int
-                                    ? (ride['price'] as int).toDouble()
-                                    : (ride['price'] as double),
+                                price: (ride['price'] ?? 0).toDouble(),
+                                creatorId: ride['creatorId'] ?? 'Unknown',
+                                rideId: ride['rideId'] ?? '',
+                                seatNeeded: widget.seats ?? 0,
                               );
                             },
                           ),

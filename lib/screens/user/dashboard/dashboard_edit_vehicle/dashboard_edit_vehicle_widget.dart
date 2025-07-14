@@ -54,22 +54,28 @@ class _DashboardEditVehicleWidgetState
     _model.emailTextFieldTextController6 ??= TextEditingController();
     _model.emailTextFieldFocusNode6 ??= FocusNode();
   }
-
   Future<void> createCar() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
     final carId = FirebaseFirestore.instance.collection('cars').doc().id;
 
+    final brand = _model.emailTextFieldTextController1?.text.trim() ?? '';
+    final model = _model.emailTextFieldTextController2?.text.trim() ?? '';
+    final year = int.tryParse(_model.emailTextFieldTextController4?.text.trim() ?? '0') ?? 0;
+    final color = _model.emailTextFieldTextController4?.text.trim() ?? '';
+    final plateNumber = _model.emailTextFieldTextController5?.text.trim() ?? '';
+    final vin = _model.emailTextFieldTextController6?.text.trim() ?? '';
+
     final carInfo = CarInformation(
       carId: carId,
       ownerId: user.uid,
-      brand: _model.emailTextFieldTextController1?.text ?? '',
-      model: _model.emailTextFieldTextController2?.text ?? '',
-      plateNumber: _model.emailTextFieldTextController3?.text ?? '',
-      seatsAvailable:
-          int.tryParse(_model.emailTextFieldTextController4?.text ?? '0') ?? 0,
-      color: _model.emailTextFieldTextController5?.text ?? '',
+      brand: brand,
+      model: model,
+      year: year,
+      color: color,
+      plateNumber: plateNumber,
+      vin: vin,
       isVerified: false, // always false on creation
     );
 
@@ -78,7 +84,6 @@ class _DashboardEditVehicleWidgetState
         .doc(carId)
         .set(carInfo.toJson());
   }
-
   @override
   void dispose() {
     _model.dispose();
@@ -1388,98 +1393,59 @@ class _DashboardEditVehicleWidgetState
                                         Expanded(
                                           child: FFButtonWidget(
                                             onPressed: () async {
-                                              // ✅ Get the current user
-                                              final user = FirebaseAuth
-                                                  .instance.currentUser;
+                                              final user = FirebaseAuth.instance.currentUser;
                                               if (user == null) {
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(
-                                                  SnackBar(
-                                                      content: Text(
-                                                          'You must be logged in to register a vehicle.')),
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text('You must be logged in to register a vehicle.'),
+                                                  ),
                                                 );
                                                 return;
                                               }
 
-                                              // ✅ Read your input fields
-                                              final brand = _model
-                                                      .emailTextFieldTextController1
-                                                      ?.text
-                                                      .trim() ??
-                                                  '';
-                                              final model = _model
-                                                      .emailTextFieldTextController2
-                                                      ?.text
-                                                      .trim() ??
-                                                  '';
-                                              final year = _model
-                                                      .emailTextFieldTextController3
-                                                      ?.text
-                                                      .trim() ??
-                                                  '';
-                                              final color = _model
-                                                      .emailTextFieldTextController4
-                                                      ?.text
-                                                      .trim() ??
-                                                  '';
-                                              final plateNumber = _model
-                                                      .emailTextFieldTextController5
-                                                      ?.text
-                                                      .trim() ??
-                                                  '';
-                                              final vin = _model
-                                                      .emailTextFieldTextController6
-                                                      ?.text
-                                                      .trim() ??
-                                                  '';
+                                              final brand = _model.emailTextFieldTextController1?.text.trim() ?? '';
+                                              final model = _model.emailTextFieldTextController2?.text.trim() ?? '';
+                                              final yearText = _model.emailTextFieldTextController3?.text.trim() ?? '';
+                                              final color = _model.emailTextFieldTextController4?.text.trim() ?? '';
+                                              final plateNumber = _model.emailTextFieldTextController5?.text.trim() ?? '';
+                                              final vin = _model.emailTextFieldTextController6?.text.trim() ?? '';
 
-                                              if (brand.isEmpty ||
-                                                  model.isEmpty ||
-                                                  plateNumber.isEmpty) {
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(
-                                                  SnackBar(
-                                                      content: Text(
-                                                          'Please fill in required fields.')),
+                                              final year = int.tryParse(yearText) ?? 0;
+
+                                              if (brand.isEmpty || model.isEmpty || plateNumber.isEmpty) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text('Please fill in required fields.'),
+                                                  ),
                                                 );
                                                 return;
                                               }
+                                              final carId = FirebaseFirestore.instance.collection('cars').doc().id;
 
-                                              // Create a new CarInformation object
                                               final car = CarInformation(
-                                                carId:
-                                                    '', // Will be set by Firestore doc ID
+                                                carId: carId,
                                                 ownerId: user.uid,
                                                 brand: brand,
                                                 model: model,
-                                                plateNumber: plateNumber,
-                                                seatsAvailable:
-                                                    4, // Or get from input
+                                                year: year,
                                                 color: color,
-                                                isVerified: false, // New field!
+                                                plateNumber: plateNumber,
+                                                vin: vin,
+                                                isVerified: false,
                                               );
 
-                                              // Add to Firestore
-                                              final docRef =
-                                                  await FirebaseFirestore
-                                                      .instance
-                                                      .collection('cars')
-                                                      .add(car.toJson());
+                                              await FirebaseFirestore.instance
+                                                  .collection('cars')
+                                                  .doc(carId)
+                                                  .set(car.toJson());
 
-                                              // Update the carId field with Firestore doc ID if you want to store it too
-                                              await docRef
-                                                  .update({'carId': docRef.id});
-
-                                              // Feedback
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                SnackBar(
-                                                    content: Text(
-                                                        'Vehicle registered successfully!')),
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text('Vehicle registered successfully!'),
+                                                ),
                                               );
 
-                                              // Maybe navigate
-                                              Navigator.of(context).pop();
+                                              context.pushNamed('dashboardHome');
                                             },
                                             text: 'Save',
                                             options: FFButtonOptions(

@@ -928,12 +928,8 @@ class _DashboardChangePasswordWidgetState
                               Expanded(
                                 child: FFButtonWidget(
                                   onPressed: () async {
-                                    final currentPassword = _model
-                                        .passwordTextFieldTextController1?.text
-                                        .trim();
-                                    final newPassword = _model
-                                        .passwordTextFieldTextController2?.text
-                                        .trim();
+                                    final currentPassword = _model.passwordTextFieldTextController1?.text.trim();
+                                    final newPassword = _model.passwordTextFieldTextController2?.text.trim();
 
                                     if (currentPassword == null ||
                                         newPassword == null ||

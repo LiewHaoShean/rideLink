@@ -1,6 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -13,6 +10,9 @@ import 'package:provider/provider.dart';
 
 import 'dashboard_security_model.dart';
 export 'dashboard_security_model.dart';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class DashboardSecurityWidget extends StatefulWidget {
   const DashboardSecurityWidget({super.key});
@@ -766,8 +766,7 @@ class _DashboardSecurityWidgetState extends State<DashboardSecurityWidget> {
                                   children: [
                                     Expanded(
                                       child: Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0, 5, 0, 5),
+                                        padding: EdgeInsetsDirectional.fromSTEB(0, 5, 0, 5),
                                         child: Column(
                                           mainAxisSize: MainAxisSize.max,
                                           children: [
@@ -775,8 +774,7 @@ class _DashboardSecurityWidgetState extends State<DashboardSecurityWidget> {
                                               width: 354.79,
                                               decoration: BoxDecoration(),
                                               child: Padding(
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(0, 5, 0, 5),
+                                                padding: EdgeInsetsDirectional.fromSTEB(0, 5, 0, 5),
                                                 child: Container(
                                                   width: double.infinity,
                                                   child: TextFormField(

@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -18,8 +21,7 @@ class DashboardSecurityWidget extends StatefulWidget {
   static String routePath = '/dashboardSecurity';
 
   @override
-  State<DashboardSecurityWidget> createState() =>
-      _DashboardSecurityWidgetState();
+  State<DashboardSecurityWidget> createState() => _DashboardSecurityWidgetState();
 }
 
 class _DashboardSecurityWidgetState extends State<DashboardSecurityWidget> {
@@ -40,6 +42,26 @@ class _DashboardSecurityWidgetState extends State<DashboardSecurityWidget> {
 
     _model.passwordTextFieldTextController2 ??= TextEditingController();
     _model.passwordTextFieldFocusNode2 ??= FocusNode();
+
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      if (userDoc.exists) {
+        final data = userDoc.data()!;
+        setState(() {
+          _model.emailTextFieldTextController?.text = data['email'] ?? '';
+          _model.passwordTextFieldTextController1?.text = data['name'] ?? '';
+          _model.passwordTextFieldTextController2?.text = 'Contact admin if needed.';
+        });
+      }
+    }
   }
 
   @override
@@ -189,9 +211,7 @@ class _DashboardSecurityWidgetState extends State<DashboardSecurityWidget> {
                                               highlightColor:
                                                   Colors.transparent,
                                               onTap: () async {
-                                                context.pushNamed(
-                                                    DashboardChangePasswordWidget
-                                                        .routeName);
+                                                context.pushNamed(DashboardChangePasswordWidget.routeName);
                                               },
                                               child: Text(
                                                 'Edit',
@@ -260,14 +280,12 @@ class _DashboardSecurityWidgetState extends State<DashboardSecurityWidget> {
                               mainAxisSize: MainAxisSize.max,
                               children: [
                                 Padding(
-                                  padding: EdgeInsets.only(
-                                      left: 10.0), // 👈 Add left padding here
+                                  padding: EdgeInsets.only(left: 10.0), 
                                   child: Row(
                                     mainAxisSize: MainAxisSize.max,
                                     children: [
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0, 0, 0, 5),
+                                        padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 5),
                                         child: Text(
                                           'Email',
                                           style: FlutterFlowTheme.of(context)
@@ -323,18 +341,15 @@ class _DashboardSecurityWidgetState extends State<DashboardSecurityWidget> {
                                                 child: Container(
                                                   width: 200,
                                                   child: TextFormField(
-                                                    controller: _model
-                                                        .emailTextFieldTextController,
-                                                    focusNode: _model
-                                                        .emailTextFieldFocusNode,
+                                                    controller: _model.emailTextFieldTextController,
+                                                    focusNode: _model.emailTextFieldFocusNode,
                                                     autofocus: false,
                                                     obscureText: false,
+                                                    readOnly: true,
                                                     decoration: InputDecoration(
                                                       isDense: true,
                                                       labelStyle:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .bodyMedium
+                                                          FlutterFlowTheme.of(context).bodyMedium
                                                               .override(
                                                                 font:
                                                                     GoogleFonts
@@ -495,7 +510,7 @@ class _DashboardSecurityWidgetState extends State<DashboardSecurityWidget> {
                                         padding: EdgeInsetsDirectional.fromSTEB(
                                             0, 0, 0, 5),
                                         child: Text(
-                                          'Phone',
+                                          'User Public Name',
                                           style: FlutterFlowTheme.of(context)
                                               .bodyLarge
                                               .override(
@@ -545,12 +560,11 @@ class _DashboardSecurityWidgetState extends State<DashboardSecurityWidget> {
                                                 child: Container(
                                                   width: double.infinity,
                                                   child: TextFormField(
-                                                    controller: _model
-                                                        .passwordTextFieldTextController1,
-                                                    focusNode: _model
-                                                        .passwordTextFieldFocusNode1,
+                                                    controller: _model.passwordTextFieldTextController1,
+                                                    focusNode: _model.passwordTextFieldFocusNode1,
                                                     autofocus: false,
                                                     obscureText: false,
+                                                    readOnly: true,
                                                     decoration: InputDecoration(
                                                       isDense: true,
                                                       labelStyle:
@@ -581,7 +595,7 @@ class _DashboardSecurityWidgetState extends State<DashboardSecurityWidget> {
                                                                     .labelMedium
                                                                     .fontStyle,
                                                               ),
-                                                      hintText: 'Phone',
+                                                      hintText: 'User Profile Name',
                                                       hintStyle:
                                                           FlutterFlowTheme.of(
                                                                   context)
@@ -766,10 +780,8 @@ class _DashboardSecurityWidgetState extends State<DashboardSecurityWidget> {
                                                 child: Container(
                                                   width: double.infinity,
                                                   child: TextFormField(
-                                                    controller: _model
-                                                        .passwordTextFieldTextController2,
-                                                    focusNode: _model
-                                                        .passwordTextFieldFocusNode2,
+                                                    controller: _model.passwordTextFieldTextController2,
+                                                    focusNode: _model.passwordTextFieldFocusNode2,
                                                     autofocus: false,
                                                     readOnly: true,
                                                     obscureText: false,

@@ -11,6 +11,9 @@ import 'package:provider/provider.dart';
 import 'dashboard_vehicle_model.dart';
 export 'dashboard_vehicle_model.dart';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class DashboardVehicleWidget extends StatefulWidget {
   const DashboardVehicleWidget({super.key});
 
@@ -48,6 +51,45 @@ class _DashboardVehicleWidgetState extends State<DashboardVehicleWidget> {
 
     _model.emailTextFieldTextController6 ??= TextEditingController();
     _model.emailTextFieldFocusNode6 ??= FocusNode();
+
+    // ✅ Load car info
+    _loadCarInfo();
+  }
+
+  Future<void> _loadCarInfo() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    // Assuming each user has ONE car — adjust query if needed
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('cars')
+        .where('ownerId', isEqualTo: user.uid)
+        .where('isVerified', isEqualTo: true)
+        .limit(1)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      final carData = querySnapshot.docs.first.data();
+
+      setState(() {
+        _model.emailTextFieldTextController1?.text = carData['brand'] ?? '-';
+        _model.emailTextFieldTextController2?.text = carData['model'] ?? '-';
+        _model.emailTextFieldTextController3?.text = carData['year']?.toString() ?? '-';
+        _model.emailTextFieldTextController4?.text = carData['color'] ?? '-';
+        _model.emailTextFieldTextController5?.text = carData['plateNumber'] ?? '-';
+        _model.emailTextFieldTextController6?.text = carData['vin'] ?? '-';
+      });
+    } else {
+      // If no car found — optional fallback
+      setState(() {
+        _model.emailTextFieldTextController1?.text = '-';
+        _model.emailTextFieldTextController2?.text = '-';
+        _model.emailTextFieldTextController3?.text = '-';
+        _model.emailTextFieldTextController4?.text = '-';
+        _model.emailTextFieldTextController5?.text = '-';
+        _model.emailTextFieldTextController6?.text = '-';
+      });
+    }
   }
 
   @override
@@ -396,6 +438,7 @@ class _DashboardVehicleWidgetState extends State<DashboardVehicleWidget> {
                                                                               child: TextFormField(
                                                                                 controller: _model.emailTextFieldTextController1,
                                                                                 focusNode: _model.emailTextFieldFocusNode1,
+                                                                                readOnly: true,
                                                                                 autofocus: false,
                                                                                 obscureText: false,
                                                                                 decoration: InputDecoration(
@@ -579,6 +622,7 @@ class _DashboardVehicleWidgetState extends State<DashboardVehicleWidget> {
                                                                               child: TextFormField(
                                                                                 controller: _model.emailTextFieldTextController2,
                                                                                 focusNode: _model.emailTextFieldFocusNode2,
+                                                                                readOnly: true,
                                                                                 autofocus: false,
                                                                                 obscureText: false,
                                                                                 decoration: InputDecoration(
@@ -762,6 +806,7 @@ class _DashboardVehicleWidgetState extends State<DashboardVehicleWidget> {
                                                                               child: TextFormField(
                                                                                 controller: _model.emailTextFieldTextController3,
                                                                                 focusNode: _model.emailTextFieldFocusNode3,
+                                                                                readOnly: true,
                                                                                 autofocus: false,
                                                                                 obscureText: false,
                                                                                 decoration: InputDecoration(
@@ -945,6 +990,7 @@ class _DashboardVehicleWidgetState extends State<DashboardVehicleWidget> {
                                                                               child: TextFormField(
                                                                                 controller: _model.emailTextFieldTextController4,
                                                                                 focusNode: _model.emailTextFieldFocusNode4,
+                                                                                readOnly: true,
                                                                                 autofocus: false,
                                                                                 obscureText: false,
                                                                                 decoration: InputDecoration(
@@ -1128,6 +1174,7 @@ class _DashboardVehicleWidgetState extends State<DashboardVehicleWidget> {
                                                                               child: TextFormField(
                                                                                 controller: _model.emailTextFieldTextController5,
                                                                                 focusNode: _model.emailTextFieldFocusNode5,
+                                                                                readOnly: true,
                                                                                 autofocus: false,
                                                                                 obscureText: false,
                                                                                 decoration: InputDecoration(
@@ -1313,6 +1360,7 @@ class _DashboardVehicleWidgetState extends State<DashboardVehicleWidget> {
                                                                               child: TextFormField(
                                                                                 controller: _model.emailTextFieldTextController6,
                                                                                 focusNode: _model.emailTextFieldFocusNode6,
+                                                                                readOnly: true,
                                                                                 autofocus: false,
                                                                                 obscureText: false,
                                                                                 decoration: InputDecoration(
@@ -1411,11 +1459,10 @@ class _DashboardVehicleWidgetState extends State<DashboardVehicleWidget> {
                             mainAxisSize: MainAxisSize.max,
                             children: [
                               Container(
-                                width: 396.1,
+                                width: 380.0,
                                 height: 143.43,
                                 decoration: BoxDecoration(
-                                  color: FlutterFlowTheme.of(context)
-                                      .secondaryBackground,
+                                  color: FlutterFlowTheme.of(context).secondaryBackground,
                                 ),
                               ),
                             ],

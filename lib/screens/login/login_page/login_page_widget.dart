@@ -13,7 +13,9 @@ export 'login_page_model.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ride_link_carpooling/services/auth_gate.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '/models/user.dart';
+import '/services/firestore_service.dart';
 
 class LoginPageWidget extends StatefulWidget {
   const LoginPageWidget({super.key});
@@ -519,11 +521,34 @@ class _LoginPageWidgetState extends State<LoginPageWidget> {
                         try {
                           final userCredential = await signInWithEmail(
                             email: _model.emailTextFieldTextController!.text,
-                            password: _model.passwordlTextFieldTextController!.text,
+                            password:
+                                _model.passwordlTextFieldTextController!.text,
                           );
-                          context.pushNamed('searchRideHome');
+                          
+                          // Get the user's role from Firestore
+                          final user = FirebaseAuth.instance.currentUser;
+                          if (user != null) {
+                            final firestoreService = FirestoreService();
+                            final userModel = await firestoreService.getUser(user.uid);
+                            
+                            if (userModel != null) {
+                              // Check user role and redirect accordingly
+                              if (userModel.userRole == 'admin') {
+                                context.pushNamed('home'); // Admin home page
+                              } else {
+                                context.pushNamed('searchRideHome'); // Passenger page
+                              }
+                            } else {
+                              // If user document doesn't exist, default to passenger
+                              context.pushNamed('searchRideHome');
+                            }
+                          } else {
+                            // Fallback to passenger page if user is null
+                            context.pushNamed('searchRideHome');
+                          }
                         } catch (e) {
-                          String errorMessage = 'Login failed. Please try again.';
+                          String errorMessage =
+                              'Login failed. Please try again.';
                           if (e is FirebaseAuthException) {
                             switch (e.code) {
                               case 'user-not-found':

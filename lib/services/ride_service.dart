@@ -15,7 +15,7 @@ class RideService {
     if (user == null) {
       throw Exception('User not signed in');
     }
-    
+
     final rideData = {
       'creatorId': user.uid,
       'from': from.toJson(),
@@ -33,7 +33,8 @@ class RideService {
   }
 
   Future<Map<String, dynamic>> readCreatorTempRide(String rideId) async {
-    final docRef = FirebaseFirestore.instance.collection('temp_rides').doc(rideId);
+    final docRef =
+        FirebaseFirestore.instance.collection('temp_rides').doc(rideId);
     final docSnapshot = await docRef.get();
 
     if (!docSnapshot.exists) {
@@ -55,9 +56,13 @@ class RideService {
         .collection('temp_rides')
         .where('from.name', isEqualTo: from.name)
         .where('to.name', isEqualTo: to.name)
-        .where('date', isEqualTo: Timestamp.fromDate(DateTime(date.year, date.month, date.day)))
+        .where('date',
+            isEqualTo:
+                Timestamp.fromDate(DateTime(date.year, date.month, date.day)))
         .get();
 
     return querySnapshot.docs.map((doc) => doc.data()).toList();
   }
+
+  //Get all rides (Admin)
 }

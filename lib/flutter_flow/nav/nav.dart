@@ -249,9 +249,12 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: SearchRidePendingRideWidget.routeName,
           path: SearchRidePendingRideWidget.routePath,
-          builder: (context, params) => params.isEmpty
-              ? NavBarPage(initialPage: 'searchRidePendingRide')
-              : SearchRidePendingRideWidget(),
+          builder: (context, params) => SearchRidePendingRideWidget(
+            rideId: params.getParam('rideId', ParamType.String),
+            creatorId: params.getParam('creatorId', ParamType.String),
+            carId: params.getParam('carId', ParamType.String),
+            seatNeeded: params.getParam('seatNeeded', ParamType.int),
+          ),
         ),
         FFRoute(
           name: SearchRideCompleteWidget.routeName,

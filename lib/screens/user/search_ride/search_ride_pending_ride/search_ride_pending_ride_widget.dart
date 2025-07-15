@@ -193,7 +193,7 @@ class _SearchRidePendingRideWidgetState extends State<SearchRidePendingRideWidge
                     children: [
                       Expanded(
                         child: Container(
-                          height: 150,
+                          height: 100,
                           decoration: BoxDecoration(
                             color: FlutterFlowTheme.of(context)
                                 .secondaryBackground,
@@ -231,7 +231,7 @@ class _SearchRidePendingRideWidgetState extends State<SearchRidePendingRideWidge
                                               size: 24,
                                             ),
                                             onPressed: () {
-                                              print('IconButton pressed ...');
+                                              context.pushNamed('dashboardHome');
                                             },
                                           ),
                                         ],

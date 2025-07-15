@@ -6,6 +6,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+
 import 'admin_ride_details_model.dart';
 export 'admin_ride_details_model.dart';
 
@@ -56,83 +57,98 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   Padding(
-                    padding:
-                        EdgeInsetsDirectional.fromSTEB(10.0, 0.0, 10.0, 0.0),
+                    padding: EdgeInsetsDirectional.fromSTEB(10, 0, 10, 0),
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Container(
-                          width: 406.6,
-                          height: 100.0,
-                          decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context)
-                                .secondaryBackground,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Column(
-                                mainAxisSize: MainAxisSize.max,
-                                children: [
-                                  Container(
-                                    width: 42.16,
-                                    height: 100.0,
-                                    decoration: BoxDecoration(
-                                      color: FlutterFlowTheme.of(context)
-                                          .secondaryBackground,
-                                    ),
-                                    child: Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 0.0, 1.0, 0.0),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          FlutterFlowIconButton(
-                                            borderRadius: 8.0,
-                                            buttonSize: 40.0,
-                                            fillColor: Color(0xFFE5E5E5),
-                                            icon: Icon(
-                                              Icons.arrow_back_ios_new,
-                                              color: Color(0xFF00275C),
-                                              size: 24.0,
-                                            ),
-                                            onPressed: () {
-                                              print('IconButton pressed ...');
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Column(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Expanded(
-                                    child: Container(
-                                      width: 340.09,
-                                      height: 100.0,
+                        Expanded(
+                          child: Container(
+                            width: 406.6,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              color: FlutterFlowTheme.of(context)
+                                  .secondaryBackground,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                Column(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    Container(
+                                      width: 42.16,
+                                      height: 100,
                                       decoration: BoxDecoration(
                                         color: FlutterFlowTheme.of(context)
                                             .secondaryBackground,
                                       ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            '10 Jun 2025, 06:00 PM',
-                                            style: FlutterFlowTheme.of(context)
-                                                .titleLarge
-                                                .override(
-                                                  font: GoogleFonts.interTight(
+                                      child: Padding(
+                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                            0, 0, 1, 0),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            FlutterFlowIconButton(
+                                              borderRadius: 8,
+                                              buttonSize: 40,
+                                              fillColor: Color(0xFFE5E5E5),
+                                              icon: Icon(
+                                                Icons.arrow_back_ios_new,
+                                                color: Color(0xFF00275C),
+                                                size: 24,
+                                              ),
+                                              onPressed: () async {
+                                                context.safePop();
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        width: 340.09,
+                                        height: 100,
+                                        decoration: BoxDecoration(
+                                          color: FlutterFlowTheme.of(context)
+                                              .secondaryBackground,
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              '10 Jun 2025, 06:00 PM',
+                                              style: FlutterFlowTheme.of(
+                                                      context)
+                                                  .titleLarge
+                                                  .override(
+                                                    font:
+                                                        GoogleFonts.interTight(
+                                                      fontWeight:
+                                                          FlutterFlowTheme.of(
+                                                                  context)
+                                                              .titleLarge
+                                                              .fontWeight,
+                                                      fontStyle:
+                                                          FlutterFlowTheme.of(
+                                                                  context)
+                                                              .titleLarge
+                                                              .fontStyle,
+                                                    ),
+                                                    letterSpacing: 0.0,
                                                     fontWeight:
                                                         FlutterFlowTheme.of(
                                                                 context)
@@ -144,26 +160,15 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                             .titleLarge
                                                             .fontStyle,
                                                   ),
-                                                  letterSpacing: 0.0,
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .titleLarge
-                                                          .fontWeight,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .titleLarge
-                                                          .fontStyle,
-                                                ),
-                                          ),
-                                        ],
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -176,25 +181,27 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                       children: [
                         Container(
                           width: 394.5,
-                          height: 647.0,
+                          height: 647,
                           decoration: BoxDecoration(
                             color: FlutterFlowTheme.of(context)
                                 .secondaryBackground,
                           ),
                           child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                10.0, 0.0, 10.0, 0.0),
+                            padding:
+                                EdgeInsetsDirectional.fromSTEB(10, 0, 10, 0),
                             child: Column(
                               mainAxisSize: MainAxisSize.max,
                               children: [
                                 Row(
                                   mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Column(
                                       mainAxisSize: MainAxisSize.max,
                                       children: [
                                         Container(
-                                          width: 276.7,
+                                          width: 270,
                                           height: 32.48,
                                           decoration: BoxDecoration(
                                             color: FlutterFlowTheme.of(context)
@@ -230,7 +237,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                           color: FlutterFlowTheme
                                                                   .of(context)
                                                               .secondaryText,
-                                                          fontSize: 16.0,
+                                                          fontSize: 16,
                                                           letterSpacing: 0.0,
                                                           fontWeight:
                                                               FlutterFlowTheme.of(
@@ -255,7 +262,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                       mainAxisSize: MainAxisSize.max,
                                       children: [
                                         Container(
-                                          width: 100.0,
+                                          width: 80,
                                           height: 31.38,
                                           decoration: BoxDecoration(
                                             color: FlutterFlowTheme.of(context)
@@ -282,7 +289,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                                 .fontStyle,
                                                       ),
                                                       color: Color(0xFF00275C),
-                                                      fontSize: 18.0,
+                                                      fontSize: 18,
                                                       letterSpacing: 0.0,
                                                       fontWeight:
                                                           FontWeight.bold,
@@ -305,15 +312,14 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                   children: [
                                     Expanded(
                                       child: Container(
-                                        width: 100.0,
+                                        width: 100,
                                         height: 118.7,
                                         decoration: BoxDecoration(
                                           color: FlutterFlowTheme.of(context)
                                               .secondaryBackground,
                                         ),
                                         child: Align(
-                                          alignment:
-                                              AlignmentDirectional(0.0, 0.0),
+                                          alignment: AlignmentDirectional(0, 0),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             mainAxisAlignment:
@@ -325,7 +331,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                   Flexible(
                                                     child: Container(
                                                       width: 372.2,
-                                                      height: 108.0,
+                                                      height: 108,
                                                       decoration: BoxDecoration(
                                                         color: FlutterFlowTheme
                                                                 .of(context)
@@ -342,7 +348,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                             children: [
                                                               Container(
                                                                 width: 97.9,
-                                                                height: 108.0,
+                                                                height: 108,
                                                                 decoration:
                                                                     BoxDecoration(
                                                                   color: FlutterFlowTheme.of(
@@ -417,7 +423,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                             children: [
                                                               Container(
                                                                 width: 23.7,
-                                                                height: 108.0,
+                                                                height: 108,
                                                                 decoration:
                                                                     BoxDecoration(
                                                                   color: FlutterFlowTheme.of(
@@ -458,7 +464,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                                                 Icon(
                                                                               Icons.circle_outlined,
                                                                               color: Color(0xFF00275C),
-                                                                              size: 16.0,
+                                                                              size: 16,
                                                                             ),
                                                                           ),
                                                                         ),
@@ -476,10 +482,10 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                                         children: [
                                                                           SizedBox(
                                                                             height:
-                                                                                45.0,
+                                                                                45,
                                                                             child:
                                                                                 VerticalDivider(
-                                                                              thickness: 2.0,
+                                                                              thickness: 2,
                                                                               color: Color(0xFF00275C),
                                                                             ),
                                                                           ),
@@ -509,7 +515,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                                                 Icon(
                                                                               Icons.circle_outlined,
                                                                               color: Color(0xFF00275C),
-                                                                              size: 16.0,
+                                                                              size: 16,
                                                                             ),
                                                                           ),
                                                                         ),
@@ -529,7 +535,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                                 child:
                                                                     Container(
                                                                   width: 249.7,
-                                                                  height: 108.0,
+                                                                  height: 108,
                                                                   decoration:
                                                                       BoxDecoration(
                                                                     color: FlutterFlowTheme.of(
@@ -540,10 +546,10 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                                       Padding(
                                                                     padding: EdgeInsetsDirectional
                                                                         .fromSTEB(
-                                                                            10.0,
-                                                                            0.0,
-                                                                            0.0,
-                                                                            0.0),
+                                                                            10,
+                                                                            0,
+                                                                            0,
+                                                                            0),
                                                                     child:
                                                                         Column(
                                                                       mainAxisSize:
@@ -677,7 +683,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                     Expanded(
                                       child: Container(
                                         width: 373.7,
-                                        height: 80.0,
+                                        height: 80,
                                         decoration: BoxDecoration(
                                           color: FlutterFlowTheme.of(context)
                                               .secondaryBackground,
@@ -690,8 +696,8 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                               children: [
                                                 Expanded(
                                                   child: Container(
-                                                    width: 80.0,
-                                                    height: 100.0,
+                                                    width: 80,
+                                                    height: 100,
                                                     decoration: BoxDecoration(
                                                       color: FlutterFlowTheme
                                                               .of(context)
@@ -701,10 +707,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                       padding:
                                                           EdgeInsetsDirectional
                                                               .fromSTEB(
-                                                                  0.0,
-                                                                  0.0,
-                                                                  1.0,
-                                                                  0.0),
+                                                                  0, 0, 1, 0),
                                                       child: Row(
                                                         mainAxisSize:
                                                             MainAxisSize.max,
@@ -713,8 +716,8 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                                 .center,
                                                         children: [
                                                           Container(
-                                                            width: 55.0,
-                                                            height: 55.0,
+                                                            width: 55,
+                                                            height: 55,
                                                             decoration:
                                                                 BoxDecoration(
                                                               color: FlutterFlowTheme
@@ -723,7 +726,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                               borderRadius:
                                                                   BorderRadius
                                                                       .circular(
-                                                                          100.0),
+                                                                          100),
                                                             ),
                                                             child: Row(
                                                               mainAxisSize:
@@ -738,7 +741,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                                   color: FlutterFlowTheme.of(
                                                                           context)
                                                                       .primaryBackground,
-                                                                  size: 30.0,
+                                                                  size: 30,
                                                                 ),
                                                               ],
                                                             ),
@@ -756,7 +759,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                 Expanded(
                                                   child: Container(
                                                     width: 209.39,
-                                                    height: 100.0,
+                                                    height: 100,
                                                     decoration: BoxDecoration(
                                                       color: FlutterFlowTheme
                                                               .of(context)
@@ -766,10 +769,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                       padding:
                                                           EdgeInsetsDirectional
                                                               .fromSTEB(
-                                                                  10.0,
-                                                                  0.0,
-                                                                  0.0,
-                                                                  0.0),
+                                                                  10, 0, 0, 0),
                                                       child: Column(
                                                         mainAxisSize:
                                                             MainAxisSize.max,
@@ -908,8 +908,8 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                   children: [
                                     Expanded(
                                       child: Container(
-                                        width: 100.0,
-                                        height: 225.0,
+                                        width: 100,
+                                        height: 225,
                                         decoration: BoxDecoration(
                                           color: FlutterFlowTheme.of(context)
                                               .secondaryBackground,
@@ -923,8 +923,8 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                 children: [
                                                   Expanded(
                                                     child: Container(
-                                                      width: 100.0,
-                                                      height: 70.0,
+                                                      width: 100,
+                                                      height: 70,
                                                       decoration: BoxDecoration(
                                                         color: FlutterFlowTheme
                                                                 .of(context)
@@ -942,8 +942,8 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                               Expanded(
                                                                 child:
                                                                     Container(
-                                                                  width: 80.0,
-                                                                  height: 100.0,
+                                                                  width: 80,
+                                                                  height: 100,
                                                                   decoration:
                                                                       BoxDecoration(
                                                                     color: FlutterFlowTheme.of(
@@ -954,10 +954,10 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                                       Padding(
                                                                     padding: EdgeInsetsDirectional
                                                                         .fromSTEB(
-                                                                            0.0,
-                                                                            0.0,
-                                                                            1.0,
-                                                                            0.0),
+                                                                            0,
+                                                                            0,
+                                                                            1,
+                                                                            0),
                                                                     child: Row(
                                                                       mainAxisSize:
                                                                           MainAxisSize
@@ -968,15 +968,15 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                                       children: [
                                                                         Container(
                                                                           width:
-                                                                              55.0,
+                                                                              55,
                                                                           height:
-                                                                              55.0,
+                                                                              55,
                                                                           decoration:
                                                                               BoxDecoration(
                                                                             color:
                                                                                 FlutterFlowTheme.of(context).secondaryText,
                                                                             borderRadius:
-                                                                                BorderRadius.circular(100.0),
+                                                                                BorderRadius.circular(100),
                                                                           ),
                                                                           child:
                                                                               Row(
@@ -988,7 +988,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                                               Icon(
                                                                                 Icons.person,
                                                                                 color: FlutterFlowTheme.of(context).primaryBackground,
-                                                                                size: 30.0,
+                                                                                size: 30,
                                                                               ),
                                                                             ],
                                                                           ),
@@ -1009,7 +1009,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                                 child:
                                                                     Container(
                                                                   width: 209.39,
-                                                                  height: 100.0,
+                                                                  height: 100,
                                                                   decoration:
                                                                       BoxDecoration(
                                                                     color: FlutterFlowTheme.of(
@@ -1020,10 +1020,10 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                                       Padding(
                                                                     padding: EdgeInsetsDirectional
                                                                         .fromSTEB(
-                                                                            10.0,
-                                                                            0.0,
-                                                                            0.0,
-                                                                            0.0),
+                                                                            10,
+                                                                            0,
+                                                                            0,
+                                                                            0),
                                                                     child:
                                                                         Column(
                                                                       mainAxisSize:
@@ -1069,8 +1069,8 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                 children: [
                                                   Expanded(
                                                     child: Container(
-                                                      width: 100.0,
-                                                      height: 70.0,
+                                                      width: 100,
+                                                      height: 70,
                                                       decoration: BoxDecoration(
                                                         color: FlutterFlowTheme
                                                                 .of(context)
@@ -1088,8 +1088,8 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                               Expanded(
                                                                 child:
                                                                     Container(
-                                                                  width: 80.0,
-                                                                  height: 100.0,
+                                                                  width: 80,
+                                                                  height: 100,
                                                                   decoration:
                                                                       BoxDecoration(
                                                                     color: FlutterFlowTheme.of(
@@ -1100,10 +1100,10 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                                       Padding(
                                                                     padding: EdgeInsetsDirectional
                                                                         .fromSTEB(
-                                                                            0.0,
-                                                                            0.0,
-                                                                            1.0,
-                                                                            0.0),
+                                                                            0,
+                                                                            0,
+                                                                            1,
+                                                                            0),
                                                                     child: Row(
                                                                       mainAxisSize:
                                                                           MainAxisSize
@@ -1114,15 +1114,15 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                                       children: [
                                                                         Container(
                                                                           width:
-                                                                              55.0,
+                                                                              55,
                                                                           height:
-                                                                              55.0,
+                                                                              55,
                                                                           decoration:
                                                                               BoxDecoration(
                                                                             color:
                                                                                 FlutterFlowTheme.of(context).secondaryText,
                                                                             borderRadius:
-                                                                                BorderRadius.circular(100.0),
+                                                                                BorderRadius.circular(100),
                                                                           ),
                                                                           child:
                                                                               Row(
@@ -1134,7 +1134,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                                               Icon(
                                                                                 Icons.person,
                                                                                 color: FlutterFlowTheme.of(context).primaryBackground,
-                                                                                size: 35.0,
+                                                                                size: 35,
                                                                               ),
                                                                             ],
                                                                           ),
@@ -1155,7 +1155,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                                 child:
                                                                     Container(
                                                                   width: 209.39,
-                                                                  height: 100.0,
+                                                                  height: 100,
                                                                   decoration:
                                                                       BoxDecoration(
                                                                     color: FlutterFlowTheme.of(
@@ -1166,10 +1166,10 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                                       Padding(
                                                                     padding: EdgeInsetsDirectional
                                                                         .fromSTEB(
-                                                                            10.0,
-                                                                            0.0,
-                                                                            0.0,
-                                                                            0.0),
+                                                                            10,
+                                                                            0,
+                                                                            0,
+                                                                            0),
                                                                     child:
                                                                         Column(
                                                                       mainAxisSize:
@@ -1215,8 +1215,8 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                 children: [
                                                   Expanded(
                                                     child: Container(
-                                                      width: 100.0,
-                                                      height: 70.0,
+                                                      width: 100,
+                                                      height: 70,
                                                       decoration: BoxDecoration(
                                                         color: FlutterFlowTheme
                                                                 .of(context)
@@ -1234,8 +1234,8 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                               Expanded(
                                                                 child:
                                                                     Container(
-                                                                  width: 80.0,
-                                                                  height: 100.0,
+                                                                  width: 80,
+                                                                  height: 100,
                                                                   decoration:
                                                                       BoxDecoration(
                                                                     color: FlutterFlowTheme.of(
@@ -1246,10 +1246,10 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                                       Padding(
                                                                     padding: EdgeInsetsDirectional
                                                                         .fromSTEB(
-                                                                            0.0,
-                                                                            0.0,
-                                                                            1.0,
-                                                                            0.0),
+                                                                            0,
+                                                                            0,
+                                                                            1,
+                                                                            0),
                                                                     child: Row(
                                                                       mainAxisSize:
                                                                           MainAxisSize
@@ -1260,15 +1260,15 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                                       children: [
                                                                         Container(
                                                                           width:
-                                                                              55.0,
+                                                                              55,
                                                                           height:
-                                                                              55.0,
+                                                                              55,
                                                                           decoration:
                                                                               BoxDecoration(
                                                                             color:
                                                                                 FlutterFlowTheme.of(context).secondaryText,
                                                                             borderRadius:
-                                                                                BorderRadius.circular(100.0),
+                                                                                BorderRadius.circular(100),
                                                                           ),
                                                                           child:
                                                                               Row(
@@ -1280,7 +1280,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                                               Icon(
                                                                                 Icons.person,
                                                                                 color: FlutterFlowTheme.of(context).primaryBackground,
-                                                                                size: 35.0,
+                                                                                size: 35,
                                                                               ),
                                                                             ],
                                                                           ),
@@ -1301,7 +1301,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                                 child:
                                                                     Container(
                                                                   width: 209.39,
-                                                                  height: 100.0,
+                                                                  height: 100,
                                                                   decoration:
                                                                       BoxDecoration(
                                                                     color: FlutterFlowTheme.of(
@@ -1312,10 +1312,10 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                                       Padding(
                                                                     padding: EdgeInsetsDirectional
                                                                         .fromSTEB(
-                                                                            10.0,
-                                                                            0.0,
-                                                                            0.0,
-                                                                            0.0),
+                                                                            10,
+                                                                            0,
+                                                                            0,
+                                                                            0),
                                                                     child:
                                                                         Column(
                                                                       mainAxisSize:
@@ -1382,7 +1382,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                 ),
                                 Padding(
                                   padding: EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 10.0, 0.0, 0.0),
+                                      0, 10, 0, 0),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.max,
                                     mainAxisAlignment:
@@ -1429,7 +1429,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                                         .titleLarge
                                                         .fontStyle,
                                               ),
-                                              fontSize: 24.0,
+                                              fontSize: 24,
                                               letterSpacing: 0.0,
                                               fontWeight:
                                                   FlutterFlowTheme.of(context)

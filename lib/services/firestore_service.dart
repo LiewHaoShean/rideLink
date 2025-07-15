@@ -43,6 +43,14 @@ class FirestoreService {
         .toList();
   }
 
+  Future<CarInformation?> getCarById(String carId) async {
+    final doc = await _db.collection('cars').doc(carId).get();
+    if (doc.exists) {
+      return CarInformation.fromJson(doc.data()!);
+    }
+    return null;
+  }
+
   /// TRIPS
   Future<void> createTrip(Trip trip) async {
     await _db.collection('trips').doc(trip.tripId).set(trip.toJson());

@@ -1,7 +1,8 @@
 // Export pages
 export 'screens/login/home_page/home_page_widget.dart' show HomePageWidget;
 export 'screens/login/login_page/login_page_widget.dart' show LoginPageWidget;
-export 'screens/login/sign_up_page/sign_up_page_widget.dart' show SignUpPageWidget;
+export 'screens/login/sign_up_page/sign_up_page_widget.dart'
+    show SignUpPageWidget;
 export 'screens/login/verification_page/verification_page_widget.dart'
     show VerificationPageWidget;
 export 'screens/login/user_profile_page/user_profile_page_widget.dart'
@@ -61,30 +62,32 @@ export 'screens/user/search_ride/search_ride_pending_ride/search_ride_pending_ri
     show SearchRidePendingRideWidget;
 export 'screens/user/search_ride/search_ride_complete/search_ride_complete_widget.dart'
     show SearchRideCompleteWidget;
-export '/admin/home/home_widget.dart' show HomeWidget;
-export '/admin/admin_user_management/admin_user_management_widget.dart'
+export 'screens/admin/home/home_widget.dart' show HomeWidget;
+export 'screens/admin/admin_user_management/admin_user_management_widget.dart'
     show AdminUserManagementWidget;
-export '/admin/admin_user_details/admin_user_details_widget.dart'
+export 'screens/admin/admin_user_details/admin_user_details_widget.dart'
     show AdminUserDetailsWidget;
-export '/admin/admin_ride_management/admin_ride_management_widget.dart'
+export 'screens/admin/admin_ride_management/admin_ride_management_widget.dart'
     show AdminRideManagementWidget;
-export '/admin/admin_ride_details/admin_ride_details_widget.dart'
+export 'screens/admin/admin_ride_details/admin_ride_details_widget.dart'
     show AdminRideDetailsWidget;
-export '/admin/admin_driver_verification/admin_driver_verification_widget.dart'
+export 'screens/admin/admin_driver_verification/admin_driver_verification_widget.dart'
     show AdminDriverVerificationWidget;
-export '/admin/admin_driver_verification_details/admin_driver_verification_details_widget.dart'
+export 'screens/admin/admin_driver_verification_details/admin_driver_verification_details_widget.dart'
     show AdminDriverVerificationDetailsWidget;
-export '/admin/admin_finance/admin_finance_widget.dart' show AdminFinanceWidget;
-export '/admin/admin_customer_service/admin_customer_service_widget.dart'
+export 'screens/admin/admin_finance/admin_finance_widget.dart'
+    show AdminFinanceWidget;
+export 'screens/admin/admin_customer_service/admin_customer_service_widget.dart'
     show AdminCustomerServiceWidget;
-export '/admin/admin_customer_service_details/admin_customer_service_details_widget.dart'
+export 'screens/admin/admin_customer_service_details/admin_customer_service_details_widget.dart'
     show AdminCustomerServiceDetailsWidget;
-export '/admin/admin_security/admin_security_widget.dart'
+export 'screens/admin/admin_security/admin_security_widget.dart'
     show AdminSecurityWidget;
-export '/admin/admin_change_password/admin_change_password_widget.dart'
+export 'screens/admin/admin_change_password/admin_change_password_widget.dart'
     show AdminChangePasswordWidget;
 export 'screens/login/reset_password/reset_password_widget.dart'
     show ResetPasswordWidget;
-export 'screens/login/confirm_email/confirm_email_widget.dart' show ConfirmEmailWidget;
+export 'screens/login/confirm_email/confirm_email_widget.dart'
+    show ConfirmEmailWidget;
 export 'screens/user/dashboard/dashboard_profile/dashboard_profile_widget.dart'
     show DashboardProfileWidget;

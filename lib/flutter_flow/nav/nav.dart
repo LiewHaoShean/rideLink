@@ -63,7 +63,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           path: SignUpPageWidget.routePath,
           builder: (context, params) => SignUpPageWidget(),
         ),
-       FFRoute(
+        FFRoute(
           name: VerificationPageWidget.routeName,
           path: VerificationPageWidget.routePath,
           builder: (context, params) => VerificationPageWidget(
@@ -109,8 +109,12 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: SearchRideResultWidget.routeName,
           path: SearchRideResultWidget.routePath,
           builder: (context, params) {
-            final fromJson = jsonDecode(params.getParam('from', ParamType.String) ?? '{}') as Map<String, dynamic>;
-            final toJson = jsonDecode(params.getParam('to', ParamType.String) ?? '{}') as Map<String, dynamic>;
+            final fromJson =
+                jsonDecode(params.getParam('from', ParamType.String) ?? '{}')
+                    as Map<String, dynamic>;
+            final toJson =
+                jsonDecode(params.getParam('to', ParamType.String) ?? '{}')
+                    as Map<String, dynamic>;
 
             return SearchRideResultWidget(
               from: Location.fromJson(fromJson),
@@ -274,7 +278,9 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: AdminUserDetailsWidget.routeName,
           path: AdminUserDetailsWidget.routePath,
-          builder: (context, params) => AdminUserDetailsWidget(),
+          builder: (context, params) => AdminUserDetailsWidget(
+            userId: params.getParam<String>('userId', ParamType.String)!,
+          ),
         ),
         FFRoute(
           name: AdminRideManagementWidget.routeName,

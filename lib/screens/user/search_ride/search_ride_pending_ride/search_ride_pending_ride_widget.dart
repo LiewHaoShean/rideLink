@@ -12,20 +12,35 @@ import 'package:provider/provider.dart';
 import 'search_ride_pending_ride_model.dart';
 export 'search_ride_pending_ride_model.dart';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class SearchRidePendingRideWidget extends StatefulWidget {
-  const SearchRidePendingRideWidget({super.key});
+  final String? rideId;
+  final String? creatorId;
+  final String? carId;
+  final int? seatNeeded;
+
+  const SearchRidePendingRideWidget({
+    super.key,
+    this.rideId,
+    this.creatorId,
+    this.carId,
+    this.seatNeeded,
+  });
 
   static String routeName = 'searchRidePendingRide';
   static String routePath = '/searchRidePendingRide';
 
   @override
-  State<SearchRidePendingRideWidget> createState() =>
-      _SearchRidePendingRideWidgetState();
+  State<SearchRidePendingRideWidget> createState() => _SearchRidePendingRideWidgetState();
 }
 
-class _SearchRidePendingRideWidgetState
-    extends State<SearchRidePendingRideWidget> {
+class _SearchRidePendingRideWidgetState extends State<SearchRidePendingRideWidget> {
   late SearchRidePendingRideModel _model;
+  Map<String, dynamic>? rideData;
+  Map<String, dynamic>? creatorData;
+  Map<String, dynamic>? carData;
+  List<Map<String, dynamic>> usersInRide = [];
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -33,6 +48,119 @@ class _SearchRidePendingRideWidgetState
   void initState() {
     super.initState();
     _model = createModel(context, () => SearchRidePendingRideModel());
+    _loadRideDetails();
+    _fetchUsersInRide();
+  }
+
+  /// Load the ride + driver + car in one go
+  Future<void> _loadRideDetails() async {
+    if (widget.rideId == null) return;
+
+    try {
+      // Get the ride doc
+      final rideDoc = await FirebaseFirestore.instance
+          .collection('temp_rides')
+          .doc(widget.rideId)
+          .get();
+
+      if (!rideDoc.exists) {
+        return;
+      }
+
+      final ride = rideDoc.data();
+      if (ride == null) return;
+
+      // Get creator info
+      final creatorUid = ride['creatorId'] as String?;
+      String creatorName = 'Unknown';
+      String creatorGender = 'male';
+
+      if (creatorUid != null) {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(creatorUid)
+            .get();
+
+        if (userDoc.exists) {
+          creatorName = userDoc['name'] ?? 'Unknown';
+          creatorGender = userDoc['gender'] ?? 'male';
+        }
+      }
+
+      // Get car info
+      Map<String, dynamic>? carInfo;
+      if (creatorUid != null) {
+        final carQuery = await FirebaseFirestore.instance
+            .collection('cars')
+            .where('ownerId', isEqualTo: creatorUid)
+            .where('isVerified', isEqualTo: true)
+            .limit(1)
+            .get();
+
+        if (carQuery.docs.isNotEmpty) {
+          final doc = carQuery.docs.first;
+          carInfo = {
+            'carBrand': doc['brand'] ?? 'Unknown',
+            'carModel': doc['model'] ?? 'Unknown',
+            'carColor': doc['color'] ?? 'Unknown',
+            'carPlate': doc['plateNumber'] ?? 'Unknown',
+            'carVin': doc['vin'] ?? 'Unknown',
+            'carYear': doc['year']?.toString() ?? 'Unknown',
+            'carId': doc.id,
+          };
+        }
+      }
+
+      // 4️⃣ Format timestamps
+      String formattedDate = 'N/A';
+      String formattedTime = 'N/A';
+
+      final gender = creatorData?['gender'] ?? 'male';
+      final date = ride['date'] as Timestamp?;
+      final time = ride['time'] as Timestamp?;
+
+      if (date != null) {
+        formattedDate = DateFormat('EEE, d MMM yyyy').format(date.toDate());
+      }
+
+      if (time != null) {
+        formattedTime = DateFormat('hh:mm a').format(time.toDate());
+      }
+
+      // 5️⃣ Store all in state
+      setState(() {
+        rideData = {
+          'from': ride['from'] ?? '',
+          'to': ride['to'] ?? '',
+          'price': ride['price'] ?? 0,
+          'seats': ride['seats'] ?? 0,
+          'formattedDate': formattedDate,
+          'formattedTime': formattedTime,
+        };
+        creatorData = {
+          'name': creatorName,
+          'gender': creatorGender,
+        };
+        carData = carInfo;
+      });
+    } catch (e) {
+      print('Error loading ride details: $e');
+    }
+  }
+
+  Future<void> _fetchUsersInRide() async {
+    final doc = await FirebaseFirestore.instance
+        .collection('rides')
+        .doc(widget.rideId)
+        .get();
+
+    if (doc.exists) {
+      final data = doc.data();
+      final users = data?['users'] as List<dynamic>? ?? [];
+      setState(() {
+        usersInRide = users.cast<Map<String, dynamic>>();
+      });
+    }
   }
 
   @override
@@ -65,7 +193,7 @@ class _SearchRidePendingRideWidgetState
                     children: [
                       Expanded(
                         child: Container(
-                          height: 100,
+                          height: 150,
                           decoration: BoxDecoration(
                             color: FlutterFlowTheme.of(context)
                                 .secondaryBackground,
@@ -77,7 +205,7 @@ class _SearchRidePendingRideWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Container(
-                                    width: 42.16,
+                                    width: 40,
                                     height: 100,
                                     decoration: BoxDecoration(
                                       color: FlutterFlowTheme.of(context)
@@ -117,7 +245,7 @@ class _SearchRidePendingRideWidgetState
                                 children: [
                                   Expanded(
                                     child: Container(
-                                      width: 341.01,
+                                      width: 300.0,
                                       height: 100,
                                       decoration: BoxDecoration(
                                         color: FlutterFlowTheme.of(context)
@@ -214,8 +342,8 @@ class _SearchRidePendingRideWidgetState
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
+                  children: usersInRide.map((user) {
+                    return Container(
                       width: 394.5,
                       height: 641,
                       decoration: BoxDecoration(
@@ -314,7 +442,8 @@ class _SearchRidePendingRideWidgetState
                                                                             MainAxisAlignment.center,
                                                                         children: [
                                                                           Text(
-                                                                            '8 Jun 2025',
+                                                                            rideData?['formattedDate'] ??
+                                                                                'N/A',
                                                                             style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                                                   font: GoogleFonts.inter(
                                                                                     fontWeight: FontWeight.w600,
@@ -335,7 +464,8 @@ class _SearchRidePendingRideWidgetState
                                                                             MainAxisAlignment.center,
                                                                         children: [
                                                                           Text(
-                                                                            '05:00 PM',
+                                                                            rideData?['formattedTime'] ??
+                                                                                'N/A',
                                                                             style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                                                   font: GoogleFonts.inter(
                                                                                     fontWeight: FontWeight.w600,
@@ -479,7 +609,7 @@ class _SearchRidePendingRideWidgetState
                                                                                 CrossAxisAlignment.center,
                                                                             children: [
                                                                               Text(
-                                                                                'APU',
+                                                                                rideData?['from']?['name'] ?? 'Unknown',
                                                                                 style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                                                       font: GoogleFonts.inter(
                                                                                         fontWeight: FontWeight.w600,
@@ -500,7 +630,7 @@ class _SearchRidePendingRideWidgetState
                                                                                 MainAxisAlignment.start,
                                                                             children: [
                                                                               Text(
-                                                                                'Parkhill Residence',
+                                                                                rideData?['to']?['name'] ?? 'Unknown',
                                                                                 style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                                                       font: GoogleFonts.inter(
                                                                                         fontWeight: FontWeight.w600,
@@ -631,7 +761,7 @@ class _SearchRidePendingRideWidgetState
                                                                                         mainAxisAlignment: MainAxisAlignment.center,
                                                                                         children: [
                                                                                           Text(
-                                                                                            'Hor Yuan Li',
+                                                                                            creatorData?['name'] ?? 'Unknown',
                                                                                             style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                                                                   font: GoogleFonts.inter(
                                                                                                     fontWeight: FontWeight.bold,
@@ -826,8 +956,8 @@ class _SearchRidePendingRideWidgetState
                           ],
                         ),
                       ),
-                    ),
-                  ],
+                    );
+                  }).toList(),
                 ),
               ),
             ],

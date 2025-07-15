@@ -36,6 +36,8 @@ class RideCard extends StatelessWidget {
       child: InkWell(
         splashColor: Colors.transparent,
         onTap: () async {
+          print('Tapped rideId = $rideId');
+          print('Passing creatorId = $creatorId');
           context.pushNamed(
             SearchRideDetailsWidget.routeName,
             queryParameters: {

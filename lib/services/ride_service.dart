@@ -44,7 +44,7 @@ class RideService {
     return docSnapshot.data() as Map<String, dynamic>;
   }
 
-  ///Search for rides matching query
+  /// Search for rides matching query
   Future<List<Map<String, dynamic>>> searchRides({
     required Location from,
     required Location to,
@@ -54,28 +54,36 @@ class RideService {
   }) async {
     final firestore = FirebaseFirestore.instance;
 
-    // Step 1: Run the filtered query
+    // Run the filtered query
     final querySnapshot = await firestore
         .collection('temp_rides')
         .where('from.name', isEqualTo: from.name)
         .where('to.name', isEqualTo: to.name)
-        .where('date',
-            isEqualTo:
-                Timestamp.fromDate(DateTime(date.year, date.month, date.day)))
+        .where('date', isEqualTo: Timestamp.fromDate(DateTime(date.year, date.month, date.day)))
+        .where('seats', isGreaterThanOrEqualTo: seatsNeeded) // filter by seats
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
-      return querySnapshot.docs
-          .map((doc) => doc.data() as Map<String, dynamic>)
-          .toList();
+      return querySnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        data['rideId'] = doc.id;
+        return data;
+      }).toList();
     }
 
-    // Step 2: Fallback — get ALL rides if no match found
+    // Fallback — get ALL rides, but filter in Dart
     final fallbackSnapshot = await firestore.collection('temp_rides').get();
 
-    return fallbackSnapshot.docs
-        .map((doc) => doc.data() as Map<String, dynamic>)
-        .toList();
+    final fallbackRides = fallbackSnapshot.docs.map((doc) {
+      final data = doc.data() as Map<String, dynamic>;
+      data['rideId'] = doc.id;
+      return data;
+    }).where((ride) {
+      final availableSeats = ride['seats'] as int? ?? 0;
+      return availableSeats >= seatsNeeded;
+    }).toList();
+
+    return fallbackRides;
   }
 
   //Get all rides (Admin)

@@ -94,9 +94,8 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: SearchRideHomeWidget.routeName,
           path: SearchRideHomeWidget.routePath,
-          builder: (context, params) => params.isEmpty
-              ? NavBarPage(initialPage: 'searchRideHome')
-              : SearchRideHomeWidget(),
+          builder: (context, params) =>
+              NavBarPage(initialPage: 'searchRideHome'),
         ),
         FFRoute(
           name: CreateRideHomeWidget.routeName,

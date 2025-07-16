@@ -1,3 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:timeago/timeago.dart' as dateFormat;
+import 'package:timeago/timeago.dart' as timeFormat;
+
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -36,132 +40,160 @@ class SearchRidePendingRideWidget extends StatefulWidget {
 }
 
 class _SearchRidePendingRideWidgetState extends State<SearchRidePendingRideWidget> {
+  bool? isPassenger; // null = loading, true = in ride, false = not in ride
+  bool isLoading = true;
   late SearchRidePendingRideModel _model;
   Map<String, dynamic>? rideData;
   Map<String, dynamic>? creatorData;
   Map<String, dynamic>? carData;
   List<Map<String, dynamic>> usersInRide = [];
-
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  List<Map<String, dynamic>> matchedTrips = [];
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => SearchRidePendingRideModel());
-    _loadRideDetails();
-    _fetchUsersInRide();
+    _fetchUserTrips();
+    _loadTrips();
   }
 
-  /// Load the ride + driver + car in one go
-  Future<void> _loadRideDetails() async {
-    if (widget.rideId == null) return;
+  Future<void> _loadTrips() async {
+    final trips = await _fetchUserTrips();
+    setState(() {
+      matchedTrips = trips;
+      isLoading = false;
+    });
+  }
 
+  Future<List<Map<String, dynamic>>> _fetchUserTrips() async {
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+
+    if (currentUserId == null) {
+      print('[DEBUG] No user signed in — returning empty list.');
+      return [];
+    }
+
+    print('[DEBUG] Fetching trips for user: $currentUserId');
+
+    final tripSnapshot = await FirebaseFirestore.instance.collection('trips').get();
+
+    print('[DEBUG] Total trips fetched from Firestore: ${tripSnapshot.docs.length}');
+
+    final matchedTrips = <Map<String, dynamic>>[];
+
+    for (final doc in tripSnapshot.docs) {
+      final tripData = doc.data();
+      final passengers = tripData['passengers'] as List<dynamic>? ?? [];
+
+      for (final p in passengers) {
+        final map = p as Map<String, dynamic>;
+        if (map['passengerId'] == currentUserId &&
+            (map['status'] == 'joined' || map['status'] == 'accepted')) {
+          print('[DEBUG] Trip ${doc.id} matched for user.');
+
+          final creatorId = tripData['creatorId'];
+          String creatorName = 'Unknown Driver';
+
+          try {
+            final userDoc = await FirebaseFirestore.instance.collection('users').doc(creatorId).get();
+            if (userDoc.exists) {
+              creatorName = userDoc.data()?['name'] ?? 'Unknown Driver';
+            }
+          } catch (e) {
+            print('[ERROR] Failed to fetch creatorName for $creatorId: $e');
+          }
+
+          final departureTimestamp = tripData['departureTime'];
+          DateTime? departureTime;
+          if (departureTimestamp is Timestamp) {
+            departureTime = departureTimestamp.toDate();
+          }
+
+          matchedTrips.add({
+            'tripId': doc.id,
+            'status': map['status'],
+            'origin': tripData['origin'],
+            'destination': tripData['destination'],
+            'departureTime': departureTime,
+            'creatorName': creatorName,
+          });
+        }
+      }
+    }
+
+    print('[DEBUG] Total matched trips for user: ${matchedTrips.length}');
+    return matchedTrips;
+  }
+
+  Future<void> _cancelBooking(String tripId, String passengerId) async {
     try {
-      // Get the ride doc
-      final rideDoc = await FirebaseFirestore.instance
-          .collection('temp_rides')
-          .doc(widget.rideId)
-          .get();
+      final docRef = FirebaseFirestore.instance.collection('trips').doc(tripId);
 
-      if (!rideDoc.exists) {
+      final tripDoc = await docRef.get();
+      if (!tripDoc.exists) {
+        print('Trip not found');
         return;
       }
 
-      final ride = rideDoc.data();
-      if (ride == null) return;
+      final data = tripDoc.data();
+      List<dynamic> passengers = data?['passengers'] ?? [];
 
-      // Get creator info
-      final creatorUid = ride['creatorId'] as String?;
-      String creatorName = 'Unknown';
-      String creatorGender = 'male';
+      passengers = passengers.where((p) {
+        final map = p as Map<String, dynamic>;
+        return map['passengerId'] != passengerId;
+      }).toList();
 
-      if (creatorUid != null) {
-        final userDoc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(creatorUid)
-            .get();
+      await docRef.update({'passengers': passengers});
 
-        if (userDoc.exists) {
-          creatorName = userDoc['name'] ?? 'Unknown';
-          creatorGender = userDoc['gender'] ?? 'male';
-        }
-      }
+      print('Booking cancelled for $passengerId in Trip $tripId');
 
-      // Get car info
-      Map<String, dynamic>? carInfo;
-      if (creatorUid != null) {
-        final carQuery = await FirebaseFirestore.instance
-            .collection('cars')
-            .where('ownerId', isEqualTo: creatorUid)
-            .where('isVerified', isEqualTo: true)
-            .limit(1)
-            .get();
-
-        if (carQuery.docs.isNotEmpty) {
-          final doc = carQuery.docs.first;
-          carInfo = {
-            'carBrand': doc['brand'] ?? 'Unknown',
-            'carModel': doc['model'] ?? 'Unknown',
-            'carColor': doc['color'] ?? 'Unknown',
-            'carPlate': doc['plateNumber'] ?? 'Unknown',
-            'carVin': doc['vin'] ?? 'Unknown',
-            'carYear': doc['year']?.toString() ?? 'Unknown',
-            'carId': doc.id,
-          };
-        }
-      }
-
-      // 4️⃣ Format timestamps
-      String formattedDate = 'N/A';
-      String formattedTime = 'N/A';
-
-      final gender = creatorData?['gender'] ?? 'male';
-      final date = ride['date'] as Timestamp?;
-      final time = ride['time'] as Timestamp?;
-
-      if (date != null) {
-        formattedDate = DateFormat('EEE, d MMM yyyy').format(date.toDate());
-      }
-
-      if (time != null) {
-        formattedTime = DateFormat('hh:mm a').format(time.toDate());
-      }
-
-      // 5️⃣ Store all in state
       setState(() {
-        rideData = {
-          'from': ride['from'] ?? '',
-          'to': ride['to'] ?? '',
-          'price': ride['price'] ?? 0,
-          'seats': ride['seats'] ?? 0,
-          'formattedDate': formattedDate,
-          'formattedTime': formattedTime,
-        };
-        creatorData = {
-          'name': creatorName,
-          'gender': creatorGender,
-        };
-        carData = carInfo;
+        usersInRide = passengers.cast<Map<String, dynamic>>();
+        isPassenger = false;
       });
+
+      // Show success dialog
+      if (context.mounted) {
+        await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Success'),
+            content: Text('Your booking has been cancelled.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text('OK'),
+              ),
+            ],
+          ),
+        );
+
+        await _loadTrips(); // Refresh trip list 
+      }
+
     } catch (e) {
-      print('Error loading ride details: $e');
+      print('Error cancelling booking: $e');
+
+      // Optional: show error dialog
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Error'),
+            content: Text('Failed to cancel booking. Please try again.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
     }
   }
 
-  Future<void> _fetchUsersInRide() async {
-    final doc = await FirebaseFirestore.instance
-        .collection('rides')
-        .doc(widget.rideId)
-        .get();
-
-    if (doc.exists) {
-      final data = doc.data();
-      final users = data?['users'] as List<dynamic>? ?? [];
-      setState(() {
-        usersInRide = users.cast<Map<String, dynamic>>();
-      });
-    }
-  }
 
   @override
   void dispose() {
@@ -172,6 +204,19 @@ class _SearchRidePendingRideWidgetState extends State<SearchRidePendingRideWidge
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final allPassengers = matchedTrips.expand((trip) {
+      final passengers = trip['passengers'] as List<dynamic>? ?? [];
+      return passengers.map((p) {
+        final map = p as Map<String, dynamic>;
+        map['tripId'] = trip['tripId'];
+        return map;
+      });
+    }).toList();
+
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -186,6 +231,7 @@ class _SearchRidePendingRideWidgetState extends State<SearchRidePendingRideWidge
             mainAxisSize: MainAxisSize.max,
             children: [
               Expanded(
+                flex: 0,
                 child: Padding(
                   padding: EdgeInsetsDirectional.fromSTEB(10, 0, 10, 0),
                   child: Row(
@@ -231,7 +277,8 @@ class _SearchRidePendingRideWidgetState extends State<SearchRidePendingRideWidge
                                               size: 24,
                                             ),
                                             onPressed: () {
-                                              context.pushNamed('dashboardHome');
+                                              context
+                                                  .pushNamed('dashboardHome');
                                             },
                                           ),
                                         ],
@@ -340,625 +387,133 @@ class _SearchRidePendingRideWidgetState extends State<SearchRidePendingRideWidge
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: usersInRide.map((user) {
-                    return Container(
-                      width: 394.5,
-                      height: 641,
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).secondaryBackground,
-                      ),
-                      child: Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(10, 0, 10, 0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+
+                      Container(
+                        width: 394.5,
+                        decoration: BoxDecoration(
+                          color:
+                              FlutterFlowTheme.of(context).secondaryBackground,
+                        ),
+                        child: Row(
+
+
+                          children: matchedTrips.map((trip) {
+                            final isCurrentUser = true; // because this trip is already filtered for current user
+                            final status = trip['status'] ?? 'unknown';
+                            final tripId = trip['tripId'];
+                            final origin = trip['origin'] ?? 'Unknown Origin';
+                            final destination = trip['destination'] ?? 'Unknown Destination';
+                            final departureTime = trip['departureTime'] as DateTime?;
+                            final date = departureTime != null ? dateFormat.format(departureTime) : 'Unknown Date';
+                            final time = departureTime != null ? timeFormat.format(departureTime) : 'Unknown Time';
+                            final creatorName = trip['creatorName'] ?? 'Unknown Driver';
+
+                            return Container(
+                              width: 350,
+                              padding: const EdgeInsets.all(16),
+                              margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF00275C),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: const Color(0xFF00275C), width: 2),
+                              ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
-                                    0, 10, 0, 10),
-                                child: InkWell(
-                                  splashColor: Colors.transparent,
-                                  focusColor: Colors.transparent,
-                                  hoverColor: Colors.transparent,
-                                  highlightColor: Colors.transparent,
-                                  onTap: () async {
-                                    context.pushNamed(
-                                        SearchRidePendingRideWidget.routeName);
-                                  },
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        child: Container(
-                                          height: 267.4,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFF00275C),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                blurRadius: 12,
-                                                color: Color(0x33000000),
-                                                offset: Offset(
-                                                  0,
-                                                  5,
-                                                ),
-                                              )
-                                            ],
-                                            borderRadius:
-                                                BorderRadius.circular(10),
+                                padding: const EdgeInsets.all(8),
+                                  child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Date: $date',
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .copyWith(
+                                            color: Colors.white,
                                           ),
-                                          child: InkWell(
-                                            splashColor: Colors.transparent,
-                                            focusColor: Colors.transparent,
-                                            hoverColor: Colors.transparent,
-                                            highlightColor: Colors.transparent,
-                                            onTap: () async {
-                                              context.pushNamed(
-                                                  SearchRideWaitingDriverWidget
-                                                      .routeName);
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Time: $time',
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .copyWith(
+                                            color: Colors.white,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'From: $origin',
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .copyWith(
+                                            color: Colors.white,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'To: $destination',
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .copyWith(
+                                            color: Colors.white,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Driver: $creatorName',
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .copyWith(
+                                            color: Colors.white,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Status: $status',
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .copyWith(
+                                            color: Colors.white,
+                                          ),
+                                    ),
+                                    if (isCurrentUser)
+                                      Align(
+                                        alignment: Alignment.center,
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(top: 12),
+                                          child: FFButtonWidget(
+                                            onPressed: () async {
+                                              await _cancelBooking(tripId, FirebaseAuth.instance.currentUser!.uid);
                                             },
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.max,
-                                              children: [
-                                                Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.max,
-                                                  children: [
-                                                    Expanded(
-                                                      child: Container(
-                                                        height: 108,
-                                                        decoration:
-                                                            BoxDecoration(),
-                                                        child: Row(
-                                                          mainAxisSize:
-                                                              MainAxisSize.max,
-                                                          children: [
-                                                            Column(
-                                                              mainAxisSize:
-                                                                  MainAxisSize
-                                                                      .max,
-                                                              children: [
-                                                                Container(
-                                                                  width: 97.9,
-                                                                  height: 108,
-                                                                  decoration:
-                                                                      BoxDecoration(),
-                                                                  child: Column(
-                                                                    mainAxisSize:
-                                                                        MainAxisSize
-                                                                            .max,
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .spaceAround,
-                                                                    children: [
-                                                                      Row(
-                                                                        mainAxisSize:
-                                                                            MainAxisSize.max,
-                                                                        mainAxisAlignment:
-                                                                            MainAxisAlignment.center,
-                                                                        children: [
-                                                                          Text(
-                                                                            rideData?['formattedDate'] ??
-                                                                                'N/A',
-                                                                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                                                  font: GoogleFonts.inter(
-                                                                                    fontWeight: FontWeight.w600,
-                                                                                    fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                                                                  ),
-                                                                                  color: FlutterFlowTheme.of(context).primaryBackground,
-                                                                                  letterSpacing: 0.0,
-                                                                                  fontWeight: FontWeight.w600,
-                                                                                  fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                                                                ),
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                      Row(
-                                                                        mainAxisSize:
-                                                                            MainAxisSize.max,
-                                                                        mainAxisAlignment:
-                                                                            MainAxisAlignment.center,
-                                                                        children: [
-                                                                          Text(
-                                                                            rideData?['formattedTime'] ??
-                                                                                'N/A',
-                                                                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                                                  font: GoogleFonts.inter(
-                                                                                    fontWeight: FontWeight.w600,
-                                                                                    fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                                                                  ),
-                                                                                  color: FlutterFlowTheme.of(context).primaryBackground,
-                                                                                  letterSpacing: 0.0,
-                                                                                  fontWeight: FontWeight.w600,
-                                                                                  fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                                                                ),
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                            Column(
-                                                              mainAxisSize:
-                                                                  MainAxisSize
-                                                                      .max,
-                                                              children: [
-                                                                Container(
-                                                                  width: 23.7,
-                                                                  height: 108,
-                                                                  decoration:
-                                                                      BoxDecoration(),
-                                                                  child: Column(
-                                                                    mainAxisSize:
-                                                                        MainAxisSize
-                                                                            .max,
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .center,
-                                                                    children: [
-                                                                      Row(
-                                                                        mainAxisSize:
-                                                                            MainAxisSize.max,
-                                                                        mainAxisAlignment:
-                                                                            MainAxisAlignment.center,
-                                                                        crossAxisAlignment:
-                                                                            CrossAxisAlignment.end,
-                                                                        children: [
-                                                                          Flexible(
-                                                                            child:
-                                                                                Container(
-                                                                              width: 55.5,
-                                                                              height: 16.3,
-                                                                              decoration: BoxDecoration(),
-                                                                              child: Icon(
-                                                                                Icons.circle_outlined,
-                                                                                color: FlutterFlowTheme.of(context).primaryBackground,
-                                                                                size: 16,
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                      Flexible(
-                                                                        child:
-                                                                            Row(
-                                                                          mainAxisSize:
-                                                                              MainAxisSize.max,
-                                                                          mainAxisAlignment:
-                                                                              MainAxisAlignment.center,
-                                                                          crossAxisAlignment:
-                                                                              CrossAxisAlignment.center,
-                                                                          children: [
-                                                                            SizedBox(
-                                                                              height: 45,
-                                                                              child: VerticalDivider(
-                                                                                thickness: 2,
-                                                                                color: FlutterFlowTheme.of(context).primaryBackground,
-                                                                              ),
-                                                                            ),
-                                                                          ],
-                                                                        ),
-                                                                      ),
-                                                                      Row(
-                                                                        mainAxisSize:
-                                                                            MainAxisSize.max,
-                                                                        crossAxisAlignment:
-                                                                            CrossAxisAlignment.start,
-                                                                        children: [
-                                                                          Flexible(
-                                                                            child:
-                                                                                Container(
-                                                                              width: 55.5,
-                                                                              height: 16.3,
-                                                                              decoration: BoxDecoration(),
-                                                                              child: Icon(
-                                                                                Icons.circle_outlined,
-                                                                                color: FlutterFlowTheme.of(context).primaryBackground,
-                                                                                size: 16,
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                            Column(
-                                                              mainAxisSize:
-                                                                  MainAxisSize
-                                                                      .max,
-                                                              children: [
-                                                                Expanded(
-                                                                  child:
-                                                                      Container(
-                                                                    width:
-                                                                        249.7,
-                                                                    decoration:
-                                                                        BoxDecoration(),
-                                                                    child:
-                                                                        Padding(
-                                                                      padding: EdgeInsetsDirectional
-                                                                          .fromSTEB(
-                                                                              10,
-                                                                              0,
-                                                                              0,
-                                                                              0),
-                                                                      child:
-                                                                          Column(
-                                                                        mainAxisSize:
-                                                                            MainAxisSize.max,
-                                                                        mainAxisAlignment:
-                                                                            MainAxisAlignment.spaceAround,
-                                                                        crossAxisAlignment:
-                                                                            CrossAxisAlignment.center,
-                                                                        children: [
-                                                                          Row(
-                                                                            mainAxisSize:
-                                                                                MainAxisSize.max,
-                                                                            mainAxisAlignment:
-                                                                                MainAxisAlignment.start,
-                                                                            crossAxisAlignment:
-                                                                                CrossAxisAlignment.center,
-                                                                            children: [
-                                                                              Text(
-                                                                                rideData?['from']?['name'] ?? 'Unknown',
-                                                                                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                                                      font: GoogleFonts.inter(
-                                                                                        fontWeight: FontWeight.w600,
-                                                                                        fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                                                                      ),
-                                                                                      color: FlutterFlowTheme.of(context).primaryBackground,
-                                                                                      letterSpacing: 0.0,
-                                                                                      fontWeight: FontWeight.w600,
-                                                                                      fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                                                                    ),
-                                                                              ),
-                                                                            ],
-                                                                          ),
-                                                                          Row(
-                                                                            mainAxisSize:
-                                                                                MainAxisSize.max,
-                                                                            mainAxisAlignment:
-                                                                                MainAxisAlignment.start,
-                                                                            children: [
-                                                                              Text(
-                                                                                rideData?['to']?['name'] ?? 'Unknown',
-                                                                                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                                                      font: GoogleFonts.inter(
-                                                                                        fontWeight: FontWeight.w600,
-                                                                                        fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                                                                      ),
-                                                                                      color: FlutterFlowTheme.of(context).primaryBackground,
-                                                                                      letterSpacing: 0.0,
-                                                                                      fontWeight: FontWeight.w600,
-                                                                                      fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                                                                    ),
-                                                                              ),
-                                                                            ],
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ],
-                                                        ),
+                                            text: 'Cancel Request',
+                                            options: FFButtonOptions(
+                                              width: 300,
+                                              height: 40,
+                                              color: const Color(0xFFFF5963), // custom button color
+                                              textStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .titleSmall
+                                                      .override(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.white,
                                                       ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.max,
-                                                  children: [
-                                                    Expanded(
-                                                      child: Container(
-                                                        height: 79.3,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color:
-                                                              Color(0xFF00275C),
-                                                        ),
-                                                        child: Padding(
-                                                          padding:
-                                                              EdgeInsetsDirectional
-                                                                  .fromSTEB(10,
-                                                                      0, 0, 0),
-                                                          child: Row(
-                                                            mainAxisSize:
-                                                                MainAxisSize
-                                                                    .max,
-                                                            children: [
-                                                              Flexible(
-                                                                child: Column(
-                                                                  mainAxisSize:
-                                                                      MainAxisSize
-                                                                          .max,
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .start,
-                                                                  children: [
-                                                                    Expanded(
-                                                                      child:
-                                                                          Container(
-                                                                        width:
-                                                                            51.1,
-                                                                        decoration:
-                                                                            BoxDecoration(
-                                                                          color:
-                                                                              Color(0xFF00275C),
-                                                                        ),
-                                                                        child:
-                                                                            Row(
-                                                                          mainAxisSize:
-                                                                              MainAxisSize.max,
-                                                                          mainAxisAlignment:
-                                                                              MainAxisAlignment.center,
-                                                                          children: [
-                                                                            FaIcon(
-                                                                              FontAwesomeIcons.userCircle,
-                                                                              color: FlutterFlowTheme.of(context).primaryBackground,
-                                                                              size: 40,
-                                                                            ),
-                                                                          ],
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                              Column(
-                                                                mainAxisSize:
-                                                                    MainAxisSize
-                                                                        .max,
-                                                                children: [
-                                                                  Expanded(
-                                                                    child:
-                                                                        Container(
-                                                                      width:
-                                                                          214.6,
-                                                                      decoration:
-                                                                          BoxDecoration(
-                                                                        color: Color(
-                                                                            0xFF00275C),
-                                                                      ),
-                                                                      child:
-                                                                          Padding(
-                                                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                                                            5,
-                                                                            0,
-                                                                            0,
-                                                                            0),
-                                                                        child:
-                                                                            Column(
-                                                                          mainAxisSize:
-                                                                              MainAxisSize.max,
-                                                                          mainAxisAlignment:
-                                                                              MainAxisAlignment.center,
-                                                                          children: [
-                                                                            Row(
-                                                                              mainAxisSize: MainAxisSize.max,
-                                                                              children: [
-                                                                                Container(
-                                                                                  width: 193.41,
-                                                                                  height: 28.3,
-                                                                                  decoration: BoxDecoration(),
-                                                                                  child: Row(
-                                                                                    mainAxisSize: MainAxisSize.max,
-                                                                                    children: [
-                                                                                      Column(
-                                                                                        mainAxisSize: MainAxisSize.max,
-                                                                                        mainAxisAlignment: MainAxisAlignment.center,
-                                                                                        children: [
-                                                                                          Text(
-                                                                                            creatorData?['name'] ?? 'Unknown',
-                                                                                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                                                                  font: GoogleFonts.inter(
-                                                                                                    fontWeight: FontWeight.bold,
-                                                                                                    fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                                                                                  ),
-                                                                                                  color: FlutterFlowTheme.of(context).primaryBackground,
-                                                                                                  fontSize: 18,
-                                                                                                  letterSpacing: 0.0,
-                                                                                                  fontWeight: FontWeight.bold,
-                                                                                                  fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                                                                                ),
-                                                                                          ),
-                                                                                        ],
-                                                                                      ),
-                                                                                      Padding(
-                                                                                        padding: EdgeInsetsDirectional.fromSTEB(3, 0, 0, 0),
-                                                                                        child: Column(
-                                                                                          mainAxisSize: MainAxisSize.max,
-                                                                                          children: [
-                                                                                            Icon(
-                                                                                              Icons.male_outlined,
-                                                                                              color: FlutterFlowTheme.of(context).secondary,
-                                                                                              size: 24,
-                                                                                            ),
-                                                                                          ],
-                                                                                        ),
-                                                                                      ),
-                                                                                    ],
-                                                                                  ),
-                                                                                ),
-                                                                              ],
-                                                                            ),
-                                                                          ],
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                              Column(
-                                                                mainAxisSize:
-                                                                    MainAxisSize
-                                                                        .max,
-                                                                children: [
-                                                                  Expanded(
-                                                                    child:
-                                                                        Container(
-                                                                      width:
-                                                                          92.2,
-                                                                      decoration:
-                                                                          BoxDecoration(),
-                                                                      child:
-                                                                          Column(
-                                                                        mainAxisSize:
-                                                                            MainAxisSize.max,
-                                                                        mainAxisAlignment:
-                                                                            MainAxisAlignment.center,
-                                                                        children: [
-                                                                          Text(
-                                                                            'Pending',
-                                                                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                                                  font: GoogleFonts.inter(
-                                                                                    fontWeight: FontWeight.bold,
-                                                                                    fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                                                                  ),
-                                                                                  color: FlutterFlowTheme.of(context).primaryBackground,
-                                                                                  fontSize: 16,
-                                                                                  letterSpacing: 0.0,
-                                                                                  fontWeight: FontWeight.bold,
-                                                                                  fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                                                                ),
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.max,
-                                                  children: [
-                                                    Expanded(
-                                                      child: Container(
-                                                        height: 75.8,
-                                                        decoration:
-                                                            BoxDecoration(),
-                                                        child: Row(
-                                                          mainAxisSize:
-                                                              MainAxisSize.max,
-                                                          children: [
-                                                            Expanded(
-                                                              child: Padding(
-                                                                padding:
-                                                                    EdgeInsetsDirectional
-                                                                        .fromSTEB(
-                                                                            10,
-                                                                            0,
-                                                                            10,
-                                                                            0),
-                                                                child:
-                                                                    Container(
-                                                                  width: 100,
-                                                                  height: 77.1,
-                                                                  decoration:
-                                                                      BoxDecoration(
-                                                                    color: Color(
-                                                                        0xFF00275C),
-                                                                  ),
-                                                                  child: Column(
-                                                                    mainAxisSize:
-                                                                        MainAxisSize
-                                                                            .max,
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .center,
-                                                                    children: [
-                                                                      Row(
-                                                                        mainAxisSize:
-                                                                            MainAxisSize.max,
-                                                                        children: [
-                                                                          Expanded(
-                                                                            child:
-                                                                                Container(
-                                                                              width: 350,
-                                                                              height: 50,
-                                                                              decoration: BoxDecoration(),
-                                                                              child: Row(
-                                                                                mainAxisSize: MainAxisSize.max,
-                                                                                crossAxisAlignment: CrossAxisAlignment.center,
-                                                                                children: [
-                                                                                  Expanded(
-                                                                                    child: FFButtonWidget(
-                                                                                      onPressed: () {
-                                                                                        print('Button pressed ...');
-                                                                                      },
-                                                                                      text: 'Cancel',
-                                                                                      options: FFButtonOptions(
-                                                                                        height: 45.66,
-                                                                                        padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
-                                                                                        iconPadding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
-                                                                                        color: FlutterFlowTheme.of(context).error,
-                                                                                        textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                                                                                              font: GoogleFonts.interTight(
-                                                                                                fontWeight: FlutterFlowTheme.of(context).titleSmall.fontWeight,
-                                                                                                fontStyle: FlutterFlowTheme.of(context).titleSmall.fontStyle,
-                                                                                              ),
-                                                                                              color: FlutterFlowTheme.of(context).primaryBackground,
-                                                                                              letterSpacing: 0.0,
-                                                                                              fontWeight: FlutterFlowTheme.of(context).titleSmall.fontWeight,
-                                                                                              fontStyle: FlutterFlowTheme.of(context).titleSmall.fontStyle,
-                                                                                            ),
-                                                                                        elevation: 0,
-                                                                                        borderRadius: BorderRadius.circular(8),
-                                                                                      ),
-                                                                                    ),
-                                                                                  ),
-                                                                                ],
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
+                                              borderRadius: BorderRadius.circular(8),
                                             ),
                                           ),
                                         ),
                                       ),
-                                    ],
-                                  ),
+                                  ],
                                 ),
-                              ),
-                            ),
-                          ],
+                                ),
+                              );
+                          }).toList(),
+
                         ),
                       ),
-                    );
-                  }).toList(),
-                ),
+                    ]),
               ),
             ],
           ),

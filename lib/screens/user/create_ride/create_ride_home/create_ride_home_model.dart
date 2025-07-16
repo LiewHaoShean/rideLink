@@ -14,6 +14,9 @@ import 'package:ride_link_carpooling/models/location.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ride_link_carpooling/services/ride_service.dart';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:ride_link_carpooling/models/trip.dart';
+
 class CreateRideHomeModel extends FlutterFlowModel<CreateRideHomeWidget> {
   final _rideService = RideService();
   
@@ -40,25 +43,32 @@ class CreateRideHomeModel extends FlutterFlowModel<CreateRideHomeWidget> {
   String? Function(BuildContext, String?)? textController3Validator;
 
   /// Method to create ride in Firestore
-  Future<DocumentReference> createRide() async {
-    if (_selectedLocation1 == null) throw Exception('Origin is not set');
-    if (_selectedLocation2 == null) throw Exception('Destination is not set');
-    if (datePicked1 == null) throw Exception('Departure date is not set');
-    if (textController3 == null || textController3!.text.trim().isEmpty) {
-      throw Exception('Price is not set');
+  
+  Future<DocumentReference?> createRide() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) throw Exception('No user logged in');
+
+      final trip = Trip(
+        rideId: '',
+        creatorId: user.uid,
+        origin: selectedLocation1?.name ?? '',
+        destination: selectedLocation2?.name ?? '',
+        departureTime: datePicked1!,
+        availableSeats: seatNumber ?? 0,
+        pricePerSeat: double.tryParse(textController3?.text.trim() ?? '') ?? 0.0,
+        passengers: [],
+        status: 'scheduled',
+      );
+
+      final docRef = await FirebaseFirestore.instance.collection('trips').add(trip.toJson());
+      return docRef;
+    } catch (e) {
+      debugPrint('Error creating trip: $e');
+      return null;
     }
-
-    final docRef = await _rideService.createTempRide(
-      from: _selectedLocation1!,
-      to: _selectedLocation2!,
-      date: datePicked1!,
-      time: datePicked2!,
-      seatNumber: seatNumber ?? 1,
-      price: double.tryParse(textController3!.text.trim()) ?? 0,
-    );
-
-    return docRef;
   }
+
 
   @override
   void initState(BuildContext context) {}

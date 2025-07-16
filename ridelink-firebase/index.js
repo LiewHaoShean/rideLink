@@ -21,7 +21,7 @@ exports.cleanUpTempRides = functions.https.onRequest(async (req, res) => {
     const cutoff = now - 30 * 60 * 1000; // 30 minutes ago
 
     const snapshot = await admin.firestore()
-      .collection("temp_rides")
+      .collection("trips")
       .where("createdAt", "<=", cutoff)
       .get();
 

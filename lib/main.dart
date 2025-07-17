@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -45,8 +49,7 @@ class _MyAppState extends State<MyApp> {
   late AppStateNotifier _appStateNotifier;
   late GoRouter _router;
   String getRoute([RouteMatch? routeMatch]) {
-    final RouteMatch lastMatch =
-        routeMatch ?? _router.routerDelegate.currentConfiguration.last;
+    final RouteMatch lastMatch = routeMatch ?? _router.routerDelegate.currentConfiguration.last;
     final RouteMatchList matchList = lastMatch is ImperativeRouteMatch
         ? lastMatch.matches
         : _router.routerDelegate.currentConfiguration;
@@ -75,7 +78,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'RideLink Carpooling',
-      localizationsDelegates: [
+      localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
@@ -96,7 +99,7 @@ class _MyAppState extends State<MyApp> {
 }
 
 class NavBarPage extends StatefulWidget {
-  NavBarPage({
+  const NavBarPage({
     Key? key,
     this.initialPage,
     this.page,
@@ -115,12 +118,66 @@ class NavBarPage extends StatefulWidget {
 class _NavBarPageState extends State<NavBarPage> {
   String _currentPageName = 'searchRideHome';
   late Widget? _currentPage;
+  StreamSubscription<QuerySnapshot>? _tripSubscription;
 
   @override
   void initState() {
     super.initState();
     _currentPageName = widget.initialPage ?? _currentPageName;
     _currentPage = widget.page;
+    _startTripStatusListener();
+  }
+
+  @override
+  void dispose() {
+    _tripSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _startTripStatusListener() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    FirebaseFirestore.instance.collection('users').doc(user.uid).get().then((userDoc) {
+      if (!userDoc.exists || userDoc.data()?['userRole']?.toString().toLowerCase() != 'passenger') return;
+
+      _tripSubscription = FirebaseFirestore.instance
+          .collection('trips')
+          .where('passengers', arrayContainsAny: [
+            {'passengerId': user.uid, 'status': 'accepted'}
+          ])
+          .snapshots()
+          .listen((snapshot) {
+        for (var change in snapshot.docChanges) {
+          final tripData = change.doc.data();
+          if (tripData == null) continue;
+
+          if (tripData['status'] == 'ongoing') {
+            showDialog(
+              context: context,
+              builder: (dialogContext) => AlertDialog(
+                title: const Text('Ride Started'),
+                content: const Text('The driver has started the ride!'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(dialogContext).pop();
+                      context.pushNamed(
+                        SearchRideWaitingDriverWidget.routeName,
+                        queryParameters: {'rideId': change.doc.id},
+                      );
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              ),
+            );
+          }
+        }
+      }, onError: (error) {
+        print('[ERROR] Trip listener error: $error');
+      });
+    });
   }
 
   @override
@@ -149,7 +206,7 @@ class _NavBarPageState extends State<NavBarPage> {
         showSelectedLabels: false,
         showUnselectedLabels: false,
         type: BottomNavigationBarType.fixed,
-        items: <BottomNavigationBarItem>[
+        items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(
               Icons.search,

@@ -1,6 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -14,6 +11,9 @@ import 'package:provider/provider.dart';
 import 'create_ride_waiting_list_model.dart';
 export 'create_ride_waiting_list_model.dart';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 class CreateRideWaitingListWidget extends StatefulWidget {
   final String rideId;
 
@@ -26,12 +26,10 @@ class CreateRideWaitingListWidget extends StatefulWidget {
   static String routePath = '/createRideWaitingList';
 
   @override
-  State<CreateRideWaitingListWidget> createState() =>
-      _CreateRideWaitingListWidgetState();
+  State<CreateRideWaitingListWidget> createState() => _CreateRideWaitingListWidgetState();
 }
 
-class _CreateRideWaitingListWidgetState
-    extends State<CreateRideWaitingListWidget> with WidgetsBindingObserver {
+class _CreateRideWaitingListWidgetState extends State<CreateRideWaitingListWidget> with WidgetsBindingObserver {
   bool isLoading = true;
   late CreateRideWaitingListModel _model;
   late Future<DocumentSnapshot<Map<String, dynamic>>> _rideFuture;
@@ -44,9 +42,7 @@ class _CreateRideWaitingListWidgetState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // Initialize the ride future to fetch ride details
-    _rideFuture =
-        FirebaseFirestore.instance.collection('trips').doc(widget.rideId).get();
+    _rideFuture = FirebaseFirestore.instance.collection('trips').doc(widget.rideId).get();
     _model = createModel(context, () => CreateRideWaitingListModel());
     _loadTrips();
   }
@@ -86,8 +82,7 @@ class _CreateRideWaitingListWidgetState
     final tripSnapshot =
         await FirebaseFirestore.instance.collection('trips').get();
 
-    print(
-        '[DEBUG] Total trips fetched from Firestore: ${tripSnapshot.docs.length}');
+    print('[DEBUG] Total trips fetched from Firestore: ${tripSnapshot.docs.length}');
 
     final matchedTrips = <Map<String, dynamic>>[];
 
@@ -254,7 +249,8 @@ class _CreateRideWaitingListWidgetState
                         width: 100,
                         height: 80,
                         decoration: BoxDecoration(
-                          color: FlutterFlowTheme.of(context).secondaryBackground,
+                          color:
+                              FlutterFlowTheme.of(context).secondaryBackground,
                         ),
                         child: Padding(
                           padding: EdgeInsetsDirectional.fromSTEB(10, 0, 10, 0),
@@ -346,7 +342,8 @@ class _CreateRideWaitingListWidgetState
 
                                             if (!snapshot.hasData ||
                                                 !snapshot.data!.exists) {
-                                              return const Text('Ride not found');
+                                              return const Text(
+                                                  'Ride not found');
                                             }
 
                                             final rideData =
@@ -377,9 +374,10 @@ class _CreateRideWaitingListWidgetState
                                                         true
                                                     ? fromSnap.data!.docs.first
                                                     : null;
-                                                final fromAddress = fromDoc
-                                                        ?.data()['addressLine'] ??
-                                                    originName;
+                                                final fromAddress =
+                                                    fromDoc?.data()[
+                                                            'name'] ??
+                                                        originName;
 
                                                 // 🔗 Now lookup TO location in `locations`
                                                 return FutureBuilder<
@@ -394,8 +392,10 @@ class _CreateRideWaitingListWidgetState
                                                       .limit(1)
                                                       .get(),
                                                   builder: (context, toSnap) {
-                                                    if (toSnap.connectionState ==
-                                                        ConnectionState.waiting) {
+                                                    if (toSnap
+                                                            .connectionState ==
+                                                        ConnectionState
+                                                            .waiting) {
                                                       return const CircularProgressIndicator();
                                                     }
 
@@ -404,44 +404,43 @@ class _CreateRideWaitingListWidgetState
                                                                 ?.docs
                                                                 .isNotEmpty ==
                                                             true
-                                                        ? toSnap.data!.docs.first
+                                                        ? toSnap
+                                                            .data!.docs.first
                                                         : null;
-                                                    final toAddress =
-                                                        toDoc?.data()[
-                                                                'addressLine'] ??
-                                                            destinationName;
+                                                    final toAddress = toDoc
+                                                                ?.data()[
+                                                            'name'] ??
+                                                        destinationName;
 
                                                     return Text(
                                                       '$fromAddress to $toAddress',
-                                                      style: FlutterFlowTheme.of(
-                                                              context)
-                                                          .titleLarge
-                                                          .override(
-                                                            font: GoogleFonts
-                                                                .interTight(
-                                                              fontWeight:
-                                                                  FlutterFlowTheme.of(
+                                                      style:
+                                                          FlutterFlowTheme.of(
+                                                                  context)
+                                                              .titleLarge
+                                                              .override(
+                                                                font: GoogleFonts
+                                                                    .interTight(
+                                                                  fontWeight: FlutterFlowTheme.of(
                                                                           context)
                                                                       .titleLarge
                                                                       .fontWeight,
-                                                              fontStyle:
-                                                                  FlutterFlowTheme.of(
+                                                                  fontStyle: FlutterFlowTheme.of(
                                                                           context)
                                                                       .titleLarge
                                                                       .fontStyle,
-                                                            ),
-                                                            letterSpacing: 0.0,
-                                                            fontWeight:
-                                                                FlutterFlowTheme.of(
+                                                                ),
+                                                                letterSpacing:
+                                                                    0.0,
+                                                                fontWeight: FlutterFlowTheme.of(
                                                                         context)
                                                                     .titleLarge
                                                                     .fontWeight,
-                                                            fontStyle:
-                                                                FlutterFlowTheme.of(
+                                                                fontStyle: FlutterFlowTheme.of(
                                                                         context)
                                                                     .titleLarge
                                                                     .fontStyle,
-                                                          ),
+                                                              ),
                                                     );
                                                   },
                                                 );
@@ -481,36 +480,38 @@ class _CreateRideWaitingListWidgetState
 
                                             return Text(
                                               '$seatCount seat${seatCount == 1 ? '' : 's'} left',
-                                              style: FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .override(
-                                                    font: GoogleFonts.inter(
-                                                      fontWeight:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .bodyMedium
-                                                              .fontWeight,
-                                                      fontStyle:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .bodyMedium
-                                                              .fontStyle,
-                                                    ),
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .secondaryText,
-                                                    letterSpacing: 0.0,
-                                                    fontWeight:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .bodyMedium
-                                                            .fontWeight,
-                                                    fontStyle:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .bodyMedium
-                                                            .fontStyle,
-                                                  ),
+                                              style:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        font: GoogleFonts.inter(
+                                                          fontWeight:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .bodyMedium
+                                                                  .fontWeight,
+                                                          fontStyle:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .bodyMedium
+                                                                  .fontStyle,
+                                                        ),
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .secondaryText,
+                                                        letterSpacing: 0.0,
+                                                        fontWeight:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .bodyMedium
+                                                                .fontWeight,
+                                                        fontStyle:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .bodyMedium
+                                                                .fontStyle,
+                                                      ),
                                             );
                                           },
                                         ),
@@ -526,8 +527,6 @@ class _CreateRideWaitingListWidgetState
                     ),
                   ],
                 ),
-                
-                
                 Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
@@ -537,8 +536,10 @@ class _CreateRideWaitingListWidgetState
                           .doc(widget.rideId)
                           .snapshots(),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
                         }
 
                         if (snapshot.hasError) {
@@ -615,8 +616,8 @@ class _CreateRideWaitingListWidgetState
                                     height: 100,
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                      color:
-                                          const Color.fromARGB(255, 69, 56, 254),
+                                      color: const Color.fromARGB(
+                                          255, 69, 56, 254),
                                       borderRadius: BorderRadius.circular(12),
                                       border: Border.all(
                                         color: Colors.grey,
@@ -624,7 +625,8 @@ class _CreateRideWaitingListWidgetState
                                       ),
                                     ),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         // Avatar/Icon
                                         Container(
@@ -748,28 +750,101 @@ class _CreateRideWaitingListWidgetState
                     ),
                   ],
                 ),
-
-
                 Row(
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Expanded(
                       child: Container(
                         width: 100,
-                        height: 500,
+                        height: 600,
                         decoration: BoxDecoration(
-                          color: FlutterFlowTheme.of(context).secondaryBackground,
+                          color:
+                              FlutterFlowTheme.of(context).secondaryBackground,
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.max,
                           children: [
                             Expanded(
                               child: Padding(
-                                padding:
-                                    EdgeInsetsDirectional.fromSTEB(10, 0, 10, 0),
+                                padding: EdgeInsetsDirectional.fromSTEB(
+                                    10, 0, 10, 0),
                                 child: FFButtonWidget(
                                   onPressed: () async {
-                                    context.pushNamed(CreateRideStartRideWidget.routeName);
+                                    // Read the trip doc live from Firestore
+                                    final tripDoc = await FirebaseFirestore.instance
+                                        .collection('trips')
+                                        .doc(widget.rideId)
+                                        .get();
+
+                                    if (!tripDoc.exists) {
+                                      // Show an error if the trip doesn't exist
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) => const AlertDialog(
+                                          title: Text('Trip not found'),
+                                          content: Text('This ride does not exist.'),
+                                        ),
+                                      );
+                                      return;
+                                    }
+
+                                    final data = tripDoc.data()!;
+                                    final passengers = data['passengers'] ?? [];
+
+                                    // Check for accepted passengers in the passengers array
+                                    final hasAcceptedPassenger = (passengers as List)
+                                        .any((p) => p['status']?.toString().toLowerCase() == 'accepted');
+
+                                    if (!hasAcceptedPassenger) {
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: const Text('No passenger accepted'),
+                                          content: const Text('You must have at least one accepted passenger before starting the ride.'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.of(context).pop(),
+                                              child: const Text('OK'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                      return;
+                                    }
+
+                                    // Update the top-level trip status to "ongoing"
+                                    try {
+                                      await FirebaseFirestore.instance
+                                          .collection('trips')
+                                          .doc(widget.rideId)
+                                          .update({
+                                        'status': 'selecting',
+                                      });
+                                    } catch (e) {
+                                      // Handle any errors during the update
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: const Text('Error'),
+                                          content: Text('Failed to update trip status: $e'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.of(context).pop(),
+                                              child: const Text('OK'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                      return;
+                                    }
+
+                                    // If successful, navigate to the start ride screen
+                                    context.pushNamed(
+                                      CreateRideStartRideWidget.routeName,
+                                      queryParameters: {
+                                        'rideId': widget.rideId,
+                                      },
+                                    );
                                   },
                                   text: 'Complete',
                                   options: FFButtonOptions(
@@ -794,12 +869,14 @@ class _CreateRideWaitingListWidgetState
                                           ),
                                           color: Colors.white,
                                           letterSpacing: 0.0,
-                                          fontWeight: FlutterFlowTheme.of(context)
-                                              .titleSmall
-                                              .fontWeight,
-                                          fontStyle: FlutterFlowTheme.of(context)
-                                              .titleSmall
-                                              .fontStyle,
+                                          fontWeight:
+                                              FlutterFlowTheme.of(context)
+                                                  .titleSmall
+                                                  .fontWeight,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .titleSmall
+                                                  .fontStyle,
                                         ),
                                     elevation: 0,
                                     borderRadius: BorderRadius.circular(24),

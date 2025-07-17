@@ -76,7 +76,8 @@ class _SearchRidePendingRideWidgetState extends State<SearchRidePendingRideWidge
 
     print('[DEBUG] Fetching trips for user: $currentUserId');
 
-    final tripSnapshot = await FirebaseFirestore.instance.collection('trips').get();
+    final tripSnapshot = await FirebaseFirestore.instance.collection('trips')
+    .where('status', whereNotIn: ['ongoing', 'finished']).get();
 
     print('[DEBUG] Total trips fetched from Firestore: ${tripSnapshot.docs.length}');
 

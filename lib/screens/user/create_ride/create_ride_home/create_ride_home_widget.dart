@@ -1,6 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -18,6 +15,8 @@ export 'create_ride_home_model.dart';
 
 import 'package:ride_link_carpooling/models/location.dart';
 import 'package:ride_link_carpooling/services/location_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CreateRideHomeWidget extends StatefulWidget {
   const CreateRideHomeWidget({super.key});
@@ -252,8 +251,7 @@ class _CreateRideHomeWidgetState extends State<CreateRideHomeWidget> {
                                           return DropdownMenuItem<Location>(
                                             value: location,
                                             child: Text(
-                                              location
-                                                  .name, // ✅ show the name or addressLine
+                                              location.name, 
                                               overflow: TextOverflow.ellipsis,
                                               style:
                                                   FlutterFlowTheme.of(context)
@@ -1185,18 +1183,12 @@ class _CreateRideHomeWidgetState extends State<CreateRideHomeWidget> {
                                                                   ),
                                                                   Column(
                                                                     mainAxisSize:
-                                                                        MainAxisSize
-                                                                            .max,
+                                                                        MainAxisSize.max,
                                                                     mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .center,
+                                                                        MainAxisAlignment.center,
                                                                     children: [
                                                                       Padding(
-                                                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                                                            10,
-                                                                            0,
-                                                                            10,
-                                                                            0),
+                                                                        padding: EdgeInsetsDirectional.fromSTEB(10,0,10,0),
                                                                         child:
                                                                             Text(
                                                                           valueOrDefault<
@@ -1221,33 +1213,22 @@ class _CreateRideHomeWidgetState extends State<CreateRideHomeWidget> {
                                                                     ],
                                                                   ),
                                                                   Column(
-                                                                    mainAxisSize:
-                                                                        MainAxisSize
-                                                                            .max,
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .center,
+                                                                    mainAxisSize: MainAxisSize.max,
+                                                                    mainAxisAlignment: MainAxisAlignment.center,
                                                                     children: [
                                                                       FlutterFlowIconButton(
-                                                                        borderRadius:
-                                                                            8,
-                                                                        buttonSize:
-                                                                            40,
+                                                                        borderRadius: 8,
+                                                                        buttonSize: 40,
                                                                         icon:
-                                                                            Icon(
-                                                                          Icons
-                                                                              .add_circle,
-                                                                          color:
-                                                                              Color(0xFF00275C),
-                                                                          size:
-                                                                              24,
+                                                                        const Icon(
+                                                                          Icons.add_circle,
+                                                                          color:  Color(0xFF00275C),
+                                                                          size: 24,
                                                                         ),
                                                                         onPressed:
                                                                             () async {
-                                                                          if (_model.seatNumber! <
-                                                                              4) {
-                                                                            _model.seatNumber =
-                                                                                _model.seatNumber! + 1;
+                                                                          if (_model.seatNumber! < 4) {
+                                                                            _model.seatNumber = _model.seatNumber! + 1;
                                                                             safeSetState(() {});
                                                                           } else {
                                                                             await showDialog(

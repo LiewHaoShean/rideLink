@@ -7,7 +7,7 @@ export 'screens/login/verification_page/verification_page_widget.dart'
     show VerificationPageWidget;
 export 'screens/login/user_profile_page/user_profile_page_widget.dart'
     show UserProfilePageWidget;
-export '/success_page/success_page_widget.dart' show SuccessPageWidget;
+export 'screens/success_page/success_page_widget.dart' show SuccessPageWidget;
 export 'screens/user/search_ride/search_ride_home/search_ride_home_widget.dart'
     show SearchRideHomeWidget;
 export 'screens/user/create_ride/create_ride_home/create_ride_home_widget.dart'
@@ -53,7 +53,7 @@ export 'screens/user/create_ride/vehicle_register/vehicle_register_widget.dart'
 export 'screens/user/create_ride/license_verification/license_verification_widget.dart'
     show LicenseVerificationWidget;
 export '/processing_page/processing_page_widget.dart' show ProcessingPageWidget;
-export '/verification_success_page/verification_success_page_widget.dart'
+export 'screens/verification_success_page/verification_success_page_widget.dart'
     show VerificationSuccessPageWidget;
 export '/fail_page/fail_page_widget.dart' show FailPageWidget;
 export 'screens/user/search_ride/search_ride_waiting_driver/search_ride_waiting_driver_widget.dart'

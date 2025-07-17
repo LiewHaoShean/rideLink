@@ -143,12 +143,16 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: CreateRideStartRideWidget.routeName,
           path: CreateRideStartRideWidget.routePath,
-          builder: (context, params) => CreateRideStartRideWidget(),
+          builder: (context, params) => CreateRideStartRideWidget(
+            rideId: params.getParam('rideId', ParamType.String) ?? '',
+          ),
         ),
         FFRoute(
           name: CreateRideCompleteWidget.routeName,
           path: CreateRideCompleteWidget.routePath,
-          builder: (context, params) => CreateRideCompleteWidget(),
+          builder: (context, params) => CreateRideCompleteWidget(
+            rideId: params.getParam('rideId', ParamType.String) ?? '',
+          ),
         ),
         FFRoute(
           name: MessageMainWidget.routeName,
@@ -247,7 +251,9 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: SearchRideWaitingDriverWidget.routeName,
           path: SearchRideWaitingDriverWidget.routePath,
-          builder: (context, params) => SearchRideWaitingDriverWidget(),
+          builder: (context, params) => SearchRideWaitingDriverWidget(
+            rideId: params.getParam('rideId', ParamType.String) ?? '',
+          ),
         ),
         FFRoute(
           name: SearchRidePendingRideWidget.routeName,
@@ -262,7 +268,9 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: SearchRideCompleteWidget.routeName,
           path: SearchRideCompleteWidget.routePath,
-          builder: (context, params) => SearchRideCompleteWidget(),
+          builder: (context, params) => SearchRideCompleteWidget(
+            rideId: params.getParam('rideId', ParamType.String) ?? '',
+          ),
         ),
         FFRoute(
           name: HomeWidget.routeName,

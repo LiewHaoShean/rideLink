@@ -2,6 +2,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:ride_link_carpooling/providers/chat_provider.dart';
+import 'package:ride_link_carpooling/providers/message_provider.dart';
+import 'package:ride_link_carpooling/providers/trip_provider.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import 'flutter_flow/flutter_flow_util.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,6 +15,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/user_provider.dart';
+import 'package:provider/provider.dart';
+import 'providers/vehicle_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,6 +31,10 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => VehicleProvider()),
+        ChangeNotifierProvider(create: (_) => TripProvider()),
+        ChangeNotifierProvider(create: (_) => ChatProvider()),
+        ChangeNotifierProvider(create: (_) => MessageProvider())
       ],
       child: MyApp(),
     ),
@@ -37,7 +46,8 @@ class MyApp extends StatefulWidget {
   @override
   State<MyApp> createState() => _MyAppState();
 
-  static _MyAppState of(BuildContext context) => context.findAncestorStateOfType<_MyAppState>()!;
+  static _MyAppState of(BuildContext context) =>
+      context.findAncestorStateOfType<_MyAppState>()!;
 }
 
 class _MyAppState extends State<MyApp> {
@@ -126,10 +136,11 @@ class _NavBarPageState extends State<NavBarPage> {
 
   @override
   Widget build(BuildContext context) {
+    final userId = context.watch<UserProvider>().userId ?? '';
     final tabs = {
       'searchRideHome': SearchRideHomeWidget(),
       'createRideHome': CreateRideHomeWidget(),
-      'messageMain': MessageMainWidget(),
+      'messageMain': MessageMainWidget(senderId: userId),
       'dashboardHome': DashboardHomeWidget(),
       'searchRidePendingRide': SearchRidePendingRideWidget(),
     };

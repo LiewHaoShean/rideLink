@@ -10,6 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'home_model.dart';
 export 'home_model.dart';
+import '../../../../providers/user_provider.dart';
 
 class HomeWidget extends StatefulWidget {
   const HomeWidget({super.key});
@@ -461,8 +462,30 @@ class _HomeWidgetState extends State<HomeWidget> {
                         hoverColor: Colors.transparent,
                         highlightColor: Colors.transparent,
                         onTap: () async {
-                          context
-                              .pushNamed(AdminCustomerServiceWidget.routeName);
+                          final userId =
+                              Provider.of<UserProvider>(context, listen: false)
+                                  .userId;
+                          print(userId);
+                          if (userId == null) {
+                            return;
+                          }
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AdminCustomerServiceWidget(
+                                senderId: userId,
+                              ),
+                            ),
+                          );
+                          // if (userId == null) {
+                          //   // Optionally show a message or prevent navigation
+                          //   return;
+                          // }
+                          // Navigator.pushNamed(
+                          //   context,
+                          //   AdminCustomerServiceWidget.routeName,
+                          //   arguments: {'senderId': userId},
+                          // );
                         },
                         child: Row(
                           mainAxisSize: MainAxisSize.max,

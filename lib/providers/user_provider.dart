@@ -4,15 +4,22 @@ import '../models/user.dart';
 
 class UserProvider with ChangeNotifier {
   final UserService _userService = UserService();
-  
+
   List<UserModel> _users = [];
   bool _isLoading = false;
   String? _error;
+  String? _userId;
 
   // Getters
   List<UserModel> get users => _users;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  String? get userId => _userId;
+
+  void setUserId(String id) {
+    _userId = id;
+    notifyListeners();
+  }
 
   // Load all users
   Future<void> loadUsers() async {
@@ -47,6 +54,8 @@ class UserProvider with ChangeNotifier {
     try {
       return _users.firstWhere((user) => user.uid == uid);
     } catch (e) {
+      print("Error:");
+      print(e);
       return null;
     }
   }
@@ -59,10 +68,10 @@ class UserProvider with ChangeNotifier {
   // Search users by name or email
   List<UserModel> searchUsers(String query) {
     if (query.isEmpty) return _users;
-    
+
     return _users.where((user) {
       return user.name.toLowerCase().contains(query.toLowerCase()) ||
-             user.email.toLowerCase().contains(query.toLowerCase());
+          user.email.toLowerCase().contains(query.toLowerCase());
     }).toList();
   }
 }

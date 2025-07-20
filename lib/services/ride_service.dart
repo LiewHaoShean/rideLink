@@ -77,6 +77,4 @@ class RideService {
         .map((doc) => doc.data() as Map<String, dynamic>)
         .toList();
   }
-
-  //Get all rides (Admin)
 }

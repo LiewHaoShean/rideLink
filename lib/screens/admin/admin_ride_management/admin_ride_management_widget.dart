@@ -1,3 +1,5 @@
+import 'package:ride_link_carpooling/providers/trip_provider.dart';
+
 import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -37,6 +39,12 @@ class _AdminRideManagementWidgetState extends State<AdminRideManagementWidget> {
 
     _model.textController ??= TextEditingController();
     _model.textFieldFocusNode ??= FocusNode();
+
+    loadTrips();
+  }
+
+  Future<void> loadTrips() async {
+    await context.read<TripProvider>().loadTrips();
   }
 
   @override
@@ -313,108 +321,161 @@ class _AdminRideManagementWidgetState extends State<AdminRideManagementWidget> {
                             mainAxisSize: MainAxisSize.max,
                             children: [
                               // Placeholder content for ride management
-                              Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 5.0, 0.0, 5.0),
-                                      child: Container(
-                                  width: double.infinity,
-                                  height: 80.0,
-                                        decoration: BoxDecoration(
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryBackground,
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    border: Border.all(
-                                      color: FlutterFlowTheme.of(context)
-                                          .primaryBackground,
-                                      width: 1.0,
-                                    ),
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        16.0, 12.0, 16.0, 12.0),
-                                    child: Row(
-                                      children: [
-                                        CircleAvatar(
-                                          radius: 25.0,
-                                          backgroundColor: Color(0xFFDDDEE0),
-                                          child: Icon(
-                                            Icons.drive_eta,
-                                            color: FlutterFlowTheme.of(context)
-                                                .primaryText,
-                                            size: 30.0,
-                                          ),
-                                        ),
-                                        SizedBox(width: 16.0),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                              Consumer<TripProvider>(
+                                  builder: (context, tripProvider, child) {
+                                if (tripProvider.isLoading) {
+                                  return Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                }
+
+                                if (tripProvider.error != null) {
+                                  return Center(
+                                    child: Column(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.center,
-                                                            children: [
-                                                              Text(
-                                                'Sample Ride',
-                                                style:
+                                            children: [
+                                        Text(
+                                          'Error: ${tripProvider.error}',
+                                          style: FlutterFlowTheme.of(context)
+                                              .bodyMedium,
+                                        ),
+                                        SizedBox(height: 10),
+                                        ElevatedButton(
+                                            onPressed: () => loadTrips(),
+                                            child: Text('Retry')),
+                                      ],
+                                    ),
+                                  );
+                                }
+
+                                if (tripProvider.trips.isEmpty) {
+                                  return Center(
+                                    child: Text(
+                                      'No trips found',
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium,
+                                    ),
+                                  );
+                                }
+
+                                List filteredTrips = tripProvider.trips;
+                                if (_model.textController.text.isEmpty) {
+                                  filteredTrips = tripProvider
+                                      .searchTrips(_model.textController.text);
+                                }
+
+                                return SingleChildScrollView(
+                                  child: Column(
+                                                mainAxisSize: MainAxisSize.max,
+                                                children: [
+                                      ...filteredTrips.map((trip) => Padding(
+                                            padding:
+                                                EdgeInsetsDirectional.fromSTEB(
+                                                    0.0, 5.0, 0.0, 5.0),
+                                                    child: Container(
+                                              width: double.infinity,
+                                              height: 80.0,
+                                                      decoration: BoxDecoration(
+                                                color:
                                                     FlutterFlowTheme.of(context)
-                                                                    .titleMedium
-                                                                    .override(
-                                                                      font: GoogleFonts
-                                                                          .interTight(
-                                                            fontWeight:
-                                                                FlutterFlowTheme.of(
+                                                            .secondaryBackground,
+                                                borderRadius:
+                                                    BorderRadius.circular(8.0),
+                                                border: Border.all(
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .primaryBackground,
+                                                  width: 1.0,
+                                                ),
+                                                      ),
+                                                      child: Padding(
+                                                padding: EdgeInsetsDirectional
+                                                                .fromSTEB(
+                                                        16.0, 12.0, 16.0, 12.0),
+                                                        child: Row(
+                                                          children: [
+                                                    CircleAvatar(
+                                                      radius: 25.0,
+                                                      backgroundColor:
+                                                          Color(0xFFDDDEE0),
+                                                      child: Icon(
+                                                        Icons.drive_eta,
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .primaryText,
+                                                                    size: 30.0,
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 16.0),
+                                                  Expanded(
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                          children: [
+                                                            Text(
+                                                            'Sample Ride',
+                                                              style: FlutterFlowTheme
+                                                                      .of(context)
+                                                                  .titleMedium
+                                                                  .override(
+                                                                    font: GoogleFonts
+                                                                        .interTight(
+                                                                      fontWeight: FlutterFlowTheme.of(
                                                                               context)
                                                                           .titleMedium
                                                                           .fontWeight,
-                                                            fontStyle:
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .titleMedium
+                                                                      fontStyle: FlutterFlowTheme.of(
+                                                                              context)
+                                                                          .titleMedium
                                                                           .fontStyle,
-                                                          ),
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .titleMedium
-                                                                          .fontWeight,
-                                                          fontStyle:
-                                                              FlutterFlowTheme.of(
+                                                                    ),
+                                                                    letterSpacing:
+                                                                        0.0,
+                                                                    fontWeight: FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .titleMedium
+                                                                        .fontWeight,
+                                                                    fontStyle: FlutterFlowTheme.of(
                                                                             context)
                                                                         .titleMedium
                                                                         .fontStyle,
                                                                   ),
                                                             ),
-                                              SizedBox(height: 4.0),
+                                                          SizedBox(height: 4.0),
                                                             Text(
-                                                'Ride management content will go here',
-                                                style: FlutterFlowTheme.of(
-                                                        context)
+                                                            'Ride management content will go here',
+                                                              style: FlutterFlowTheme
+                                                                      .of(context)
                                                                   .bodyMedium
                                                                   .override(
-                                                      font: GoogleFonts.inter(
-                                                        fontWeight:
-                                                            FlutterFlowTheme.of(
+                                                                  font:
+                                                                      GoogleFonts
+                                                                        .inter(
+                                                                      fontWeight: FlutterFlowTheme.of(
                                                                               context)
                                                                           .bodyMedium
                                                                           .fontWeight,
-                                                        fontStyle:
-                                                            FlutterFlowTheme.of(
+                                                                      fontStyle: FlutterFlowTheme.of(
                                                                               context)
                                                                           .bodyMedium
                                                                           .fontStyle,
                                                                     ),
-                                                      color:
-                                                          FlutterFlowTheme.of(
+                                                                    color: FlutterFlowTheme.of(
                                                                             context)
                                                                         .secondaryText,
-                                                      letterSpacing: 0.0,
-                                                      fontWeight:
-                                                          FlutterFlowTheme.of(
+                                                                    letterSpacing:
+                                                                        0.0,
+                                                                    fontWeight: FlutterFlowTheme.of(
                                                                             context)
                                                                         .bodyMedium
                                                                         .fontWeight,
-                                                      fontStyle:
-                                                          FlutterFlowTheme.of(
+                                                                    fontStyle: FlutterFlowTheme.of(
                                                                             context)
                                                                         .bodyMedium
                                                                         .fontStyle,
@@ -422,18 +483,24 @@ class _AdminRideManagementWidgetState extends State<AdminRideManagementWidget> {
                                                             ),
                                                           ],
                                                         ),
-                                        ),
-                                        Icon(
-                                          Icons.arrow_forward_ios,
-                                          color: FlutterFlowTheme.of(context)
+                                                    ),
+                                                                Icon(
+                                                      Icons.arrow_forward_ios,
+                                                      color:
+                                                          FlutterFlowTheme.of(
+                                                                            context)
                                                                         .secondaryText,
-                                          size: 16.0,
+                                                      size: 16.0,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
                                             ),
-                                          ],
-                                        ),
-                                      ),
-                                ),
-                              ),
+                                          ))
+                                    ],
+                                  ),
+                                );
+                              }),
                             ],
                           ),
                         ),

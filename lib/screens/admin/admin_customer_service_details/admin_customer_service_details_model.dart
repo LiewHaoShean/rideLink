@@ -11,9 +11,15 @@ import 'package:provider/provider.dart';
 
 class AdminCustomerServiceDetailsModel
     extends FlutterFlowModel<AdminCustomerServiceDetailsWidget> {
+  FocusNode? textFieldFocusNode;
+  TextEditingController? textController;
+  String? Function(BuildContext, String?)? textControllerValidator;
   @override
   void initState(BuildContext context) {}
 
   @override
-  void dispose() {}
+  void dispose() {
+    textFieldFocusNode?.dispose();
+    textController?.dispose();
+  }
 }

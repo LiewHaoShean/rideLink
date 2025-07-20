@@ -33,13 +33,16 @@ class VehicleProvider with ChangeNotifier {
 
   // Get vehicle by user ID (ownerId)
   Future<CarInformation?> getUserVehicle(String userId) async {
+    print("getUserVehicle called with userId: $userId");
     try {
       final vehicles = await _firestoreService.getCarsByOwner(userId);
+      print('Fetched vehicle: $vehicles');
       if (vehicles.isNotEmpty) {
         return vehicles.first;
       }
       return null;
     } catch (e) {
+      print("Error in getUserVehicle: $e");
       _error = e.toString();
       notifyListeners();
       return null;

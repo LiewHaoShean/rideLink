@@ -1,3 +1,5 @@
+import 'package:ride_link_carpooling/providers/user_provider.dart';
+
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -524,19 +526,21 @@ class _LoginPageWidgetState extends State<LoginPageWidget> {
                             password:
                                 _model.passwordlTextFieldTextController!.text,
                           );
-                          
+
                           // Get the user's role from Firestore
                           final user = FirebaseAuth.instance.currentUser;
                           if (user != null) {
                             final firestoreService = FirestoreService();
-                            final userModel = await firestoreService.getUser(user.uid);
-                            
+                            final userModel =
+                                await firestoreService.getUser(user.uid);
+                            context.read<UserProvider>().setUserId(user.uid);
                             if (userModel != null) {
                               // Check user role and redirect accordingly
                               if (userModel.userRole == 'admin') {
                                 context.pushNamed('home'); // Admin home page
                               } else {
-                                context.pushNamed('searchRideHome'); // Passenger page
+                                context.pushNamed(
+                                    'searchRideHome'); // Passenger page
                               }
                             } else {
                               // If user document doesn't exist, default to passenger

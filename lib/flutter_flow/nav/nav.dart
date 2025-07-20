@@ -131,7 +131,8 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => SearchRideDetailsWidget(
             rideId: params.getParam('rideId', ParamType.String),
             creatorId: params.getParam('creatorId', ParamType.String),
-            seatNeeded: int.tryParse(params.getParam('seatNeeded', ParamType.String) ?? '0'),
+            seatNeeded: int.tryParse(
+                params.getParam('seatNeeded', ParamType.String) ?? '0'),
           ),
         ),
         FFRoute(
@@ -154,14 +155,18 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: MessageMainWidget.routeName,
           path: MessageMainWidget.routePath,
-          builder: (context, params) => params.isEmpty
-              ? NavBarPage(initialPage: 'messageMain')
-              : MessageMainWidget(),
+          builder: (context, params) => MessageMainWidget(
+            senderId: params.getParam('userId', ParamType.String) ?? '',
+          ),
         ),
         FFRoute(
           name: MessageDetailsWidget.routeName,
           path: MessageDetailsWidget.routePath,
-          builder: (context, params) => MessageDetailsWidget(),
+          builder: (context, params) => MessageDetailsWidget(
+            senderId: params.getParam('userId', ParamType.String) ?? '',
+            chatId: params.getParam('chatId', ParamType.String) ?? '',
+            receiverId: params.getParam('receiverId', ParamType.String) ?? '',
+          ),
         ),
         FFRoute(
           name: NotificationDetailWidget.routeName,
@@ -307,12 +312,17 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: AdminCustomerServiceWidget.routeName,
           path: AdminCustomerServiceWidget.routePath,
-          builder: (context, params) => AdminCustomerServiceWidget(),
+          builder: (context, params) => AdminCustomerServiceWidget(
+              senderId: params.getParam('userId', ParamType.String) ?? ''),
         ),
         FFRoute(
           name: AdminCustomerServiceDetailsWidget.routeName,
           path: AdminCustomerServiceDetailsWidget.routePath,
-          builder: (context, params) => AdminCustomerServiceDetailsWidget(),
+          builder: (context, params) => AdminCustomerServiceDetailsWidget(
+            senderId: params.getParam('userId', ParamType.String) ?? '',
+            chatId: params.getParam('chatId', ParamType.String) ?? '',
+            receiverId: params.getParam('receiverId', ParamType.String) ?? '',
+          ),
         ),
         FFRoute(
           name: AdminSecurityWidget.routeName,

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ride_link_carpooling/models/trip.dart';
 
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -43,7 +44,7 @@ class _SearchRideResultWidgetState extends State<SearchRideResultWidget> {
   late SearchRideResultModel _model;
   bool isLoading = true;
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  List<Map<String, dynamic>> rides = [];
+  List<Trip> trips = [];
 
   @override
   void initState() {
@@ -52,67 +53,77 @@ class _SearchRideResultWidgetState extends State<SearchRideResultWidget> {
     late Future<List<Map<String, dynamic>>> _searchResults;
 
     _model = createModel(context, () => SearchRideResultModel());
-    _fetchRides();
-    _searchResults = _rideService.searchRides(
-      from: widget.from,
-      to: widget.to,
-      date: widget.date,
-      time: widget.time,
-      seatsNeeded: widget.seats,
-    );
+    _fetchTrips();
   }
 
-  Future<void> _fetchRides() async {
+  Future<void> _fetchTrips() async {
     try {
-      final result = await RideService().searchRides(
-        from: widget.from,
-        to: widget.to,
+      final resultDocs = await RideService().searchRides(
+        from: widget.from.name,
+        to: widget.to.name,
         date: widget.date,
         time: widget.time,
         seatsNeeded: widget.seats,
       );
 
-      List<Map<String, dynamic>> ridesToShow;
+      List<Trip> tripsToShow = [];
 
-      if (result.isEmpty) {
-        // Fallback: ALL rides
-        final allRidesSnapshot =
-            await FirebaseFirestore.instance.collection('temp_rides').get();
-
-        ridesToShow = allRidesSnapshot.docs.map((doc) {
+      if (resultDocs.isEmpty) {
+        // Fallback: get all trips
+        final allTripsSnapshot = await FirebaseFirestore.instance.collection('trips').get();
+        tripsToShow = allTripsSnapshot.docs.map((doc) {
           final data = doc.data() as Map<String, dynamic>;
           data['rideId'] = doc.id;
-          return data;
+          return Trip.fromJson(data);
         }).toList();
       } else {
-        ridesToShow = result;
+        tripsToShow = resultDocs.map((doc) {
+          return Trip.fromJson(doc);
+        }).toList();
       }
 
-      // Enrich each ride with creator info
-      final List<Map<String, dynamic>> enrichedRides = [];
+      // ✅ Enrich each Trip — keep rideId!
+      final List<Trip> enrichedTrips = [];
 
-      for (final ride in ridesToShow) {
-        final creatorUid = ride['creatorId'] as String?;
-        if (creatorUid != null) {
+      for (final trip in tripsToShow) {
+        final creatorUid = trip.creatorId;
+
+        String creatorName = 'Unknown';
+        String creatorGender = 'male';
+
+        if (creatorUid.isNotEmpty) {
           final userDoc = await FirebaseFirestore.instance
               .collection('users')
               .doc(creatorUid)
               .get();
-          ride['creatorName'] = userDoc.exists ? userDoc['name'] ?? 'Unknown' : 'Unknown';
-          ride['creatorGender'] = userDoc.exists ? userDoc['gender'] ?? 'male' : 'male';
-        } else {
-          ride['creatorName'] = 'Unknown';
-          ride['creatorGender'] = 'male';
+
+          if (userDoc.exists) {
+            creatorName = userDoc.data()?['name'] ?? 'Unknown';
+            creatorGender = userDoc.data()?['gender'] ?? 'male';
+          }
         }
 
-        enrichedRides.add(ride);
-      }
+        // Keep rideId when copying trip!
+        final enrichedTrip = Trip(
+          rideId: trip.rideId,
+          creatorId: trip.creatorId,
+          origin: trip.origin,
+          destination: trip.destination,
+          departureTime: trip.departureTime,
+          availableSeats: trip.availableSeats,
+          pricePerSeat: trip.pricePerSeat,
+          passengers: trip.passengers,
+          status: trip.status,
+        );
 
+        enrichedTrips.add(enrichedTrip);
+      }
       setState(() {
-        rides = enrichedRides;
+        trips = enrichedTrips;
         isLoading = false;
       });
     } catch (e) {
+      debugPrint('Error fetching trips: $e');
       setState(() {
         isLoading = false;
       });
@@ -132,7 +143,7 @@ class _SearchRideResultWidgetState extends State<SearchRideResultWidget> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (rides.isEmpty) {
+    if (trips.isEmpty) {
       return const Center(child: Text('No rides found.'));
     }
     return GestureDetector(
@@ -281,33 +292,55 @@ class _SearchRideResultWidgetState extends State<SearchRideResultWidget> {
                     child: SingleChildScrollView(
                       child: Column(
                         children: [
-                          ListView.builder(
-                            shrinkWrap:
-                                true, // needed if inside another scroll view, else remove
-                            physics:
-                                const NeverScrollableScrollPhysics(), // needed if parent scrolls, else remove
-                            itemCount: rides.length,
-                            itemBuilder: (context, index) {
-                              final ride = rides[index];
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: trips.length,
+                          itemBuilder: (context, index) {
+                            final trip = trips[index];
 
-                              // Convert Firestore Timestamp safely
-                              final Timestamp timeStamp = ride['time'] as Timestamp;
-                              final DateTime time = timeStamp.toDate();
-                              final String formattedTime = TimeOfDay.fromDateTime(time).format(context);
+                            final String formattedTime = TimeOfDay.fromDateTime(trip.departureTime).format(context);
 
-                              return RideCard(
-                                time: formattedTime ?? 'N/A',
-                                from: ride['from'] != null ? Location.fromJson(ride['from']) : Location.empty(),
-                                to: ride['to'] != null ? Location.fromJson(ride['to']) : Location.empty(),
-                                driverName: ride['creatorName'] ?? 'Unknown',
-                                gender: ride['creatorGender'] ?? 'male',
-                                price: (ride['price'] ?? 0).toDouble(),
-                                creatorId: ride['creatorId'] ?? 'Unknown',
-                                rideId: ride['rideId'] ?? '',
-                                seatNeeded: widget.seats ?? 0,
-                              );
-                            },
-                          ),
+                            return FutureBuilder<DocumentSnapshot>(
+                              future: FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(trip.creatorId)
+                                  .get(),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return const SizedBox(
+                                    height: 80,
+                                    child: Center(child: CircularProgressIndicator()),
+                                  );
+                                }
+
+                                if (snapshot.hasError) {
+                                  return const SizedBox(
+                                    height: 80,
+                                    child: Center(child: Text('Error loading driver info')),
+                                  );
+                                }
+
+                                final userData = snapshot.data?.data() as Map<String, dynamic>?;
+
+                                final creatorName = userData?['name'] ?? 'Unknown';
+                                final creatorGender = userData?['gender'] ?? 'male';
+
+                                return RideCard(
+                                  tripId: trip.rideId,
+                                  time: formattedTime,
+                                  fromName: trip.origin,
+                                  toName: trip.destination,
+                                  driverName: creatorName,
+                                  gender: creatorGender,
+                                  price: trip.pricePerSeat,
+                                  creatorId: trip.creatorId,
+                                  seatNeeded: widget.seats,
+                                );
+                              },
+                            );
+                          },
+                        ),  
                         ],
                       ),
                     ),

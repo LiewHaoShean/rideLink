@@ -2,30 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ride_link_carpooling/flutter_flow/flutter_flow_theme.dart';
 import 'package:ride_link_carpooling/flutter_flow/flutter_flow_util.dart';
-import 'package:ride_link_carpooling/models/location.dart';
 import 'package:ride_link_carpooling/screens/user/search_ride/search_ride_details/search_ride_details_widget.dart';
 
 class RideCard extends StatelessWidget {
+  final String tripId; // Unique identifier for the trip
   final String time;
-  final Location from;
-  final Location to;
+  final String fromName;
+  final String toName;
   final String driverName;
   final String gender; // e.g. 'male' or 'female'
   final double price;
   final String creatorId;
-  final String rideId;
   final int seatNeeded;
 
   const RideCard({
     Key? key,
+    required this.tripId,
     required this.time,
-    required this.from,
-    required this.to,
+    required this.fromName,
+    required this.toName,
     required this.driverName,
     required this.gender,
     required this.price,
     required this.creatorId,
-    required this.rideId,
     required this.seatNeeded,
   }) : super(key: key);
 
@@ -39,7 +38,7 @@ class RideCard extends StatelessWidget {
           context.pushNamed(
             SearchRideDetailsWidget.routeName,
             queryParameters: {
-              'rideId': rideId,
+              'rideId': tripId, 
               'creatorId': creatorId,
               'seatNeeded': seatNeeded.toString(),
             },
@@ -113,24 +112,22 @@ class RideCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            from.name,
-                            style:
-                                FlutterFlowTheme.of(context).bodyMedium.override(
-                                      font: GoogleFonts.inter(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                      color: const Color(0xFF00265C),
-                                    ),
+                            fromName,
+                            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              font: GoogleFonts.inter(
+                                fontWeight: FontWeight.w600,
+                              ),
+                              color: const Color(0xFF00265C),
+                            ),
                           ),
                           Text(
-                            to.name,
-                            style:
-                                FlutterFlowTheme.of(context).bodyMedium.override(
-                                      font: GoogleFonts.inter(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                      color: const Color(0xFF00265C),
-                                    ),
+                            toName,
+                            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              font: GoogleFonts.inter(
+                                fontWeight: FontWeight.w600,
+                              ),
+                              color: const Color(0xFF00265C),
+                            ),
                           ),
                         ],
                       ),

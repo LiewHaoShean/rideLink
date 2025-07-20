@@ -94,9 +94,8 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: SearchRideHomeWidget.routeName,
           path: SearchRideHomeWidget.routePath,
-          builder: (context, params) => params.isEmpty
-              ? NavBarPage(initialPage: 'searchRideHome')
-              : SearchRideHomeWidget(),
+          builder: (context, params) =>
+              NavBarPage(initialPage: 'searchRideHome'),
         ),
         FFRoute(
           name: CreateRideHomeWidget.routeName,
@@ -145,12 +144,16 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: CreateRideStartRideWidget.routeName,
           path: CreateRideStartRideWidget.routePath,
-          builder: (context, params) => CreateRideStartRideWidget(),
+          builder: (context, params) => CreateRideStartRideWidget(
+            rideId: params.getParam('rideId', ParamType.String) ?? '',
+          ),
         ),
         FFRoute(
           name: CreateRideCompleteWidget.routeName,
           path: CreateRideCompleteWidget.routePath,
-          builder: (context, params) => CreateRideCompleteWidget(),
+          builder: (context, params) => CreateRideCompleteWidget(
+            rideId: params.getParam('rideId', ParamType.String) ?? '',
+          ),
         ),
         FFRoute(
           name: MessageMainWidget.routeName,
@@ -253,19 +256,26 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: SearchRideWaitingDriverWidget.routeName,
           path: SearchRideWaitingDriverWidget.routePath,
-          builder: (context, params) => SearchRideWaitingDriverWidget(),
+          builder: (context, params) => SearchRideWaitingDriverWidget(
+            rideId: params.getParam('rideId', ParamType.String) ?? '',
+          ),
         ),
         FFRoute(
           name: SearchRidePendingRideWidget.routeName,
           path: SearchRidePendingRideWidget.routePath,
-          builder: (context, params) => params.isEmpty
-              ? NavBarPage(initialPage: 'searchRidePendingRide')
-              : SearchRidePendingRideWidget(),
+          builder: (context, params) => SearchRidePendingRideWidget(
+            rideId: params.getParam('rideId', ParamType.String),
+            creatorId: params.getParam('creatorId', ParamType.String),
+            carId: params.getParam('carId', ParamType.String),
+            seatNeeded: params.getParam('seatNeeded', ParamType.int),
+          ),
         ),
         FFRoute(
           name: SearchRideCompleteWidget.routeName,
           path: SearchRideCompleteWidget.routePath,
-          builder: (context, params) => SearchRideCompleteWidget(),
+          builder: (context, params) => SearchRideCompleteWidget(
+            rideId: params.getParam('rideId', ParamType.String) ?? '',
+          ),
         ),
         FFRoute(
           name: HomeWidget.routeName,

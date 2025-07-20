@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -10,18 +12,27 @@ import 'search_ride_complete_model.dart';
 export 'search_ride_complete_model.dart';
 
 class SearchRideCompleteWidget extends StatefulWidget {
-  const SearchRideCompleteWidget({super.key});
+  final String rideId;
+
+  const SearchRideCompleteWidget({
+    super.key,
+    required this.rideId,
+  });
 
   static String routeName = 'searchRideComplete';
   static String routePath = '/searchRideComplete';
 
   @override
-  State<SearchRideCompleteWidget> createState() =>
-      _SearchRideCompleteWidgetState();
+  State<SearchRideCompleteWidget> createState() => _SearchRideCompleteWidgetState();
 }
 
 class _SearchRideCompleteWidgetState extends State<SearchRideCompleteWidget> {
   late SearchRideCompleteModel _model;
+  Map<String, dynamic>? tripData;
+  List<Map<String, dynamic>> passengersData = [];
+  bool isLoading = true;
+  double? pricePerPassenger; 
+
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -29,12 +40,73 @@ class _SearchRideCompleteWidgetState extends State<SearchRideCompleteWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => SearchRideCompleteModel());
+    fetchTrip();
+  }
+
+  Future<void> fetchTrip() async {
+    try {
+      final tripDoc = FirebaseFirestore.instance.collection('trips').doc(widget.rideId);
+      final docSnapshot = await tripDoc.get();
+
+      if (docSnapshot.exists) {
+        final data = docSnapshot.data()!;
+        final passengers = data['passengers'] as List<dynamic>? ?? [];
+        List<Map<String, dynamic>> passengersList = [];
+        int acceptedPassengerCount = 0;
+
+        // Fetch passenger data and count accepted passengers
+        for (var p in passengers) {
+          if (p['status'] == 'accepted') {
+            acceptedPassengerCount++;
+            final passengerId = p['passengerId'];
+            final userDoc = await FirebaseFirestore.instance.collection('users').doc(passengerId).get();
+            final userData = userDoc.exists ? userDoc.data() : null;
+            passengersList.add({
+              'passenger': p,
+              'user': userData,
+            });
+          }
+        }
+
+        // Calculate price per passenger
+        final pricePerSeat = (data['pricePerSeat'] as num?)?.toDouble() ?? 0.0;
+        final calculatedPrice = acceptedPassengerCount > 0 ? pricePerSeat / acceptedPassengerCount : 0.0;
+
+        setState(() {
+          tripData = data;
+          passengersData = passengersList;
+          pricePerPassenger = calculatedPrice;
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      // Optionally show error dialog
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Error'),
+          content: Text('Failed to fetch trip data: $e'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   @override
   void dispose() {
     _model.dispose();
-
     super.dispose();
   }
 
@@ -50,7 +122,8 @@ class _SearchRideCompleteWidgetState extends State<SearchRideCompleteWidget> {
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: SafeArea(
           top: true,
-          child: Padding(
+          child: SingleChildScrollView(
+            child: Padding(
             padding: EdgeInsetsDirectional.fromSTEB(1.0, 0.0, 0.0, 0.0),
             child: Column(
               mainAxisSize: MainAxisSize.max,
@@ -895,6 +968,7 @@ class _SearchRideCompleteWidgetState extends State<SearchRideCompleteWidget> {
                 ),
               ],
             ),
+          ),
           ),
         ),
       ),

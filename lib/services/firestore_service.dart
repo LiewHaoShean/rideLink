@@ -52,20 +52,6 @@ class FirestoreService {
     return null;
   }
 
-  /// TRIPS
-  Future<void> createTrip(Trip trip) async {
-    await _db.collection('trips').doc(trip.tripId).set(trip.toJson());
-  }
-
-  Future<List<Trip>> getTrips() async {
-    final snapshot = await _db.collection('trips').get();
-    return snapshot.docs.map((doc) => Trip.fromJson(doc.data())).toList();
-  }
-
-  Future<void> updateTrip(Trip trip) async {
-    await _db.collection('trips').doc(trip.tripId).update(trip.toJson());
-  }
-
   /// BOOKINGS
   Future<void> createBooking(Booking booking) async {
     await _db

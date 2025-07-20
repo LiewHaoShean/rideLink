@@ -80,6 +80,7 @@ dependencies:
   firebase_auth: ^5.0.0
   cloud_firestore: ^5.0.0
   google_sign_in: any
+  google_maps_flutter: ^2.7.0
 
 dependency_overrides:
   http: 1.4.0

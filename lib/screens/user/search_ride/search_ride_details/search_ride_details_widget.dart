@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -13,6 +11,10 @@ import 'package:provider/provider.dart';
 
 import 'search_ride_details_model.dart';
 export 'search_ride_details_model.dart';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:ride_link_carpooling/models/trip.dart';
 
 class SearchRideDetailsWidget extends StatefulWidget {
   final String? rideId;
@@ -42,7 +44,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-   @override
+  @override
   void initState() {
     super.initState();
     seatNeeded = widget.seatNeeded ?? 0;
@@ -54,21 +56,16 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
     if (widget.rideId == null) return;
 
     try {
-      // Get the ride doc
       final rideDoc = await FirebaseFirestore.instance
-          .collection('temp_rides')
+          .collection('trips')
           .doc(widget.rideId)
           .get();
 
-      if (!rideDoc.exists) {
-        print('Ride not found!');
-        return;
-      }
+      if (!rideDoc.exists) return;
 
       final ride = rideDoc.data();
       if (ride == null) return;
 
-      // 2️⃣ Get creator info
       final creatorUid = ride['creatorId'] as String?;
       String creatorName = 'Unknown';
       String creatorGender = 'male';
@@ -85,7 +82,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
         }
       }
 
-      // 3️⃣ Get car info
+      // Get car info
       Map<String, dynamic>? carInfo;
       if (creatorUid != null) {
         final carQuery = await FirebaseFirestore.instance
@@ -109,32 +106,31 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
         }
       }
 
-      // 4️⃣ Format timestamps
+      // Format timestamps — fallback if needed
       String formattedDate = 'N/A';
       String formattedTime = 'N/A';
 
-      final date = ride['date'] as Timestamp?;
-      final time = ride['time'] as Timestamp?;
+      final date = ride['date'] as Timestamp? ?? ride['departureTime'] as Timestamp?;
+      final time = ride['time'] as Timestamp? ?? ride['departureTime'] as Timestamp?;
 
       if (date != null) {
         formattedDate = DateFormat('EEE, d MMM yyyy').format(date.toDate());
       }
-
       if (time != null) {
         formattedTime = DateFormat('hh:mm a').format(time.toDate());
       }
 
-      // 5️⃣ Store all in state
       setState(() {
         rideData = {
-          'from': ride['from'] ?? '',
-          'to': ride['to'] ?? '',
-          'price': ride['price'] ?? 0,
-          'seats': ride['seats'] ?? 0,
+          'from': ride['from'] ?? ride['origin'] ?? '',
+          'to': ride['to'] ?? ride['destination'] ?? '',
+          'price': ride['price'] ?? ride['pricePerSeat'] ?? 0,
+          'seats': ride['seats'] ?? ride['availableSeats'] ?? 0,
           'formattedDate': formattedDate,
           'formattedTime': formattedTime,
         };
         creatorData = {
+          'uid': creatorUid,
           'name': creatorName,
           'gender': creatorGender,
         };
@@ -145,15 +141,27 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
     }
   }
 
+
   @override
   void dispose() {
-    // _model.dispose();
-
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (rideData == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final price = rideData!['price'];
+    final seats = rideData!['seats'];
+    final from = rideData!['from'];
+    final to = rideData!['to'];
+    final date = rideData!['formattedDate'];
+    final time = rideData!['formattedTime'];
+
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -267,7 +275,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                             mainAxisSize: MainAxisSize.max,
                                             children: [
                                               Text(
-                                                '${rideData?['formattedDate'] ?? 'N/A'}',
+                                                '$date',
                                                 style:
                                                     FlutterFlowTheme.of(context)
                                                         .bodyMedium
@@ -325,7 +333,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                       MainAxisAlignment.center,
                                                   children: [
                                                     Text(
-                                                      'Total price for',
+                                                      'Total price for ',
                                                       style:
                                                           FlutterFlowTheme.of(
                                                                   context)
@@ -368,7 +376,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                       MainAxisAlignment.center,
                                                   children: [
                                                     Text(
-                                                      ' ${rideData?['seats'] ?? 0} ',
+                                                      seatNeeded.toString(),
                                                       style:
                                                           FlutterFlowTheme.of(
                                                                   context)
@@ -411,7 +419,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                       MainAxisAlignment.center,
                                                   children: [
                                                     Text(
-                                                      'passenger',
+                                                      ' passenger',
                                                       style:
                                                           FlutterFlowTheme.of(
                                                                   context)
@@ -469,7 +477,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                   MainAxisAlignment.center,
                                               children: [
                                                 Text(
-                                                  'RM ${rideData?['price'] ?? 0}',
+                                                  'RM ${(((rideData?['price'] ?? 0) / (rideData?['seats'] ?? 1)) * (widget.seatNeeded ?? 1)).toStringAsFixed(2)}',
                                                   style: FlutterFlowTheme.of(
                                                           context)
                                                       .bodyMedium
@@ -569,7 +577,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                             MainAxisAlignment.center,
                                                                         children: [
                                                                           Text(
-                                                                            '${rideData?['time'] ?? '-'}',
+                                                                            '$time',
                                                                             style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                                                   font: GoogleFonts.inter(
                                                                                     fontWeight: FontWeight.w600,
@@ -725,7 +733,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                               CrossAxisAlignment.center,
                                                                           children: [
                                                                             Text(
-                                                                              'APU',
+                                                                              '$from',
                                                                               style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                                                     font: GoogleFonts.inter(
                                                                                       fontWeight: FontWeight.w600,
@@ -745,7 +753,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                               MainAxisAlignment.start,
                                                                           children: [
                                                                             Text(
-                                                                              'Parkhill Residence',
+                                                                              '$to',
                                                                               style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                                                     font: GoogleFonts.inter(
                                                                                       fontWeight: FontWeight.w600,
@@ -880,7 +888,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                                 MainAxisSize.max,
                                                                             children: [
                                                                               Text(
-                                                                                'Hor Yuan Li',
+                                                                                '${creatorData?['name'] ?? 'Unkwown'}',
                                                                                 style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                                                       font: GoogleFonts.inter(
                                                                                         fontWeight: FontWeight.w500,
@@ -897,19 +905,19 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                           Column(
                                                                             mainAxisSize:
                                                                                 MainAxisSize.max,
-                                                                            children: [
-                                                                              Align(
-                                                                                alignment: AlignmentDirectional(0, 0),
-                                                                                child: Padding(
-                                                                                  padding: EdgeInsetsDirectional.fromSTEB(10, 0, 0, 0),
-                                                                                  child: Icon(
-                                                                                    Icons.male_sharp,
-                                                                                    color: FlutterFlowTheme.of(context).primaryText,
-                                                                                    size: 24,
-                                                                                  ),
-                                                                                ),
-                                                                              ),
-                                                                            ],
+                                                                            // children: [
+                                                                            //   Align(
+                                                                            //     alignment: AlignmentDirectional(0, 0),
+                                                                            //     child: Padding(
+                                                                            //       padding: EdgeInsetsDirectional.fromSTEB(10, 0, 0, 0),
+                                                                            //       child: Icon(
+                                                                            //         (creatorData?['gender'] == 'female') ? Icons.female : Icons.male,
+                                                                            //         color: FlutterFlowTheme.of(context).secondaryText,
+                                                                            //         size: 28,
+                                                                            //       ),
+                                                                            //     ),
+                                                                            //   ),
+                                                                            // ],
                                                                           ),
                                                                         ],
                                                                       ),
@@ -1152,7 +1160,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                             .center,
                                                                     children: [
                                                                       Text(
-                                                                        'Hor Yuan Li',
+                                                                        '${creatorData?['name'] ?? 'Unkwown'}',
                                                                         style: FlutterFlowTheme.of(context)
                                                                             .bodyMedium
                                                                             .override(
@@ -1243,7 +1251,9 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                         MainAxisSize.max,
                                                     children: [
                                                       Text(
-                                                        'Perodua Kancil',
+                                                        carData != null
+                                                            ? '${carData!['carBrand'] ?? 'Unknown'} ${carData!['carModel'] ?? ''}'
+                                                            : 'No car info',
                                                         style:
                                                             FlutterFlowTheme.of(
                                                                     context)
@@ -1285,7 +1295,11 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                               .fromSTEB(
                                                                   2, 0, 0, 0),
                                                       child: Text(
-                                                        'White',
+                                                        carData != null
+                                                            ? (carData![
+                                                                    'carColor'] ??
+                                                                'Unknown')
+                                                            : 'No car info',
                                                         style:
                                                             FlutterFlowTheme.of(
                                                                     context)
@@ -1340,13 +1354,61 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                       children: [
                         Expanded(
                           child: Padding(
-                            padding:
-                                EdgeInsetsDirectional.fromSTEB(10, 0, 10, 0),
+                            padding: EdgeInsetsDirectional.fromSTEB(10, 0, 10, 0),
                             child: FFButtonWidget(
-                              onPressed: () async {
-                                context.pushNamed(
-                                    SearchRidePendingRideWidget.routeName);
-                              },
+                            onPressed: () async {
+                              final currentUser = FirebaseAuth.instance.currentUser;
+                              if (currentUser == null) return;
+
+                              // Get the original ride doc
+                              final rideDoc = await FirebaseFirestore.instance
+                                  .collection('trips')
+                                  .doc(widget.rideId)
+                                  .get();
+
+                              if (!rideDoc.exists) {
+                                print('Ride not found!');
+                                return;
+                              }
+
+                              final rideData = rideDoc.data();
+                              if (rideData == null) {
+                                print('Ride data is null!');
+                                return;
+                              }
+
+                              // Existing passengers
+                              List<dynamic> existingPassengers = rideData['passengers'] ?? [];
+
+                              // Add this user to passengers
+                              existingPassengers.add({
+                                'passengerId': currentUser.uid,
+                                'status': 'joined',
+                              });
+
+                              // Reduce availableSeats by 1 (or seatNeeded if you allow multiple)
+                              final currentSeats = rideData['availableSeats'] ?? rideData['seats'] ?? 0;
+                              final newSeats = currentSeats - (widget.seatNeeded ?? 1);
+
+                              // Update the same doc
+                              await FirebaseFirestore.instance
+                                  .collection('trips')
+                                  .doc(widget.rideId)
+                                  .update({
+                                'passengers': existingPassengers,
+                                'availableSeats': newSeats,
+                              });
+
+                              // Navigate with the same rideId
+                              context.pushNamed(
+                                SearchRidePendingRideWidget.routeName,
+                                queryParameters: {
+                                  'creatorId': rideData['creatorId'] ?? '',
+                                  'rideId': rideDoc.id,
+                                  'carId': carData?['carId'] ?? '',
+                                },
+                              );
+                            },
                               text: 'Book for ride',
                               options: FFButtonOptions(
                                 height: 46.7,

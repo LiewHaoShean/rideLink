@@ -27,14 +27,11 @@ class RideService {
       'created_at': FieldValue.serverTimestamp(),
     };
 
-    return await FirebaseFirestore.instance
-        .collection('temp_rides')
-        .add(rideData);
+    return await FirebaseFirestore.instance.collection('trips').add(rideData);
   }
 
   Future<Map<String, dynamic>> readCreatorTempRide(String rideId) async {
-    final docRef =
-        FirebaseFirestore.instance.collection('temp_rides').doc(rideId);
+    final docRef = FirebaseFirestore.instance.collection('trips').doc(rideId);
     final docSnapshot = await docRef.get();
 
     if (!docSnapshot.exists) {
@@ -44,37 +41,53 @@ class RideService {
     return docSnapshot.data() as Map<String, dynamic>;
   }
 
-  ///Search for rides matching query
+  /// Search for rides matching query
   Future<List<Map<String, dynamic>>> searchRides({
-    required Location from,
-    required Location to,
+    required String from,
+    required String to,
     required DateTime date,
-    required int seatsNeeded,
     required DateTime time,
+    required int seatsNeeded,
   }) async {
     final firestore = FirebaseFirestore.instance;
 
-    // Step 1: Run the filtered query
+    // Define the start and end of the day to search trips for the whole day
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+
+    // Adjust this: use the correct collection name!
     final querySnapshot = await firestore
-        .collection('temp_rides')
-        .where('from.name', isEqualTo: from.name)
-        .where('to.name', isEqualTo: to.name)
-        .where('date',
-            isEqualTo:
-                Timestamp.fromDate(DateTime(date.year, date.month, date.day)))
+        .collection('trips')
+        .where('origin', isEqualTo: from)
+        .where('destination', isEqualTo: to)
+        .where('departureTime',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+        .where('availableSeats', isGreaterThanOrEqualTo: seatsNeeded)
+        .where('status', isEqualTo: 'scheduled')
         .get();
 
+    print('Query found ${querySnapshot.docs.length} trips.');
+
+    // If query returns results, attach rideId and return
     if (querySnapshot.docs.isNotEmpty) {
-      return querySnapshot.docs
-          .map((doc) => doc.data() as Map<String, dynamic>)
-          .toList();
+      return querySnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        data['rideId'] = doc.id;
+        return data;
+      }).toList();
     }
 
-    // Step 2: Fallback — get ALL rides if no match found
-    final fallbackSnapshot = await firestore.collection('temp_rides').get();
+    // If no results, fallback: return ALL trips so you can debug
+    final fallbackSnapshot = await firestore.collection('trips').get();
+    print('Fallback fetched ${fallbackSnapshot.docs.length} total trips.');
 
-    return fallbackSnapshot.docs
-        .map((doc) => doc.data() as Map<String, dynamic>)
-        .toList();
+    final fallbackRides = fallbackSnapshot.docs.map((doc) {
+      final data = doc.data() as Map<String, dynamic>;
+      data['rideId'] = doc.id;
+      return data;
+    }).toList();
+
+    return fallbackRides;
   }
+  //Get all rides (Admin)
 }

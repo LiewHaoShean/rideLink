@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:flutter/gestures.dart';
@@ -11,7 +10,6 @@ import 'flutter_flow/flutter_flow_util.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'flutter_flow/nav/nav.dart';
 import 'index.dart';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
@@ -31,23 +29,32 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
       ],
-      child: MyApp(),
+      child: const MyApp(),
     ),
   );
 }
 
 class MyApp extends StatefulWidget {
-  // This widget is the root of your application.
+  const MyApp({super.key});
+
   @override
   State<MyApp> createState() => _MyAppState();
+
   static _MyAppState of(BuildContext context) => context.findAncestorStateOfType<_MyAppState>()!;
 }
 
 class _MyAppState extends State<MyApp> {
   ThemeMode _themeMode = FlutterFlowTheme.themeMode;
-
   late AppStateNotifier _appStateNotifier;
   late GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    _appStateNotifier = AppStateNotifier.instance;
+    _router = createRouter(_appStateNotifier);
+  }
+
   String getRoute([RouteMatch? routeMatch]) {
     final RouteMatch lastMatch = routeMatch ?? _router.routerDelegate.currentConfiguration.last;
     final RouteMatchList matchList = lastMatch is ImperativeRouteMatch
@@ -57,16 +64,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   List<String> getRouteStack() =>
-      _router.routerDelegate.currentConfiguration.matches
-          .map((e) => getRoute(e))
-          .toList();
-  @override
-  void initState() {
-    super.initState();
-
-    _appStateNotifier = AppStateNotifier.instance;
-    _router = createRouter(_appStateNotifier);
-  }
+      _router.routerDelegate.currentConfiguration.matches.map((e) => getRoute(e)).toList();
 
   void setThemeMode(ThemeMode mode) => safeSetState(() {
         _themeMode = mode;
@@ -114,33 +112,52 @@ class NavBarPage extends StatefulWidget {
   _NavBarPageState createState() => _NavBarPageState();
 }
 
-/// This is the private State class that goes with NavBarPage.
 class _NavBarPageState extends State<NavBarPage> {
   String _currentPageName = 'searchRideHome';
   late Widget? _currentPage;
   StreamSubscription<QuerySnapshot>? _tripSubscription;
+  StreamSubscription<User?>? _authSubscription;
+  final Set<String> _navigatedTrips = {};
 
   @override
   void initState() {
     super.initState();
     _currentPageName = widget.initialPage ?? _currentPageName;
     _currentPage = widget.page;
-    _startTripStatusListener();
+    _setupAuthListener();
   }
 
   @override
   void dispose() {
     _tripSubscription?.cancel();
+    _authSubscription?.cancel();
     super.dispose();
   }
 
-  void _startTripStatusListener() {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+  void _setupAuthListener() {
+    print('[DEBUG] Setting up auth state listener at ${DateTime.now()}');
+    _authSubscription = FirebaseAuth.instance.authStateChanges().listen((user) {
+      print('[DEBUG] Auth state changed: ${user?.uid ?? "No user"} at ${DateTime.now()}');
+      _tripSubscription?.cancel();
+      if (user != null) {
+        _startTripStatusListener(user);
+      } else {
+        print('[DEBUG] No user signed in — skipping trip status listener at ${DateTime.now()}');
+      }
+    }, onError: (error) {
+      print('[ERROR] Auth state listener error: $error at ${DateTime.now()}');
+    });
+  }
 
+  void _startTripStatusListener(User user) {
+    print('[DEBUG] Fetching user role for UID: ${user.uid} at ${DateTime.now()}');
     FirebaseFirestore.instance.collection('users').doc(user.uid).get().then((userDoc) {
-      if (!userDoc.exists || userDoc.data()?['userRole']?.toString().toLowerCase() != 'passenger') return;
+      if (!userDoc.exists && userDoc.data()?['userRole']?.toString().toLowerCase() != 'admin') {
+        print('[DEBUG] User is not a passenger or doc does not exist: ${userDoc.data()?.toString() ?? "No data"} at ${DateTime.now()}');
+        return;
+      }
 
+      print('[DEBUG] Setting up Firestore listener for passenger trips at ${DateTime.now()}');
       _tripSubscription = FirebaseFirestore.instance
           .collection('trips')
           .where('passengers', arrayContainsAny: [
@@ -148,46 +165,69 @@ class _NavBarPageState extends State<NavBarPage> {
           ])
           .snapshots()
           .listen((snapshot) {
+        print('[DEBUG] Snapshot received with ${snapshot.docChanges.length} changes at ${DateTime.now()}');
         for (var change in snapshot.docChanges) {
           final tripData = change.doc.data();
-          if (tripData == null) continue;
+          if (tripData == null) {
+            print('[DEBUG] Trip data is null for doc: ${change.doc.id} at ${DateTime.now()}');
+            continue;
+          }
 
-          if (tripData['status'] == 'ongoing') {
-            showDialog(
-              context: context,
-              builder: (dialogContext) => AlertDialog(
-                title: const Text('Ride Started'),
-                content: const Text('The driver has started the ride!'),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(dialogContext).pop();
-                      context.pushNamed(
-                        SearchRideWaitingDriverWidget.routeName,
-                        queryParameters: {'rideId': change.doc.id},
-                      );
-                    },
-                    child: const Text('OK'),
-                  ),
-                ],
-              ),
-            );
+          print('[DEBUG] Trip ${change.doc.id} status: ${tripData['status']} at ${DateTime.now()}');
+          if (tripData['status'] == 'ongoing' && !_navigatedTrips.contains(change.doc.id)) {
+            print('[DEBUG] Triggering dialog for trip ${change.doc.id} at ${DateTime.now()}');
+            _navigatedTrips.add(change.doc.id);
+            _showTripStartedAlert(change.doc.id);
           }
         }
       }, onError: (error) {
-        print('[ERROR] Trip listener error: $error');
+        print('[ERROR] Trip listener error: $error at ${DateTime.now()}');
       });
+    }).catchError((error) {
+      print('[ERROR] Failed to fetch user role: $error at ${DateTime.now()}');
     });
+  }
+
+  void _showTripStartedAlert(String rideId) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent dismissing by tapping outside
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Ride Started'),
+        content: const Text('The driver has started the ride!'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              context.pushNamed(
+                SearchRideWaitingDriverWidget.routeName,
+                queryParameters: {'rideId': rideId},
+              ).then((_) {
+                print('[DEBUG] Successfully navigated to SearchRideWaitingDriverWidget with rideId: $rideId at ${DateTime.now()}');
+              }).catchError((error) {
+                print('[ERROR] Navigation failed: $error at ${DateTime.now()}');
+                MyApp.of(context)._router.pushNamed(
+                  SearchRideWaitingDriverWidget.routeName,
+                  queryParameters: {'rideId': rideId},
+                );
+                print('[DEBUG] Fallback navigation attempted with rideId: $rideId at ${DateTime.now()}');
+              });
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final tabs = {
-      'searchRideHome': SearchRideHomeWidget(),
-      'createRideHome': CreateRideHomeWidget(),
-      'messageMain': MessageMainWidget(),
-      'dashboardHome': DashboardHomeWidget(),
-      'searchRidePendingRide': SearchRidePendingRideWidget(),
+      'searchRideHome': const SearchRideHomeWidget(),
+      'createRideHome': const CreateRideHomeWidget(),
+      'messageMain': const MessageMainWidget(),
+      'dashboardHome': const DashboardHomeWidget(),
+      'searchRidePendingRide': const SearchRidePendingRideWidget(),
     };
     final currentIndex = tabs.keys.toList().indexOf(_currentPageName);
 
@@ -201,52 +241,37 @@ class _NavBarPageState extends State<NavBarPage> {
           _currentPageName = tabs.keys.toList()[i];
         }),
         backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
-        selectedItemColor: Color(0xFF00275C),
+        selectedItemColor: const Color(0xFF00275C),
         unselectedItemColor: FlutterFlowTheme.of(context).secondaryText,
         showSelectedLabels: false,
         showUnselectedLabels: false,
         type: BottomNavigationBarType.fixed,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(
-              Icons.search,
-              size: 24.0,
-            ),
+            icon: Icon(Icons.search, size: 24.0),
             label: 'Search',
             tooltip: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(
-              Icons.add_circle_outline,
-              size: 24.0,
-            ),
+            icon: Icon(Icons.add_circle_outline, size: 24.0),
             label: 'Add',
             tooltip: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(
-              Icons.chat_bubble_outline_rounded,
-              size: 24.0,
-            ),
+            icon: Icon(Icons.chat_bubble_outline_rounded, size: 24.0),
             label: 'Message',
             tooltip: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(
-              Icons.person_outlined,
-              size: 24.0,
-            ),
+            icon: Icon(Icons.person_outlined, size: 24.0),
             label: 'profile',
             tooltip: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(
-              Icons.drive_eta,
-              size: 24.0,
-            ),
+            icon: Icon(Icons.drive_eta, size: 24.0),
             label: 'Ride',
             tooltip: '',
-          )
+          ),
         ],
       ),
     );

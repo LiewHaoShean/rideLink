@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:ride_link_carpooling/index.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -32,6 +33,9 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
   bool isLoading = true;
   GoogleMapController? _mapController;
   Set<Marker> _markers = {};
+  StreamSubscription<DocumentSnapshot>? _tripSubscription;
+  bool _hasNavigated = false;
+  String? _userRole;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -39,139 +43,208 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
   void initState() {
     super.initState();
     _model = SearchRideWaitingDriverModel();
-    _fetchUserTrips().then((trips) {
-      setState(() {
-        _userTrips = trips;
-        isLoading = false;
-        _updateMapMarkers(); // Update markers after fetching trips
-      });
-    });
+    _initializeData();
   }
 
   @override
   void dispose() {
+    _tripSubscription?.cancel();
     _model.dispose();
     _mapController?.dispose();
     super.dispose();
   }
 
+  Future<void> _initializeData() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      print('[DEBUG] No user signed in at ${DateTime.now()}');
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
+
+    try {
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      if (userDoc.exists) {
+        _userRole = userDoc.data()?['userRole']?.toString().toLowerCase();
+        print('[DEBUG] User role: $_userRole for UID: ${user.uid} at ${DateTime.now()}');
+      } else {
+        print('[DEBUG] User doc does not exist for UID: ${user.uid} at ${DateTime.now()}');
+      }
+    } catch (e) {
+      print('[ERROR] Failed to fetch user role: $e at ${DateTime.now()}');
+    }
+
+    final trips = await _fetchUserTrips();
+    setState(() {
+      _userTrips = trips;
+      isLoading = false;
+      _updateMapMarkers();
+    });
+
+    if (_userRole == 'passenger') {
+      _setupTripStatusListener();
+    }
+  }
+
+  void _setupTripStatusListener() {
+    print('[DEBUG] Setting up Firestore listener for trip ${widget.rideId} at ${DateTime.now()}');
+    _tripSubscription = FirebaseFirestore.instance
+        .collection('trips')
+        .doc(widget.rideId)
+        .snapshots()
+        .listen((snapshot) {
+      if (!snapshot.exists || snapshot.data() == null) {
+        print('[DEBUG] Trip ${widget.rideId} does not exist or has no data at ${DateTime.now()}');
+        return;
+      }
+      final tripData = snapshot.data()!;
+      print('[DEBUG] Trip ${widget.rideId} status: ${tripData['status']} at ${DateTime.now()}');
+      if (tripData['status'] == 'finished' && !_hasNavigated) {
+        print('[DEBUG] Triggering dialog for finished trip ${widget.rideId} at ${DateTime.now()}');
+        _hasNavigated = true;
+        _showTripFinishedAlert();
+      }
+    }, onError: (error) {
+      print('[ERROR] Trip listener error for ${widget.rideId}: $error at ${DateTime.now()}');
+    });
+  }
+
+  void _showTripFinishedAlert() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Ride Completed'),
+        content: const Text('The driver has completed the ride!'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              context.pushNamed(
+                SearchRideCompleteWidget.routeName,
+                queryParameters: {'rideId': widget.rideId},
+              ).then((_) {
+                print('[DEBUG] Successfully navigated to SearchRideCompleteWidget with rideId: ${widget.rideId} at ${DateTime.now()}');
+              }).catchError((error) {
+                print('[ERROR] Navigation failed: $error at ${DateTime.now()}');
+              });
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<List<Map<String, dynamic>>> _fetchUserTrips() async {
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
-
     if (currentUserId == null) {
-      print('[DEBUG] No user signed in — returning empty list.');
+      print('[DEBUG] No user signed in — returning empty list at ${DateTime.now()}');
       return [];
     }
 
-    print('[DEBUG] Fetching trips for user: $currentUserId');
+    print('[DEBUG] Fetching trip ${widget.rideId} for user: $currentUserId at ${DateTime.now()}');
+    final doc = await FirebaseFirestore.instance.collection('trips').doc(widget.rideId).get();
 
-    final tripSnapshot = await FirebaseFirestore.instance
-                        .collection('trips')
-                        .where('status', whereNotIn: ['ongoing', 'finished'])
-                        .get();
+    if (!doc.exists) {
+      print('[DEBUG] Trip ${widget.rideId} not found at ${DateTime.now()}');
+      return [];
+    }
 
-    print('[DEBUG] Total trips fetched from Firestore: ${tripSnapshot.docs.length}');
+    final tripData = doc.data()!;
+    final passengers = tripData['passengers'] as List<dynamic>? ?? [];
+    Map<String, dynamic>? matchedTrip;
 
-    final matchedTrips = <Map<String, dynamic>>[];
+    for (final p in passengers) {
+      final map = p as Map<String, dynamic>;
+      if (map['passengerId'] == currentUserId && (map['status'] == 'joined' || map['status'] == 'accepted')) {
+        print('[DEBUG] Trip ${doc.id} matched for user at ${DateTime.now()}');
+        final creatorId = tripData['creatorId'];
+        String creatorName = 'Unknown Driver';
 
-    for (final doc in tripSnapshot.docs) {
-      final tripData = doc.data();
-      final passengers = tripData['passengers'] as List<dynamic>? ?? [];
-
-      for (final p in passengers) {
-        final map = p as Map<String, dynamic>;
-        if (map['passengerId'] == currentUserId && (map['status'] == 'joined' || map['status'] == 'accepted')) {
-          print('[DEBUG] Trip ${doc.id} matched for user.');
-
-          final creatorId = tripData['creatorId'];
-          String creatorName = 'Unknown Driver';
-
-          try {
-            final userDoc = await FirebaseFirestore.instance.collection('users').doc(creatorId).get();
-            if (userDoc.exists) {
-              creatorName = userDoc.data()?['name'] ?? 'Unknown Driver';
-            }
-          } catch (e) {
-            print('[ERROR] Failed to fetch creatorName for $creatorId: $e');
+        try {
+          final userDoc = await FirebaseFirestore.instance.collection('users').doc(creatorId).get();
+          if (userDoc.exists) {
+            creatorName = userDoc.data()?['name'] ?? 'Unknown Driver';
           }
-
-          // Fetch car details for this creatorId
-          Map<String, dynamic>? carData;
-          try {
-            final carQuery = await FirebaseFirestore.instance
-                .collection('cars')
-                .where('ownerId', isEqualTo: creatorId)
-                .limit(1)
-                .get();
-
-            if (carQuery.docs.isNotEmpty) {
-              carData = carQuery.docs.first.data();
-            }
-          } catch (e) {
-            print('[ERROR] Failed to fetch car data for $creatorId: $e');
-          }
-
-          // Fetch origin coordinates
-          LatLng? originLatLng;
-          try {
-            final originQuery = await FirebaseFirestore.instance
-                .collection('locations')
-                .where('name', isEqualTo: tripData['origin'])
-                .limit(1)
-                .get();
-            if (originQuery.docs.isNotEmpty) {
-              final originData = originQuery.docs.first.data();
-              originLatLng = LatLng(
-                (originData['latitude'] as num).toDouble(),
-                (originData['longitude'] as num).toDouble(),
-              );
-            }
-          } catch (e) {
-            print('[ERROR] Failed to fetch origin coordinates for ${tripData['origin']}: $e');
-          }
-
-          // Fetch destination coordinates
-          LatLng? destinationLatLng;
-          try {
-            final destinationQuery = await FirebaseFirestore.instance
-                .collection('locations')
-                .where('name', isEqualTo: tripData['destination'])
-                .limit(1)
-                .get();
-            if (destinationQuery.docs.isNotEmpty) {
-              final destinationData = destinationQuery.docs.first.data();
-              destinationLatLng = LatLng(
-                (destinationData['latitude'] as num).toDouble(),
-                (destinationData['longitude'] as num).toDouble(),
-              );
-            }
-          } catch (e) {
-            print('[ERROR] Failed to fetch destination coordinates for ${tripData['destination']}: $e');
-          }
-
-          final departureTimestamp = tripData['departureTime'];
-          DateTime? departureTime;
-          if (departureTimestamp is Timestamp) {
-            departureTime = departureTimestamp.toDate();
-          }
-
-          matchedTrips.add({
-            'tripId': doc.id,
-            'status': map['status'],
-            'origin': tripData['origin'],
-            'destination': tripData['destination'],
-            'departureTime': departureTime,
-            'creatorName': creatorName,
-            'car': carData,
-            'originLatLng': originLatLng,
-            'destinationLatLng': destinationLatLng,
-          });
+        } catch (e) {
+          print('[ERROR] Failed to fetch creatorName for $creatorId: $e at ${DateTime.now()}');
         }
+
+        Map<String, dynamic>? carData;
+        try {
+          final carQuery = await FirebaseFirestore.instance
+              .collection('cars')
+              .where('ownerId', isEqualTo: creatorId)
+              .limit(1)
+              .get();
+          if (carQuery.docs.isNotEmpty) {
+            carData = carQuery.docs.first.data();
+          }
+        } catch (e) {
+          print('[ERROR] Failed to fetch car data for $creatorId: $e at ${DateTime.now()}');
+        }
+
+        LatLng? originLatLng;
+        try {
+          final originQuery = await FirebaseFirestore.instance
+              .collection('locations')
+              .where('name', isEqualTo: tripData['origin'])
+              .limit(1)
+              .get();
+          if (originQuery.docs.isNotEmpty) {
+            final originData = originQuery.docs.first.data();
+            originLatLng = LatLng(
+              (originData['latitude'] as num).toDouble(),
+              (originData['longitude'] as num).toDouble(),
+            );
+          }
+        } catch (e) {
+          print('[ERROR] Failed to fetch origin coordinates for ${tripData['origin']}: $e at ${DateTime.now()}');
+        }
+
+        LatLng? destinationLatLng;
+        try {
+          final destinationQuery = await FirebaseFirestore.instance
+              .collection('locations')
+              .where('name', isEqualTo: tripData['destination'])
+              .limit(1)
+              .get();
+          if (destinationQuery.docs.isNotEmpty) {
+            final destinationData = destinationQuery.docs.first.data();
+            destinationLatLng = LatLng(
+              (destinationData['latitude'] as num).toDouble(),
+              (destinationData['longitude'] as num).toDouble(),
+            );
+          }
+        } catch (e) {
+          print('[ERROR] Failed to fetch destination coordinates for ${tripData['destination']}: $e at ${DateTime.now()}');
+        }
+
+        final departureTimestamp = tripData['departureTime'];
+        DateTime? departureTime;
+        if (departureTimestamp is Timestamp) {
+          departureTime = departureTimestamp.toDate();
+        }
+
+        matchedTrip = {
+          'tripId': doc.id,
+          'status': map['status'],
+          'origin': tripData['origin'],
+          'destination': tripData['destination'],
+          'departureTime': departureTime,
+          'creatorName': creatorName,
+          'car': carData,
+          'originLatLng': originLatLng,
+          'destinationLatLng': destinationLatLng,
+        };
+        break;
       }
     }
 
-    print('[DEBUG] Total matched trips for user: ${matchedTrips.length}');
-    return matchedTrips;
+    return matchedTrip != null ? [matchedTrip] : [];
   }
 
   void _updateMapMarkers() {
@@ -201,17 +274,12 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
       _markers = markers;
     });
 
-    // Center the map on the origin or a midpoint if both coordinates are available
     if (_mapController != null && _markers.isNotEmpty) {
       final bounds = _computeBounds();
       if (bounds != null) {
-        _mapController!.animateCamera(
-          CameraUpdate.newLatLngBounds(bounds, 50.0), // 50.0 is padding
-        );
+        _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50.0));
       } else if (_userTrips.isNotEmpty && _userTrips[0]['originLatLng'] != null) {
-        _mapController!.animateCamera(
-          CameraUpdate.newLatLng(_userTrips[0]['originLatLng'] as LatLng),
-        );
+        _mapController!.animateCamera(CameraUpdate.newLatLng(_userTrips[0]['originLatLng'] as LatLng));
       }
     }
   }
@@ -244,7 +312,6 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
           top: true,
           child: Column(
             children: [
-              // Header
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
                 color: FlutterFlowTheme.of(context).secondaryBackground,
@@ -291,17 +358,16 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                         child: Text(
                           'Starting The Ride',
                           style: FlutterFlowTheme.of(context).headlineSmall.override(
-                            fontFamily: 'Inter Tight',
-                            fontSize: 20.0,
-                            letterSpacing: 0.0,
-                          ),
+                                fontFamily: 'Inter Tight',
+                                fontSize: 20.0,
+                                letterSpacing: 0.0,
+                              ),
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              // Main Content
               Expanded(
                 child: SingleChildScrollView(
                   child: Container(
@@ -319,7 +385,6 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                     ),
                     child: Column(
                       children: [
-                        // Google Map
                         SizedBox(
                           height: 400.0,
                           child: isLoading
@@ -328,21 +393,23 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                                   initialCameraPosition: CameraPosition(
                                     target: _userTrips.isNotEmpty && _userTrips[0]['originLatLng'] != null
                                         ? _userTrips[0]['originLatLng'] as LatLng
-                                        : const LatLng(0.0, 0.0), // Fallback
+                                        : const LatLng(3.1390, 101.6869),
                                     zoom: 14.0,
                                   ),
                                   markers: _markers,
                                   onMapCreated: (GoogleMapController controller) {
                                     _mapController = controller;
-                                    _updateMapMarkers(); // Ensure markers are set after map creation
+                                    _updateMapMarkers();
                                   },
+                                  trafficEnabled: false,
+                                  myLocationEnabled: false,
+                                  compassEnabled: false,
                                 ),
                         ),
                         const Divider(
                           thickness: 2.0,
                           color: Colors.grey,
                         ),
-                        // Driver Info
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
                           child: Row(
@@ -403,7 +470,7 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                                   borderRadius: BorderRadius.circular(24.0),
                                 ),
                                 child: Text(
-                                  'Passenger',
+                                  _userRole == 'driver' ? 'Driver' : 'Passenger',
                                   style: FlutterFlowTheme.of(context).bodyMedium.override(
                                         fontFamily: 'Inter',
                                         color: FlutterFlowTheme.of(context).primaryBackground,
@@ -416,7 +483,6 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                             ],
                           ),
                         ),
-                        // Action Buttons
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
                           child: Row(
@@ -453,81 +519,34 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                             ],
                           ),
                         ),
-                        // Cancel Button
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
-                          child: FFButtonWidget(
-                            onPressed: () async {
-                              try {
-                                await FirebaseFirestore.instance
-                                    .collection('trips')
-                                    .doc(widget.rideId)
-                                    .update({
-                                  'status': 'finished',
-                                });
-
-                                final user = FirebaseAuth.instance.currentUser;
-                                if (user == null) {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      title: const Text('Error'),
-                                      content: const Text('User not authenticated.'),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.of(context).pop(),
-                                          child: const Text('OK'),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                  return;
-                                }
-
-                                final userDoc = await FirebaseFirestore.instance
-                                    .collection('users')
-                                    .doc(user.uid)
-                                    .get();
-
-                                if (!userDoc.exists) {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      title: const Text('Error'),
-                                      content: const Text('User data not found.'),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.of(context).pop(),
-                                          child: const Text('OK'),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                  return;
-                                }
-
-                                final userRole = userDoc.data()!['userRole']?.toString().toLowerCase();
-
-                                if (userRole == 'driver') {
+                        if (_userRole == 'driver')
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+                            child: FFButtonWidget(
+                              onPressed: () async {
+                                try {
+                                  await FirebaseFirestore.instance
+                                      .collection('trips')
+                                      .doc(widget.rideId)
+                                      .update({
+                                    'status': 'finished',
+                                  });
                                   context.pushNamed(
                                     CreateRideCompleteWidget.routeName,
                                     queryParameters: {
                                       'rideId': widget.rideId,
                                     },
-                                  );
-                                } else if (userRole == 'passenger') {
-                                  context.pushNamed(
-                                    SearchRideCompleteWidget.routeName,
-                                    queryParameters: {
-                                      'rideId': widget.rideId,
-                                    },
-                                  );
-                                } else {
+                                  ).then((_) {
+                                    print('[DEBUG] Successfully navigated to CreateRideCompleteWidget with rideId: ${widget.rideId} at ${DateTime.now()}');
+                                  }).catchError((error) {
+                                    print('[ERROR] Navigation failed: $error at ${DateTime.now()}');
+                                  });
+                                } catch (e) {
                                   showDialog(
                                     context: context,
                                     builder: (context) => AlertDialog(
                                       title: const Text('Error'),
-                                      content: const Text('Invalid user role.'),
+                                      content: Text('Failed to update trip status: $e'),
                                       actions: [
                                         TextButton(
                                           onPressed: () => Navigator.of(context).pop(),
@@ -537,36 +556,21 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                                     ),
                                   );
                                 }
-                              } catch (e) {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: const Text('Error'),
-                                    content: Text('Failed to fetch user role: $e'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.of(context).pop(),
-                                        child: const Text('OK'),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }
-                            },
-                            text: 'Complete',
-                            options: FFButtonOptions(
-                              width: double.infinity,
-                              height: 40.0,
-                              color: const Color.fromARGB(255, 49, 94, 255),
-                              textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                                    fontFamily: 'Inter Tight',
-                                    color: FlutterFlowTheme.of(context).primaryBackground,
-                                    letterSpacing: 0.0,
-                                  ),
-                              borderRadius: BorderRadius.circular(8.0),
+                              },
+                              text: 'Complete',
+                              options: FFButtonOptions(
+                                width: double.infinity,
+                                height: 40.0,
+                                color: const Color.fromARGB(255, 49, 94, 255),
+                                textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                                      fontFamily: 'Inter Tight',
+                                      color: FlutterFlowTheme.of(context).primaryBackground,
+                                      letterSpacing: 0.0,
+                                    ),
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
                             ),
                           ),
-                        ),
                       ],
                     ),
                   ),

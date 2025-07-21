@@ -1,3 +1,5 @@
+import 'package:ride_link_carpooling/providers/user_provider.dart';
+
 import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -36,6 +38,12 @@ class _AdminDriverVerificationWidgetState
 
     _model.textController ??= TextEditingController();
     _model.textFieldFocusNode ??= FocusNode();
+
+    loadUsers();
+  }
+
+  Future<void> loadUsers() async {
+    await context.read<UserProvider>().loadUsers();
   }
 
   @override

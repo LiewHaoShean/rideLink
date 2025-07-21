@@ -17,4 +17,24 @@ class TripService {
       return Trip.fromJson(data);
     }).toList();
   }
+
+  Future<Trip?> readTripByTripId(String tripId) async {
+    try {
+      final docSnapshot = await FirebaseFirestore.instance
+          .collection('trips')
+          .doc(tripId)
+          .get();
+
+      if (!docSnapshot.exists) {
+        return null;
+      }
+
+      final data = docSnapshot.data()!;
+      data['tripid'] = docSnapshot.id;
+      return Trip.fromJson(data);
+    } catch (e) {
+      print('Error reading trip by ID: $e');
+      return null;
+    }
+  }
 }

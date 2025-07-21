@@ -40,10 +40,10 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
   }
 
   Future<void> _fetchUserVehicle() async {
-    print("FETCH VEHICLE START");
+    // print("FETCH VEHICLE START");
     final vehicleProvider = context.read<VehicleProvider>();
     final car = await vehicleProvider.getUserVehicle(widget.userId);
-    print("FETCH VEHICLE END");
+    // print("FETCH VEHICLE END");
     setState(() {
       _userVehicle = car;
     });

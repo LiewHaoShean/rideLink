@@ -15,6 +15,7 @@ import 'admin_ride_management_model.dart';
 export 'admin_ride_management_model.dart';
 import 'package:ride_link_carpooling/services/user_service.dart';
 import 'package:ride_link_carpooling/models/user.dart';
+import 'package:intl/intl.dart';
 
 class AdminRideManagementWidget extends StatefulWidget {
   const AdminRideManagementWidget({super.key});
@@ -310,6 +311,54 @@ class _AdminRideManagementWidgetState extends State<AdminRideManagementWidget> {
                 padding: EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 360.0,
+                      height: 40.0,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          safeSetState(() {
+                            _model.dropDownValue = null;
+                            _model.dropDownValueController?.reset();
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: FlutterFlowTheme.of(context).error,
+                          foregroundColor: Colors.white,
+                          minimumSize: Size(120.0, 40.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          elevation: 2.0,
+                        ),
+                        child: Text(
+                          'Clear',
+                          style:
+                              FlutterFlowTheme.of(context).titleSmall.override(
+                                    font: GoogleFonts.inter(
+                                      fontWeight: FontWeight.w500,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .titleSmall
+                                          .fontStyle,
+                                    ),
+                                    letterSpacing: 0.0,
+                                    fontWeight: FontWeight.w500,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .titleSmall
+                                        .fontStyle,
+                                    color: Colors.white,
+                                  ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
                   children: [
                     Expanded(
                       child: Container(
@@ -332,9 +381,9 @@ class _AdminRideManagementWidgetState extends State<AdminRideManagementWidget> {
                                 if (tripProvider.error != null) {
                                   return Center(
                                     child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
                                         Text(
                                           'Error: ${tripProvider.error}',
                                           style: FlutterFlowTheme.of(context)
@@ -360,41 +409,67 @@ class _AdminRideManagementWidgetState extends State<AdminRideManagementWidget> {
                                 }
 
                                 List filteredTrips = tripProvider.trips;
-                                if (_model.textController.text.isEmpty) {
+                                if (_model.textController.text.isNotEmpty) {
                                   filteredTrips = tripProvider
                                       .searchTrips(_model.textController.text);
+                                  print(_model.textController.text);
+                                  print(filteredTrips);
+                                }
+
+                                if (_model.dropDownValue != null &&
+                                    _model.dropDownValue!.isNotEmpty) {
+                                  filteredTrips =
+                                      tripProvider.searchTripsByStatus(
+                                          _model.dropDownValue.toString());
                                 }
 
                                 return SingleChildScrollView(
                                   child: Column(
-                                                mainAxisSize: MainAxisSize.max,
-                                                children: [
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: [
                                       ...filteredTrips.map((trip) => Padding(
-                                            padding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 5.0, 0.0, 5.0),
-                                                    child: Container(
-                                              width: double.infinity,
-                                              height: 80.0,
-                                                      decoration: BoxDecoration(
+                                          padding:
+                                              EdgeInsetsDirectional.fromSTEB(
+                                                  0.0, 5.0, 0.0, 5.0),
+                                          child: Container(
+                                            width: double.infinity,
+                                            height: 80.0,
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .secondaryBackground,
+                                              borderRadius:
+                                                  BorderRadius.circular(8.0),
+                                              border: Border.all(
                                                 color:
                                                     FlutterFlowTheme.of(context)
-                                                            .secondaryBackground,
-                                                borderRadius:
-                                                    BorderRadius.circular(8.0),
-                                                border: Border.all(
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .primaryBackground,
-                                                  width: 1.0,
-                                                ),
-                                                      ),
-                                                      child: Padding(
+                                                        .primaryBackground,
+                                                width: 1.0,
+                                              ),
+                                            ),
+                                            child: InkWell(
+                                              splashColor: Colors.transparent,
+                                              focusColor: Colors.transparent,
+                                              hoverColor: Colors.transparent,
+                                              highlightColor:
+                                                  Colors.transparent,
+                                              onTap: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        AdminRideDetailsWidget(
+                                                            tripId:
+                                                                trip.tripid),
+                                                  ),
+                                                );
+                                              },
+                                              child: Padding(
                                                 padding: EdgeInsetsDirectional
-                                                                .fromSTEB(
+                                                    .fromSTEB(
                                                         16.0, 12.0, 16.0, 12.0),
-                                                        child: Row(
-                                                          children: [
+                                                child: Row(
+                                                  children: [
                                                     CircleAvatar(
                                                       radius: 25.0,
                                                       backgroundColor:
@@ -403,13 +478,13 @@ class _AdminRideManagementWidgetState extends State<AdminRideManagementWidget> {
                                                         Icons.drive_eta,
                                                         color:
                                                             FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .primaryText,
-                                                                    size: 30.0,
+                                                                    context)
+                                                                .primaryText,
+                                                        size: 30.0,
                                                       ),
                                                     ),
                                                     SizedBox(width: 16.0),
-                                                  Expanded(
+                                                    Expanded(
                                                       child: Column(
                                                         crossAxisAlignment:
                                                             CrossAxisAlignment
@@ -417,26 +492,15 @@ class _AdminRideManagementWidgetState extends State<AdminRideManagementWidget> {
                                                         mainAxisAlignment:
                                                             MainAxisAlignment
                                                                 .center,
-                                                          children: [
-                                                            Text(
-                                                            'Sample Ride',
-                                                              style: FlutterFlowTheme
-                                                                      .of(context)
-                                                                  .titleMedium
-                                                                  .override(
-                                                                    font: GoogleFonts
-                                                                        .interTight(
-                                                                      fontWeight: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .titleMedium
-                                                                          .fontWeight,
-                                                                      fontStyle: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .titleMedium
-                                                                          .fontStyle,
-                                                                    ),
-                                                                    letterSpacing:
-                                                                        0.0,
+                                                        children: [
+                                                          Text(
+                                                            "${trip.origin} To ${trip.destination}",
+                                                            style: FlutterFlowTheme
+                                                                    .of(context)
+                                                                .titleMedium
+                                                                .override(
+                                                                  font: GoogleFonts
+                                                                      .interTight(
                                                                     fontWeight: FlutterFlowTheme.of(
                                                                             context)
                                                                         .titleMedium
@@ -446,31 +510,31 @@ class _AdminRideManagementWidgetState extends State<AdminRideManagementWidget> {
                                                                         .titleMedium
                                                                         .fontStyle,
                                                                   ),
-                                                            ),
+                                                                  letterSpacing:
+                                                                      0.0,
+                                                                  fontWeight: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .titleMedium
+                                                                      .fontWeight,
+                                                                  fontStyle: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .titleMedium
+                                                                      .fontStyle,
+                                                                ),
+                                                          ),
                                                           SizedBox(height: 4.0),
-                                                            Text(
-                                                            'Ride management content will go here',
-                                                              style: FlutterFlowTheme
-                                                                      .of(context)
-                                                                  .bodyMedium
-                                                                  .override(
+                                                          Text(
+                                                            DateFormat(
+                                                                    'd MMMM y \'at\' ha')
+                                                                .format(trip
+                                                                    .departureTime),
+                                                            style: FlutterFlowTheme
+                                                                    .of(context)
+                                                                .bodyMedium
+                                                                .override(
                                                                   font:
                                                                       GoogleFonts
-                                                                        .inter(
-                                                                      fontWeight: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .bodyMedium
-                                                                          .fontWeight,
-                                                                      fontStyle: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .bodyMedium
-                                                                          .fontStyle,
-                                                                    ),
-                                                                    color: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .secondaryText,
-                                                                    letterSpacing:
-                                                                        0.0,
+                                                                          .inter(
                                                                     fontWeight: FlutterFlowTheme.of(
                                                                             context)
                                                                         .bodyMedium
@@ -480,23 +544,37 @@ class _AdminRideManagementWidgetState extends State<AdminRideManagementWidget> {
                                                                         .bodyMedium
                                                                         .fontStyle,
                                                                   ),
-                                                            ),
-                                                          ],
-                                                        ),
+                                                                  color: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .secondaryText,
+                                                                  letterSpacing:
+                                                                      0.0,
+                                                                  fontWeight: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .bodyMedium
+                                                                      .fontWeight,
+                                                                  fontStyle: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .bodyMedium
+                                                                      .fontStyle,
+                                                                ),
+                                                          ),
+                                                        ],
+                                                      ),
                                                     ),
-                                                                Icon(
+                                                    Icon(
                                                       Icons.arrow_forward_ios,
                                                       color:
                                                           FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .secondaryText,
+                                                                  context)
+                                                              .secondaryText,
                                                       size: 16.0,
                                                     ),
                                                   ],
                                                 ),
                                               ),
                                             ),
-                                          ))
+                                          ))),
                                     ],
                                   ),
                                 );

@@ -302,7 +302,9 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: AdminRideDetailsWidget.routeName,
           path: AdminRideDetailsWidget.routePath,
-          builder: (context, params) => AdminRideDetailsWidget(),
+          builder: (context, params) => AdminRideDetailsWidget(
+            tripId: params.getParam('rideId', ParamType.String) ?? '',
+          ),
         ),
         FFRoute(
           name: AdminDriverVerificationWidget.routeName,

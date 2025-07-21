@@ -26,6 +26,7 @@ class PassengerStatus {
 
 class Trip {
   final String rideId;
+  final String? tripid; // Document ID from Firestore
   final String creatorId;
   final String origin;
   final String destination;
@@ -37,6 +38,7 @@ class Trip {
 
   Trip({
     required this.rideId, 
+    this.tripid,
     required this.creatorId,
     required this.origin,
     required this.destination,
@@ -64,6 +66,7 @@ class Trip {
 
     return Trip(
       rideId: json['rideId'] ?? '',
+      tripid: json['tripid'],
       creatorId: json['creatorId'] ?? '',
       origin: origin,
       destination: destination,

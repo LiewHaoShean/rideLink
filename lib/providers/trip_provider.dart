@@ -21,6 +21,7 @@ class TripProvider with ChangeNotifier {
     notifyListeners();
     try {
       _trips = await _tripService.readAllTrips();
+      print(trips);
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -36,5 +37,41 @@ class TripProvider with ChangeNotifier {
       return trip.origin.toLowerCase().contains(query.toLowerCase()) ||
           trip.destination.toLowerCase().contains(query.toLowerCase());
     }).toList();
+  }
+
+  List<Trip> searchTripsByStatus(String status) {
+    if (status.isEmpty) return _trips;
+
+    return _trips.where((trip) {
+      return trip.status.toLowerCase() == status.toLowerCase();
+    }).toList();
+  }
+
+  // Future<Trip?> loadTripByTripId(String tripId) async {
+  //   _isLoading = true;
+  //   _error = null;
+  //   notifyListeners();
+
+  //   try {
+  //     final trip = await _tripService.readTripByTripId(tripId);
+  //     return trip;
+  //   } catch (e) {
+  //     _error = e.toString();
+  //     return null;
+  //   } finally {
+  //     _isLoading = false;
+  //     notifyListeners();
+  //   }
+  // }
+
+  Trip? loadTripByTripId(String tripId) {
+    try {
+      print(_trips);
+      return _trips.firstWhere((trip) => trip.tripid == tripId);
+    } catch (e) {
+      print("Error:");
+      print(e);
+      return null;
+    }
   }
 }

@@ -37,13 +37,13 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
     super.initState();
     _model = createModel(context, () => AdminUserDetailsModel());
     _fetchUserVehicle();
-    print("HIHIHIHIHIH");
-    print(widget.userId);
   }
 
   Future<void> _fetchUserVehicle() async {
+    print("FETCH VEHICLE START");
     final vehicleProvider = context.read<VehicleProvider>();
     final car = await vehicleProvider.getUserVehicle(widget.userId);
+    print("FETCH VEHICLE END");
     setState(() {
       _userVehicle = car;
     });
@@ -60,6 +60,7 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
 
   @override
   Widget build(BuildContext context) {
+    print("AdminUserDetailsWidget build called");
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -714,7 +715,7 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
                                                                               mainAxisSize: MainAxisSize.max,
                                                                               children: [
                                                                                 Text(
-                                                                                  "Gender",
+                                                                                  user?.gender ?? "Gender Unverified",
                                                                                   style: FlutterFlowTheme.of(context).titleLarge.override(
                                                                                         font: GoogleFonts.interTight(
                                                                                           fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
@@ -936,7 +937,7 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
                                                                               mainAxisSize: MainAxisSize.max,
                                                                               children: [
                                                                                 Text(
-                                                                                  "phoneNumber",
+                                                                                  user?.phone ?? "No phone number",
                                                                                   style: FlutterFlowTheme.of(context).titleLarge.override(
                                                                                         font: GoogleFonts.interTight(
                                                                                           fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
@@ -998,7 +999,7 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
                                                                     .max,
                                                             children: [
                                                               Text(
-                                                                'Regitered Vehicle',
+                                                                'Registered Vehicle',
                                                                 style: FlutterFlowTheme.of(
                                                                         context)
                                                                     .headlineSmall
@@ -1226,7 +1227,7 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
                                                                               mainAxisSize: MainAxisSize.max,
                                                                               children: [
                                                                                 Text(
-                                                                                  "VehicleModel",
+                                                                                  _userVehicle?.model ?? "No Model",
                                                                                   style: FlutterFlowTheme.of(context).titleLarge.override(
                                                                                         font: GoogleFonts.interTight(
                                                                                           fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
@@ -1337,7 +1338,7 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
                                                                               mainAxisSize: MainAxisSize.max,
                                                                               children: [
                                                                                 Text(
-                                                                                  "vehicle year",
+                                                                                  _userVehicle?.year.toString() ?? "No year",
                                                                                   style: FlutterFlowTheme.of(context).titleLarge.override(
                                                                                         font: GoogleFonts.interTight(
                                                                                           fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
@@ -1448,7 +1449,7 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
                                                                               mainAxisSize: MainAxisSize.max,
                                                                               children: [
                                                                                 Text(
-                                                                                  "vehicle colour",
+                                                                                  _userVehicle?.color ?? "No color",
                                                                                   style: FlutterFlowTheme.of(context).titleLarge.override(
                                                                                         font: GoogleFonts.interTight(
                                                                                           fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
@@ -1559,7 +1560,7 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
                                                                               mainAxisSize: MainAxisSize.max,
                                                                               children: [
                                                                                 Text(
-                                                                                  "PlateNumber",
+                                                                                  _userVehicle?.plateNumber ?? "No Plate Number",
                                                                                   style: FlutterFlowTheme.of(context).titleLarge.override(
                                                                                         font: GoogleFonts.interTight(
                                                                                           fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
@@ -1670,7 +1671,7 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
                                                                               mainAxisSize: MainAxisSize.max,
                                                                               children: [
                                                                                 Text(
-                                                                                  "VehicleVIN",
+                                                                                  _userVehicle?.vin ?? "No VIN",
                                                                                   style: FlutterFlowTheme.of(context).titleLarge.override(
                                                                                         font: GoogleFonts.interTight(
                                                                                           fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,

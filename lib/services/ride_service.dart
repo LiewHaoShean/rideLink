@@ -27,14 +27,11 @@ class RideService {
       'created_at': FieldValue.serverTimestamp(),
     };
 
-    return await FirebaseFirestore.instance
-        .collection('trips')
-        .add(rideData);
+    return await FirebaseFirestore.instance.collection('trips').add(rideData);
   }
 
   Future<Map<String, dynamic>> readCreatorTempRide(String rideId) async {
-    final docRef =
-        FirebaseFirestore.instance.collection('trips').doc(rideId);
+    final docRef = FirebaseFirestore.instance.collection('trips').doc(rideId);
     final docSnapshot = await docRef.get();
 
     if (!docSnapshot.exists) {
@@ -63,7 +60,8 @@ class RideService {
         .collection('trips')
         .where('origin', isEqualTo: from)
         .where('destination', isEqualTo: to)
-        .where('departureTime', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+        .where('departureTime',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
         .where('availableSeats', isGreaterThanOrEqualTo: seatsNeeded)
         .where('status', isEqualTo: 'scheduled')
         .get();

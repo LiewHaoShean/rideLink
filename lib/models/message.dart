@@ -4,31 +4,30 @@ class Message {
   final String messageId;
   final String senderId;
   final String receiverId;
-  final String? tripId;
   final String text;
   final DateTime sentAt;
-  final bool read;
+  final bool isRead;
+  final String chatId;
 
   Message({
     required this.messageId,
     required this.senderId,
     required this.receiverId,
-    this.tripId,
     required this.text,
     required this.sentAt,
-    required this.read,
+    required this.isRead,
+    required this.chatId,
   });
 
   factory Message.fromJson(Map<String, dynamic> json) {
     return Message(
-      messageId: json['messageId'],
-      senderId: json['senderId'],
-      receiverId: json['receiverId'],
-      tripId: json['tripId'],
-      text: json['text'],
-      sentAt: (json['sentAt'] as Timestamp).toDate(),
-      read: json['read'] ?? false,
-    );
+        messageId: json['messageId'],
+        senderId: json['senderId'],
+        receiverId: json['receiverId'],
+        text: json['text'],
+        sentAt: (json['sentAt'] as Timestamp).toDate(),
+        isRead: json['read'] ?? false,
+        chatId: json['chatId']);
   }
 
   Map<String, dynamic> toJson() {
@@ -36,10 +35,10 @@ class Message {
       'messageId': messageId,
       'senderId': senderId,
       'receiverId': receiverId,
-      'tripId': tripId,
       'text': text,
       'sentAt': sentAt,
-      'read': read,
+      'read': isRead,
+      'chatId': chatId
     };
   }
 }

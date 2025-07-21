@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:ride_link_carpooling/index.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -126,16 +124,9 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
           TextButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
-              // context.pushNamed(
-              //   SearchRideCompleteWidget.routeName,
-              //   queryParameters: {'rideId': widget.rideId},
-              // )
-              
               context.pushNamed(
-                CreateRideCompleteWidget.routeName,
-                queryParameters: {
-                  'rideId': widget.rideId,
-                },
+                SearchRideCompleteWidget.routeName,
+                queryParameters: {'rideId': widget.rideId},
               ).then((_) {
                 print('[DEBUG] Successfully navigated to SearchRideCompleteWidget with rideId: ${widget.rideId} at ${DateTime.now()}');
               }).catchError((error) {
@@ -430,7 +421,7 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                                 width: 55.0,
                                 height: 55.0,
                                 decoration: BoxDecoration(
-                                  color: FlutterFlowTheme.of(context).secondaryText,
+                                  color: FlutterFlowTheme.of(context).secondaryBackground,
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(
@@ -481,7 +472,7 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                                   borderRadius: BorderRadius.circular(24.0),
                                 ),
                                 child: Text(
-                                  'Passenger',
+                                  _userRole == 'driver' ? 'Driver' : 'Passenger',
                                   style: FlutterFlowTheme.of(context).bodyMedium.override(
                                         fontFamily: 'Inter',
                                         color: FlutterFlowTheme.of(context).primaryBackground,
@@ -542,31 +533,16 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                                       .update({
                                     'status': 'finished',
                                   });
-
-                                  final user = FirebaseAuth.instance.currentUser;
-                                  if (user == null) {
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        title: const Text('Error'),
-                                        content: const Text('User not authenticated.'),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () => Navigator.of(context).pop(),
-                                            child: const Text('OK'),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                    return;
-                                  }
-
                                   context.pushNamed(
                                     CreateRideCompleteWidget.routeName,
                                     queryParameters: {
                                       'rideId': widget.rideId,
                                     },
-                                  );
+                                  ).then((_) {
+                                    print('[DEBUG] Successfully navigated to CreateRideCompleteWidget with rideId: ${widget.rideId} at ${DateTime.now()}');
+                                  }).catchError((error) {
+                                    print('[ERROR] Navigation failed: $error at ${DateTime.now()}');
+                                  });
                                 } catch (e) {
                                   showDialog(
                                     context: context,

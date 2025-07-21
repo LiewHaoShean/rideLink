@@ -38,6 +38,7 @@ class FirestoreService {
         .where('ownerId', isEqualTo: ownerId)
         .get();
 
+    print("Firestore returned ${snapshot.docs.length} docs");
     return snapshot.docs
         .map((doc) => CarInformation.fromJson(doc.data()))
         .toList();

@@ -152,7 +152,7 @@ class _NavBarPageState extends State<NavBarPage> {
   void _startTripStatusListener(User user) {
     print('[DEBUG] Fetching user role for UID: ${user.uid} at ${DateTime.now()}');
     FirebaseFirestore.instance.collection('users').doc(user.uid).get().then((userDoc) {
-      if (!userDoc.exists && userDoc.data()?['userRole']?.toString().toLowerCase() != 'admin') {
+      if (!userDoc.exists || userDoc.data()?['userRole']?.toString().toLowerCase() != 'passenger') {
         print('[DEBUG] User is not a passenger or doc does not exist: ${userDoc.data()?.toString() ?? "No data"} at ${DateTime.now()}');
         return;
       }
@@ -225,7 +225,7 @@ class _NavBarPageState extends State<NavBarPage> {
     final tabs = {
       'searchRideHome': const SearchRideHomeWidget(),
       'createRideHome': const CreateRideHomeWidget(),
-      'messageMain': const MessageMainWidget(),
+      'messageMain': const MessageMainWidget(senderId: '',),
       'dashboardHome': const DashboardHomeWidget(),
       'searchRidePendingRide': const SearchRidePendingRideWidget(),
     };

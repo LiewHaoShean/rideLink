@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:ride_link_carpooling/index.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -124,9 +125,15 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
           TextButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
+              // context.pushNamed(
+              //   SearchRideCompleteWidget.routeName,
+              //   queryParameters: {'rideId': widget.rideId},
+              // )
               context.pushNamed(
-                SearchRideCompleteWidget.routeName,
-                queryParameters: {'rideId': widget.rideId},
+                CreateRideCompleteWidget.routeName,
+                queryParameters: {
+                  'rideId': widget.rideId,
+                },
               ).then((_) {
                 print('[DEBUG] Successfully navigated to SearchRideCompleteWidget with rideId: ${widget.rideId} at ${DateTime.now()}');
               }).catchError((error) {

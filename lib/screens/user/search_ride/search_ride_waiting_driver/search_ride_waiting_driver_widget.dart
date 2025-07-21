@@ -64,7 +64,6 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
       return;
     }
 
-    // Fetch user role
     try {
       final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
       if (userDoc.exists) {
@@ -77,7 +76,6 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
       print('[ERROR] Failed to fetch user role: $e at ${DateTime.now()}');
     }
 
-    // Fetch initial trip data
     final trips = await _fetchUserTrips();
     setState(() {
       _userTrips = trips;
@@ -85,7 +83,6 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
       _updateMapMarkers();
     });
 
-    // Setup listener for passengers
     if (_userRole == 'passenger') {
       _setupTripStatusListener();
     }
@@ -125,15 +122,9 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
           TextButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
-              // context.pushNamed(
-              //   SearchRideCompleteWidget.routeName,
-              //   queryParameters: {'rideId': widget.rideId},
-              // )
               context.pushNamed(
-                CreateRideCompleteWidget.routeName,
-                queryParameters: {
-                  'rideId': widget.rideId,
-                },
+                SearchRideCompleteWidget.routeName,
+                queryParameters: {'rideId': widget.rideId},
               ).then((_) {
                 print('[DEBUG] Successfully navigated to SearchRideCompleteWidget with rideId: ${widget.rideId} at ${DateTime.now()}');
               }).catchError((error) {
@@ -428,7 +419,7 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                                 width: 55.0,
                                 height: 55.0,
                                 decoration: BoxDecoration(
-                                  color: FlutterFlowTheme.of(context).secondaryBackground,
+                                  color: FlutterFlowTheme.of(context).secondaryText,
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(

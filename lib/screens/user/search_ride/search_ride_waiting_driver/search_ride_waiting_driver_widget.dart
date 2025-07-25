@@ -80,6 +80,7 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
     setState(() {
       _userTrips = trips;
       isLoading = false;
+      print('[DEBUG] User trips loaded: ${trips.length} at ${DateTime.now()}');
       _updateMapMarkers();
     });
 
@@ -272,6 +273,7 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
     }
     setState(() {
       _markers = markers;
+      print('[DEBUG] Map markers updated: ${_markers.length} at ${DateTime.now()}');
     });
 
     if (_mapController != null && _markers.isNotEmpty) {
@@ -299,6 +301,20 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
       origin.longitude > destination.longitude ? origin.longitude : destination.longitude,
     );
     return LatLngBounds(southwest: southWest, northeast: northEast);
+  }
+
+  double _calculateMapHeight(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    const headerHeight = 60.0; // Header (padding: 10.0 vertical, button/icon: ~40.0)
+    const contentBelowMapPassenger = 157.0; // Divider (2.0) + Driver Info (75.0) + Action Buttons (60.0) + Bottom Padding (20.0)
+    const contentBelowMapDriver = 217.0; // Passenger content (157.0) + Complete Button (60.0)
+    const safeAreaPadding = 20.0; // Extra padding for safe area and scroll
+
+    final contentBelowMap = _userRole == 'driver' ? contentBelowMapDriver : contentBelowMapPassenger;
+    final availableHeight = screenHeight - headerHeight - contentBelowMap - safeAreaPadding;
+
+    // Ensure minimum height for map and cap at reasonable maximum
+    return availableHeight.clamp(300.0, 600.0);
   }
 
   @override
@@ -368,9 +384,10 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                   ],
                 ),
               ),
-              Expanded(
+              Flexible(
                 child: SingleChildScrollView(
                   child: Container(
+                    constraints: const BoxConstraints(minHeight: 300.0),
                     padding: const EdgeInsets.only(top: 20.0),
                     decoration: BoxDecoration(
                       color: FlutterFlowTheme.of(context).secondaryBackground,
@@ -386,7 +403,7 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                     child: Column(
                       children: [
                         SizedBox(
-                          height: 400.0,
+                          height: _calculateMapHeight(context),
                           child: isLoading
                               ? const Center(child: CircularProgressIndicator())
                               : GoogleMap(
@@ -459,7 +476,7 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                                               ),
                                             ],
                                           )
-                                        : const Text('Loading...'),
+                                        : const Text('No trip data available'),
                                   ],
                                 ),
                               ),
@@ -571,6 +588,7 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                               ),
                             ),
                           ),
+                        const SizedBox(height: 20.0),
                       ],
                     ),
                   ),

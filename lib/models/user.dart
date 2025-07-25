@@ -6,6 +6,8 @@ class UserModel {
   final String nic;
   final String? gender;
   final bool isEmailVerified;
+  int credit;
+  int profit;
   final String? phone;
 
   UserModel({
@@ -16,6 +18,8 @@ class UserModel {
     required this.nic,
     this.phone,
     this.gender,
+    this.credit = 0,
+    this.profit = 0,
     this.isEmailVerified = false,
   });
 
@@ -28,6 +32,8 @@ class UserModel {
       nic: json['nic'],
       phone: json['phone'],
       gender: json['gender'],
+      credit: json['credit'] ?? 0,
+      profit: json['profit'] ?? 0,
       isEmailVerified: json['isEmailVerified'] ?? false,
     );
   }
@@ -41,6 +47,8 @@ class UserModel {
       'nic': nic,
       'phone': phone,
       'gender': gender,
+      'credit': credit,
+      'profit': profit,
       'isEmailVerified': isEmailVerified,
     };
   }

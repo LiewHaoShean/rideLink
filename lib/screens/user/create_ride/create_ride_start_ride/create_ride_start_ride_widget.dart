@@ -15,7 +15,8 @@ class CreateRideStartRideWidget extends StatefulWidget {
   static String routePath = '/createRideStartRide';
 
   @override
-  State<CreateRideStartRideWidget> createState() => _CreateRideStartRideWidgetState();
+  State<CreateRideStartRideWidget> createState() =>
+      _CreateRideStartRideWidgetState();
 }
 
 class _CreateRideStartRideWidgetState extends State<CreateRideStartRideWidget> {
@@ -30,7 +31,8 @@ class _CreateRideStartRideWidgetState extends State<CreateRideStartRideWidget> {
   }
 
   Future<void> fetchTrip() async {
-    final tripDoc = FirebaseFirestore.instance.collection('trips').doc(widget.rideId);
+    final tripDoc =
+        FirebaseFirestore.instance.collection('trips').doc(widget.rideId);
     final docSnapshot = await tripDoc.get();
 
     if (docSnapshot.exists) {
@@ -41,7 +43,10 @@ class _CreateRideStartRideWidgetState extends State<CreateRideStartRideWidget> {
       for (var p in passengers) {
         if (p['status'] == 'accepted') {
           final passengerId = p['passengerId'];
-          final userDoc = await FirebaseFirestore.instance.collection('users').doc(passengerId).get();
+          final userDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(passengerId)
+              .get();
           final userData = userDoc.exists ? userDoc.data() : null;
           passengersList.add({
             'passenger': p,
@@ -62,7 +67,7 @@ class _CreateRideStartRideWidgetState extends State<CreateRideStartRideWidget> {
     }
   }
 
- @override
+  @override
   Widget build(BuildContext context) {
     if (isLoading) {
       return const Scaffold(
@@ -112,16 +117,20 @@ class _CreateRideStartRideWidgetState extends State<CreateRideStartRideWidget> {
                       Expanded(
                         child: Row(
                           children: [
-                            const Icon(Icons.person_outline, size: 20, color: Color(0xFF00275C)),
+                            const Icon(Icons.person_outline,
+                                size: 20, color: Color(0xFF00275C)),
                             const SizedBox(width: 6),
                             SizedBox(
                               width: 120,
-                              child: Text(name, overflow: TextOverflow.ellipsis),
+                              child:
+                                  Text(name, overflow: TextOverflow.ellipsis),
                             ),
                             const SizedBox(width: 6),
                             Icon(
                               gender == 'Female' ? Icons.female : Icons.male,
-                              color: gender == 'Female' ? Colors.pink : const Color(0xFF00275C),
+                              color: gender == 'Female'
+                                  ? Colors.pink
+                                  : const Color(0xFF00275C),
                               size: 20,
                             ),
                           ],
@@ -131,12 +140,14 @@ class _CreateRideStartRideWidgetState extends State<CreateRideStartRideWidget> {
                         child: Row(
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.chat, size: 20, color: Color(0xFF00275C)),
+                              icon: const Icon(Icons.chat,
+                                  size: 20, color: Color(0xFF00275C)),
                               onPressed: () {
                                 // Implement chat navigation here
                               },
                             ),
-                            const Icon(Icons.phone, size: 20, color: Color(0xFF00275C)),
+                            const Icon(Icons.phone,
+                                size: 20, color: Color(0xFF00275C)),
                             const SizedBox(width: 6),
                             Text(phone),
                           ],
@@ -146,9 +157,7 @@ class _CreateRideStartRideWidgetState extends State<CreateRideStartRideWidget> {
                   ),
                 );
               }).toList(),
-
               const SizedBox(height: 32),
-
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF00275C),

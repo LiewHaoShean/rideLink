@@ -91,3 +91,7 @@ export 'screens/login/confirm_email/confirm_email_widget.dart'
     show ConfirmEmailWidget;
 export 'screens/user/dashboard/dashboard_profile/dashboard_profile_widget.dart'
     show DashboardProfileWidget;
+export 'screens/user/dashboard/dashboard_top_up/dashboard_top_up_widget.dart'
+    show DashboardTopUpCreditWidget;
+export 'screens/user/dashboard/dashboard_withdraw/dashboard_withdraw_profit_widget.dart'
+    show DashboardWithdrawProfitWidget;

@@ -608,7 +608,7 @@ class _AdminChangePasswordWidgetState extends State<AdminChangePasswordWidget> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    width: 396.1,
+                    width: 370,
                     height: 155.1,
                     decoration: BoxDecoration(
                       color: FlutterFlowTheme.of(context).secondaryBackground,

@@ -5,8 +5,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:ride_link_carpooling/providers/card_provider.dart';
 import 'package:ride_link_carpooling/providers/chat_provider.dart';
 import 'package:ride_link_carpooling/providers/message_provider.dart';
+import 'package:ride_link_carpooling/providers/transaction_provider.dart';
 import 'package:ride_link_carpooling/providers/trip_provider.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import 'flutter_flow/flutter_flow_util.dart';
@@ -36,6 +38,8 @@ void main() async {
         ChangeNotifierProvider(create: (_) => TripProvider()),
         ChangeNotifierProvider(create: (_) => ChatProvider()),
         ChangeNotifierProvider(create: (_) => MessageProvider()),
+        ChangeNotifierProvider(create: (_) => CardProvider()),
+        ChangeNotifierProvider(create: (_) => TransactionProvider())
       ],
       child: const MyApp(),
     ),
@@ -48,7 +52,8 @@ class MyApp extends StatefulWidget {
   @override
   State<MyApp> createState() => _MyAppState();
 
-  static _MyAppState of(BuildContext context) => context.findAncestorStateOfType<_MyAppState>()!;
+  static _MyAppState of(BuildContext context) =>
+      context.findAncestorStateOfType<_MyAppState>()!;
 }
 
 class _MyAppState extends State<MyApp> {
@@ -64,7 +69,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   String getRoute([RouteMatch? routeMatch]) {
-    final RouteMatch lastMatch = routeMatch ?? _router.routerDelegate.currentConfiguration.last;
+    final RouteMatch lastMatch =
+        routeMatch ?? _router.routerDelegate.currentConfiguration.last;
     final RouteMatchList matchList = lastMatch is ImperativeRouteMatch
         ? lastMatch.matches
         : _router.routerDelegate.currentConfiguration;
@@ -72,7 +78,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   List<String> getRouteStack() =>
-      _router.routerDelegate.currentConfiguration.matches.map((e) => getRoute(e)).toList();
+      _router.routerDelegate.currentConfiguration.matches
+          .map((e) => getRoute(e))
+          .toList();
 
   void setThemeMode(ThemeMode mode) => safeSetState(() {
         _themeMode = mode;
@@ -145,12 +153,14 @@ class _NavBarPageState extends State<NavBarPage> {
   void _setupAuthListener() {
     print('[DEBUG] Setting up auth state listener at ${DateTime.now()}');
     _authSubscription = FirebaseAuth.instance.authStateChanges().listen((user) {
-      print('[DEBUG] Auth state changed: ${user?.uid ?? "No user"} at ${DateTime.now()}');
+      print(
+          '[DEBUG] Auth state changed: ${user?.uid ?? "No user"} at ${DateTime.now()}');
       _tripSubscription?.cancel();
       if (user != null) {
         _startTripStatusListener(user);
       } else {
-        print('[DEBUG] No user signed in — skipping trip status listener at ${DateTime.now()}');
+        print(
+            '[DEBUG] No user signed in — skipping trip status listener at ${DateTime.now()}');
       }
     }, onError: (error) {
       print('[ERROR] Auth state listener error: $error at ${DateTime.now()}');
@@ -158,14 +168,23 @@ class _NavBarPageState extends State<NavBarPage> {
   }
 
   void _startTripStatusListener(User user) {
-    print('[DEBUG] Fetching user role for UID: ${user.uid} at ${DateTime.now()}');
-    FirebaseFirestore.instance.collection('users').doc(user.uid).get().then((userDoc) {
-      if (!userDoc.exists || userDoc.data()?['userRole']?.toString().toLowerCase() != 'passenger') {
-        print('[DEBUG] User is not a passenger or doc does not exist: ${userDoc.data()?.toString() ?? "No data"} at ${DateTime.now()}');
+    print(
+        '[DEBUG] Fetching user role for UID: ${user.uid} at ${DateTime.now()}');
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get()
+        .then((userDoc) {
+      if (!userDoc.exists ||
+          userDoc.data()?['userRole']?.toString().toLowerCase() !=
+              'passenger') {
+        print(
+            '[DEBUG] User is not a passenger or doc does not exist: ${userDoc.data()?.toString() ?? "No data"} at ${DateTime.now()}');
         return;
       }
 
-      print('[DEBUG] Setting up Firestore listener for passenger trips at ${DateTime.now()}');
+      print(
+          '[DEBUG] Setting up Firestore listener for passenger trips at ${DateTime.now()}');
       _tripSubscription = FirebaseFirestore.instance
           .collection('trips')
           .where('passengers', arrayContainsAny: [
@@ -173,24 +192,29 @@ class _NavBarPageState extends State<NavBarPage> {
           ])
           .snapshots()
           .listen((snapshot) {
-        print('[DEBUG] Snapshot received with ${snapshot.docChanges.length} changes at ${DateTime.now()}');
-        for (var change in snapshot.docChanges) {
-          final tripData = change.doc.data();
-          if (tripData == null) {
-            print('[DEBUG] Trip data is null for doc: ${change.doc.id} at ${DateTime.now()}');
-            continue;
-          }
+            print(
+                '[DEBUG] Snapshot received with ${snapshot.docChanges.length} changes at ${DateTime.now()}');
+            for (var change in snapshot.docChanges) {
+              final tripData = change.doc.data();
+              if (tripData == null) {
+                print(
+                    '[DEBUG] Trip data is null for doc: ${change.doc.id} at ${DateTime.now()}');
+                continue;
+              }
 
-          print('[DEBUG] Trip ${change.doc.id} status: ${tripData['status']} at ${DateTime.now()}');
-          if (tripData['status'] == 'ongoing' && !_navigatedTrips.contains(change.doc.id)) {
-            print('[DEBUG] Triggering dialog for trip ${change.doc.id} at ${DateTime.now()}');
-            _navigatedTrips.add(change.doc.id);
-            _showTripStartedAlert(change.doc.id);
-          }
-        }
-      }, onError: (error) {
-        print('[ERROR] Trip listener error: $error at ${DateTime.now()}');
-      });
+              print(
+                  '[DEBUG] Trip ${change.doc.id} status: ${tripData['status']} at ${DateTime.now()}');
+              if (tripData['status'] == 'ongoing' &&
+                  !_navigatedTrips.contains(change.doc.id)) {
+                print(
+                    '[DEBUG] Triggering dialog for trip ${change.doc.id} at ${DateTime.now()}');
+                _navigatedTrips.add(change.doc.id);
+                _showTripStartedAlert(change.doc.id);
+              }
+            }
+          }, onError: (error) {
+            print('[ERROR] Trip listener error: $error at ${DateTime.now()}');
+          });
     }).catchError((error) {
       print('[ERROR] Failed to fetch user role: $error at ${DateTime.now()}');
     });
@@ -211,14 +235,16 @@ class _NavBarPageState extends State<NavBarPage> {
                 SearchRideWaitingDriverWidget.routeName,
                 queryParameters: {'rideId': rideId},
               ).then((_) {
-                print('[DEBUG] Successfully navigated to SearchRideWaitingDriverWidget with rideId: $rideId at ${DateTime.now()}');
+                print(
+                    '[DEBUG] Successfully navigated to SearchRideWaitingDriverWidget with rideId: $rideId at ${DateTime.now()}');
               }).catchError((error) {
                 print('[ERROR] Navigation failed: $error at ${DateTime.now()}');
                 MyApp.of(context)._router.pushNamed(
                   SearchRideWaitingDriverWidget.routeName,
                   queryParameters: {'rideId': rideId},
                 );
-                print('[DEBUG] Fallback navigation attempted with rideId: $rideId at ${DateTime.now()}');
+                print(
+                    '[DEBUG] Fallback navigation attempted with rideId: $rideId at ${DateTime.now()}');
               });
             },
             child: const Text('OK'),
@@ -235,7 +261,7 @@ class _NavBarPageState extends State<NavBarPage> {
       'searchRideHome': const SearchRideHomeWidget(),
       'createRideHome': const CreateRideHomeWidget(),
       'messageMain': MessageMainWidget(senderId: userId),
-      'dashboardHome': const DashboardHomeWidget(),
+      'dashboardHome': DashboardHomeWidget(userId: userId),
       'searchRidePendingRide': const SearchRidePendingRideWidget(),
     };
     final currentIndex = tabs.keys.toList().indexOf(_currentPageName);

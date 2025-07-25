@@ -179,9 +179,8 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: DashboardHomeWidget.routeName,
           path: DashboardHomeWidget.routePath,
-          builder: (context, params) => params.isEmpty
-              ? NavBarPage(initialPage: 'dashboardHome')
-              : DashboardHomeWidget(),
+          builder: (context, params) => DashboardHomeWidget(
+              userId: params.getParam('userId', ParamType.String) ?? ''),
         ),
         FFRoute(
           name: DashboardSecurityWidget.routeName,
@@ -191,12 +190,15 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: DashboardWalletWidget.routeName,
           path: DashboardWalletWidget.routePath,
-          builder: (context, params) => DashboardWalletWidget(),
+          builder: (context, params) => DashboardWalletWidget(
+            userId: params.getParam('userId', ParamType.String) ?? '',
+          ),
         ),
         FFRoute(
           name: DashboardAddCardWidget.routeName,
           path: DashboardAddCardWidget.routePath,
-          builder: (context, params) => DashboardAddCardWidget(),
+          builder: (context, params) => DashboardAddCardWidget(
+              userId: params.getParam('userId', ParamType.String) ?? ''),
         ),
         FFRoute(
           name: DashboardTransactionsWidget.routeName,
@@ -339,7 +341,8 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: AdminSecurityWidget.routeName,
           path: AdminSecurityWidget.routePath,
-          builder: (context, params) => AdminSecurityWidget(),
+          builder: (context, params) => AdminSecurityWidget(
+              userId: params.getParam('userId', ParamType.String) ?? ''),
         ),
         FFRoute(
           name: AdminChangePasswordWidget.routeName,

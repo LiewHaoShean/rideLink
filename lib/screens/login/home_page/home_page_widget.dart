@@ -49,8 +49,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
         backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
         body: SafeArea(
           top: true,
-          child: Align(
-            alignment: AlignmentDirectional(0.0, 0.0),
+          child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.max,
               children: [

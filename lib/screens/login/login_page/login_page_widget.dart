@@ -397,7 +397,7 @@ class _LoginPageWidgetState extends State<LoginPageWidget> {
                           context.pushNamed(ConfirmEmailWidget.routeName);
                         },
                         child: Text(
-                          'Forgot Password?',
+                          'Forget Password?',
                           style:
                               FlutterFlowTheme.of(context).labelMedium.override(
                                     font: GoogleFonts.inter(

@@ -40,4 +40,32 @@ class ChatService {
     }
     return null;
   }
+
+  Future<String?> searchChatByReceiverAndSenderId({
+    required String senderId,
+    required String receiverId,
+  }) async {
+    try {
+      // First, get all chats where senderId is a participant
+      final senderChatsSnapshot = await _db
+          .collection('chats')
+          .where('participants', arrayContains: senderId)
+          .get();
+
+      // Filter chats that also contain receiverId
+      for (var doc in senderChatsSnapshot.docs) {
+        final chatData = doc.data();
+        final participants = List<String>.from(chatData['participants'] ?? []);
+
+        if (participants.contains(receiverId)) {
+          return chatData['chatId'] as String;
+        }
+      }
+
+      return null; // No chat found with both participants
+    } catch (e) {
+      print('Error searching for chat: $e');
+      return null;
+    }
+  }
 }

@@ -1229,7 +1229,7 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
                                                                                       color: FlutterFlowTheme.of(context).primaryText,
                                                                                       size: 28,
                                                                                     )
-                                                                                  else if (transaction.type.toLowerCase() == 'ride')
+                                                                                  else if (transaction.type.toLowerCase() == 'driver' || transaction.type.toLowerCase() == 'passenger')
                                                                                     FaIcon(
                                                                                       FontAwesomeIcons.carSide,
                                                                                       color: FlutterFlowTheme.of(context).primaryText,
@@ -1343,7 +1343,7 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
                                                                             MainAxisAlignment.center,
                                                                         children: [
                                                                           Text(
-                                                                            (transaction.type.toLowerCase() == 'withdraw' ? '-RM ' : '+RM ') +
+                                                                            (transaction.type.toLowerCase() == 'withdraw' || transaction.type.toLowerCase() == 'passenger' ? '-RM ' : '+RM ') +
                                                                                 transaction.amount.toString(),
                                                                             style: FlutterFlowTheme.of(context).titleMedium.override(
                                                                                   font: GoogleFonts.inter(

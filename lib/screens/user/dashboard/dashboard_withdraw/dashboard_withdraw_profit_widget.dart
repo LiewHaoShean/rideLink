@@ -838,12 +838,10 @@ class _DashboardWithdrawProfitWidgetState
                             }
 
                             try {
-                              print(widget.userId);
-                              print(int.parse(amount));
                               bool success = await context
                                   .read<UserProvider>()
-                                  .withdrawProfit(
-                                      widget.userId, int.parse(amount));
+                                  .withdrawProfit(widget.userId,
+                                      int.parse(amount).toDouble());
                               // print(success);
                               if (!success) {
                                 showDialog(
@@ -880,7 +878,7 @@ class _DashboardWithdrawProfitWidgetState
                                 final transactionModel = TransactionModel(
                                   transactionId: '',
                                   userId: widget.userId,
-                                  amount: int.parse(amount),
+                                  amount: int.parse(amount).toDouble(),
                                   type: 'Withdraw',
                                   timestamp: DateTime.now(),
                                 );

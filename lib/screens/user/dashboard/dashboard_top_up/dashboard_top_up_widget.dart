@@ -630,9 +630,8 @@ class _DashboardTopUpCreditWidgetState
                             }
 
                             try {
-                              await context
-                                  .read<UserProvider>()
-                                  .addCredit(widget.userId, int.parse(amount));
+                              await context.read<UserProvider>().addCredit(
+                                  widget.userId, int.parse(amount).toDouble());
                               showDialog(
                                   context: context,
                                   builder: (context) => AlertDialog(
@@ -668,7 +667,7 @@ class _DashboardTopUpCreditWidgetState
                             final transactionModel = TransactionModel(
                               transactionId: '',
                               userId: widget.userId,
-                              amount: int.parse(amount),
+                              amount: int.parse(amount).toDouble(),
                               type: 'Top-up',
                               timestamp: DateTime.now(),
                             );

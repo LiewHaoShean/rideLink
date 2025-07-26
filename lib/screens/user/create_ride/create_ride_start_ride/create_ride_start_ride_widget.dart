@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ride_link_carpooling/flutter_flow/flutter_flow_util.dart';
 import '/index.dart';
+import 'package:ride_link_carpooling/providers/chat_provider.dart';
+import 'package:provider/provider.dart';
 
 class CreateRideStartRideWidget extends StatefulWidget {
   final String rideId;
@@ -109,6 +111,7 @@ class _CreateRideStartRideWidgetState extends State<CreateRideStartRideWidget> {
                 final name = user?['name'] ?? 'Unknown';
                 final phone = user?['phone'] ?? 'Unknown';
                 final gender = user?['gender'] ?? 'Male';
+                final userId = user?['uid'] ?? '';
 
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 8),
@@ -142,8 +145,44 @@ class _CreateRideStartRideWidgetState extends State<CreateRideStartRideWidget> {
                             IconButton(
                               icon: const Icon(Icons.chat,
                                   size: 20, color: Color(0xFF00275C)),
-                              onPressed: () {
-                                // Implement chat navigation here
+                              onPressed: () async {
+                                String chatId;
+                                final String? _existingChatId = await context
+                                    .read<ChatProvider>()
+                                    .searchChatByReceiverAndSenderId(
+                                        senderId: tripData!['creatorId'],
+                                        receiverId: userId);
+                                if (_existingChatId == null) {
+                                  chatId = await context
+                                      .read<ChatProvider>()
+                                      .createChat(
+                                          senderId: tripData!['creatorId'],
+                                          receiverId: userId,
+                                          isAdmin: false);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          MessageDetailsWidget(
+                                        senderId: tripData!['creatorId'],
+                                        chatId: chatId,
+                                        receiverId: userId,
+                                      ),
+                                    ),
+                                  );
+                                } else {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          MessageDetailsWidget(
+                                        senderId: tripData!['creatorId'],
+                                        chatId: _existingChatId,
+                                        receiverId: userId,
+                                      ),
+                                    ),
+                                  );
+                                }
                               },
                             ),
                             const Icon(Icons.phone,
@@ -192,6 +231,8 @@ class _CreateRideStartRideWidgetState extends State<CreateRideStartRideWidget> {
                     SearchRideWaitingDriverWidget.routeName,
                     queryParameters: {
                       'rideId': widget.rideId,
+                      'senderId': '',
+                      'receiverId': '',
                     },
                   );
                 },

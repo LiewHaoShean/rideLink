@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'package:ride_link_carpooling/index.dart';
+import '/flutter_flow/flutter_flow_drop_down.dart';
+import '/flutter_flow/form_field_controller.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart' hide LatLng;
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -11,13 +14,34 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'search_ride_waiting_driver_model.dart';
 export 'search_ride_waiting_driver_model.dart';
+import 'package:provider/provider.dart';
+import 'package:ride_link_carpooling/providers/user_provider.dart';
+import 'package:ride_link_carpooling/providers/chat_provider.dart';
+import 'package:ride_link_carpooling/providers/trip_provider.dart';
+import '../../../../models/trip.dart';
+
+class PassengerInfo {
+  final String passengerId;
+  final String passengerName;
+  final String status;
+
+  PassengerInfo({
+    required this.passengerId,
+    required this.passengerName,
+    required this.status,
+  });
+}
 
 class SearchRideWaitingDriverWidget extends StatefulWidget {
   final String rideId;
+  final String receiverId;
+  final String senderId;
 
   const SearchRideWaitingDriverWidget({
     super.key,
     required this.rideId,
+    required this.senderId,
+    required this.receiverId,
   });
 
   static String routeName = 'searchRideWaitingDriver';
@@ -38,6 +62,11 @@ class _SearchRideWaitingDriverWidgetState
   StreamSubscription<DocumentSnapshot>? _tripSubscription;
   bool _hasNavigated = false;
   String? _userRole;
+  Trip? _trip;
+
+  List<PassengerInfo> passengerInfos = [];
+  String? messagePassengerId;
+  bool isLoadingPassengers = false;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -46,6 +75,7 @@ class _SearchRideWaitingDriverWidgetState
     super.initState();
     _model = SearchRideWaitingDriverModel();
     _initializeData();
+    loadTrips();
   }
 
   @override
@@ -54,6 +84,55 @@ class _SearchRideWaitingDriverWidgetState
     _model.dispose();
     _mapController?.dispose();
     super.dispose();
+  }
+
+  Future<void> loadTrips() async {
+    await context.read<TripProvider>().loadTrips();
+    final trip = context.read<TripProvider>().loadTripByTripId(widget.rideId);
+
+    setState(() {
+      _trip = trip;
+    });
+
+    // Load passenger info after trip is loaded
+    if (trip != null) {
+      await loadPassengerInfo();
+    }
+  }
+
+  Future<void> loadPassengerInfo() async {
+    if (_trip == null) return;
+
+    setState(() {
+      isLoadingPassengers = true;
+    });
+
+    try {
+      // Ensure users are loaded
+      await context.read<UserProvider>().loadUsers();
+
+      passengerInfos = [];
+
+      for (var passenger in _trip!.passengers) {
+        final passengerId = passenger.passengerId;
+        final status = passenger.status;
+
+        final user = context.read<UserProvider>().getUserById(passengerId);
+        final passengerName = user?.name ?? 'Unknown User';
+
+        passengerInfos.add(PassengerInfo(
+          passengerId: passengerId,
+          passengerName: passengerName,
+          status: status,
+        ));
+      }
+    } catch (e) {
+      print('Error loading passenger info: $e');
+    } finally {
+      setState(() {
+        isLoadingPassengers = false;
+      });
+    }
   }
 
   Future<void> _initializeData() async {
@@ -263,6 +342,7 @@ class _SearchRideWaitingDriverWidgetState
           'destination': tripData['destination'],
           'departureTime': departureTime,
           'creatorName': creatorName,
+          'creatorId': tripData['creatorId'],
           'car': carData,
           'originLatLng': originLatLng,
           'destinationLatLng': destinationLatLng,
@@ -299,7 +379,8 @@ class _SearchRideWaitingDriverWidgetState
     }
     setState(() {
       _markers = markers;
-      print('[DEBUG] Map markers updated: ${_markers.length} at ${DateTime.now()}');
+      print(
+          '[DEBUG] Map markers updated: ${_markers.length} at ${DateTime.now()}');
     });
 
     if (_mapController != null && _markers.isNotEmpty) {
@@ -344,13 +425,19 @@ class _SearchRideWaitingDriverWidgetState
 
   double _calculateMapHeight(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    const headerHeight = 60.0; // Header (padding: 10.0 vertical, button/icon: ~40.0)
-    const contentBelowMapPassenger = 157.0; // Divider (2.0) + Driver Info (75.0) + Action Buttons (60.0) + Bottom Padding (20.0)
-    const contentBelowMapDriver = 217.0; // Passenger content (157.0) + Complete Button (60.0)
+    const headerHeight =
+        60.0; // Header (padding: 10.0 vertical, button/icon: ~40.0)
+    const contentBelowMapPassenger =
+        157.0; // Divider (2.0) + Driver Info (75.0) + Action Buttons (60.0) + Bottom Padding (20.0)
+    const contentBelowMapDriver =
+        217.0; // Passenger content (157.0) + Complete Button (60.0)
     const safeAreaPadding = 20.0; // Extra padding for safe area and scroll
 
-    final contentBelowMap = _userRole == 'driver' ? contentBelowMapDriver : contentBelowMapPassenger;
-    final availableHeight = screenHeight - headerHeight - contentBelowMap - safeAreaPadding;
+    final contentBelowMap = _userRole == 'driver'
+        ? contentBelowMapDriver
+        : contentBelowMapPassenger;
+    final availableHeight =
+        screenHeight - headerHeight - contentBelowMap - safeAreaPadding;
 
     // Ensure minimum height for map and cap at reasonable maximum
     return availableHeight.clamp(300.0, 600.0);
@@ -358,11 +445,12 @@ class _SearchRideWaitingDriverWidgetState
 
   @override
   Widget build(BuildContext context) {
+    // print(_userTrips[0]['creatorId']);
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
         body: SafeArea(
           top: true,
           child: Column(
@@ -568,38 +656,266 @@ class _SearchRideWaitingDriverWidgetState
                           child: Row(
                             children: [
                               Expanded(
-                                child: FFButtonWidget(
-                                  onPressed: () =>
-                                      print('Message button pressed'),
-                                  text: 'Message to Driver',
-                                  options: FFButtonOptions(
-                                    height: 40.0,
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16.0),
-                                    color: const Color(0xFFF6F7FA),
-                                    textStyle: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .override(
-                                          fontFamily: 'Inter Tight',
-                                          color: const Color(0xFF9D9FA0),
-                                          letterSpacing: 0.0,
+                                child: _userRole == 'passenger'
+                                    ? FFButtonWidget(
+                                        onPressed: () async {
+                                          String chatId;
+                                          final String? _existingChatId =
+                                              await context
+                                                  .read<ChatProvider>()
+                                                  .searchChatByReceiverAndSenderId(
+                                                      senderId: widget.senderId,
+                                                      receiverId:
+                                                          widget.receiverId);
+                                          if (_existingChatId == null) {
+                                            chatId = await context
+                                                .read<ChatProvider>()
+                                                .createChat(
+                                                    senderId: widget.senderId,
+                                                    receiverId:
+                                                        widget.receiverId,
+                                                    isAdmin: false);
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    MessageDetailsWidget(
+                                                  senderId: widget.senderId,
+                                                  chatId: chatId,
+                                                  receiverId: widget.receiverId,
+                                                ),
+                                              ),
+                                            );
+                                          } else {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    MessageDetailsWidget(
+                                                  senderId: widget.senderId,
+                                                  chatId: _existingChatId,
+                                                  receiverId: widget.receiverId,
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                        text: 'Message to Driver',
+                                        options: FFButtonOptions(
+                                          height: 40.0,
+                                          elevation: 0,
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 16.0),
+                                          color: const Color(0xFFF6F7FA),
+                                          textStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .titleSmall
+                                                  .override(
+                                                    fontFamily: 'Inter Tight',
+                                                    color:
+                                                        const Color(0xFF9D9FA0),
+                                                    letterSpacing: 0.0,
+                                                  ),
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
                                         ),
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                ),
+                                      )
+                                    : Expanded(
+                                        child: FlutterFlowDropDown<String>(
+                                          controller: _model
+                                                  .passengerDropDownValueController ??=
+                                              FormFieldController<String>(null),
+                                          options: passengerInfos
+                                              .map((passenger) =>
+                                                  passenger.passengerName)
+                                              .toList(),
+                                          onChanged: (val) {
+                                            safeSetState(() {
+                                              _model.passengerDropDownValue =
+                                                  val;
+                                              // Find the passenger ID for the selected name
+                                              final selectedPassenger =
+                                                  passengerInfos.firstWhere(
+                                                (passenger) =>
+                                                    passenger.passengerName ==
+                                                    val,
+                                                orElse: () => PassengerInfo(
+                                                  passengerId: '',
+                                                  passengerName: '',
+                                                  status: '',
+                                                ),
+                                              );
+                                              messagePassengerId =
+                                                  selectedPassenger.passengerId;
+                                            });
+                                          },
+                                          width: 200,
+                                          height: 40,
+                                          textStyle: FlutterFlowTheme.of(
+                                                  context)
+                                              .bodyMedium
+                                              .override(
+                                                font: GoogleFonts.inter(
+                                                  fontWeight:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .bodyMedium
+                                                          .fontWeight,
+                                                  fontStyle:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .bodyMedium
+                                                          .fontStyle,
+                                                ),
+                                                letterSpacing: 0.0,
+                                                fontWeight:
+                                                    FlutterFlowTheme.of(context)
+                                                        .bodyMedium
+                                                        .fontWeight,
+                                                fontStyle:
+                                                    FlutterFlowTheme.of(context)
+                                                        .bodyMedium
+                                                        .fontStyle,
+                                              ),
+                                          hintText: isLoadingPassengers
+                                              ? 'Loading...'
+                                              : 'Select passenger...',
+                                          icon: Icon(
+                                            Icons.keyboard_arrow_down_rounded,
+                                            color: FlutterFlowTheme.of(context)
+                                                .secondaryText,
+                                            size: 24,
+                                          ),
+                                          fillColor: Color(0xFFF6F7FA),
+                                          elevation: 2,
+                                          borderColor: Colors.transparent,
+                                          borderWidth: 0,
+                                          borderRadius: 8,
+                                          margin:
+                                              EdgeInsetsDirectional.fromSTEB(
+                                                  12, 0, 12, 0),
+                                          hidesUnderline: true,
+                                          isOverButton: false,
+                                          isSearchable: false,
+                                          isMultiSelect: false,
+                                        ),
+                                      ),
                               ),
-                              const SizedBox(width: 10.0),
-                              FlutterFlowIconButton(
-                                borderRadius: 100.0,
-                                buttonSize: 40.0,
-                                fillColor: const Color(0xFFF6F7FA),
-                                icon: const Icon(
-                                  Icons.phone_enabled,
-                                  color: Color(0xFF00275C),
-                                  size: 24.0,
-                                ),
-                                onPressed: () => print('Phone button pressed'),
+                              const SizedBox(
+                                width: 10.0,
+                                height: 40,
                               ),
+                              _userRole == 'passenger'
+                                  ? FlutterFlowIconButton(
+                                      borderRadius: 8,
+                                      buttonSize: 40,
+                                      fillColor: Color(0xFFF6F7FA),
+                                      icon: Icon(
+                                        Icons.message,
+                                        color: Color(0xFF00275C),
+                                        size: 24,
+                                      ),
+                                      onPressed: () async {
+                                        String chatId;
+                                        final String? _existingChatId =
+                                            await context
+                                                .read<ChatProvider>()
+                                                .searchChatByReceiverAndSenderId(
+                                                    senderId: widget.senderId,
+                                                    receiverId:
+                                                        widget.receiverId);
+                                        if (_existingChatId == null) {
+                                          chatId = await context
+                                              .read<ChatProvider>()
+                                              .createChat(
+                                                  senderId: widget.senderId,
+                                                  receiverId: widget.receiverId,
+                                                  isAdmin: false);
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  MessageDetailsWidget(
+                                                senderId: widget.senderId,
+                                                chatId: chatId,
+                                                receiverId: widget.receiverId,
+                                              ),
+                                            ),
+                                          );
+                                        } else {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  MessageDetailsWidget(
+                                                senderId: widget.senderId,
+                                                chatId: _existingChatId,
+                                                receiverId: widget.receiverId,
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                    )
+                                  : FlutterFlowIconButton(
+                                      borderRadius: 8,
+                                      buttonSize: 40,
+                                      fillColor: Color(0xFFF6F7FA),
+                                      icon: Icon(
+                                        Icons.message,
+                                        color: Color(0xFF00275C),
+                                        size: 24,
+                                      ),
+                                      onPressed: () async {
+                                        if (messagePassengerId == null ||
+                                            messagePassengerId!.isEmpty) {
+                                          // Show error message
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                  'Please select a passenger first'),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                          return;
+                                        }
+
+                                        String chatId;
+                                        final String? _existingChatId =
+                                            await context
+                                                .read<ChatProvider>()
+                                                .searchChatByReceiverAndSenderId(
+                                                    senderId:
+                                                        _trip?.creatorId ?? '',
+                                                    receiverId:
+                                                        messagePassengerId!);
+                                        if (_existingChatId == null) {
+                                          chatId = await context
+                                              .read<ChatProvider>()
+                                              .createChat(
+                                                  senderId:
+                                                      _trip?.creatorId ?? '',
+                                                  receiverId:
+                                                      messagePassengerId!,
+                                                  isAdmin: false);
+                                        } else {
+                                          chatId = _existingChatId;
+                                        }
+
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                MessageDetailsWidget(
+                                              senderId: _trip?.creatorId ?? '',
+                                              chatId: chatId,
+                                              receiverId: messagePassengerId!,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
                             ],
                           ),
                         ),

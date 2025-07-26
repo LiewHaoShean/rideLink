@@ -136,7 +136,7 @@ class _SearchRideWaitingDriverWidgetState
             onPressed: () {
               Navigator.of(dialogContext).pop();
               context.pushNamed(
-                SearchRideCompleteWidget.routeName,
+                CreateRideCompleteWidget.routeName,
                 queryParameters: {'rideId': widget.rideId},
               ).then((_) {
                 print(
@@ -548,12 +548,8 @@ class _SearchRideWaitingDriverWidgetState
                                   borderRadius: BorderRadius.circular(24.0),
                                 ),
                                 child: Text(
-                                  _userRole == 'driver'
-                                      ? 'Driver'
-                                      : 'Passenger',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
+                                  'Driver',
+                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
                                         fontFamily: 'Inter',
                                         color: FlutterFlowTheme.of(context)
                                             .primaryBackground,

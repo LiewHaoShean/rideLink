@@ -62,6 +62,7 @@ class _SearchRideWaitingDriverWidgetState
   StreamSubscription<DocumentSnapshot>? _tripSubscription;
   bool _hasNavigated = false;
   String? _userRole;
+  Map<String, dynamic>? _currentUserData;
   Trip? _trip;
 
   List<PassengerInfo> passengerInfos = [];
@@ -152,6 +153,7 @@ class _SearchRideWaitingDriverWidgetState
           .get();
       if (userDoc.exists) {
         _userRole = userDoc.data()?['userRole']?.toString().toLowerCase();
+        _currentUserData = userDoc.data();
         print(
             '[DEBUG] User role: $_userRole for UID: ${user.uid} at ${DateTime.now()}');
       } else {
@@ -252,102 +254,180 @@ class _SearchRideWaitingDriverWidgetState
     }
 
     final tripData = doc.data()!;
-    final passengers = tripData['passengers'] as List<dynamic>? ?? [];
     Map<String, dynamic>? matchedTrip;
 
-    for (final p in passengers) {
-      final map = p as Map<String, dynamic>;
-      if (map['passengerId'] == currentUserId &&
-          (map['status'] == 'joined' || map['status'] == 'accepted')) {
-        print('[DEBUG] Trip ${doc.id} matched for user at ${DateTime.now()}');
-        final creatorId = tripData['creatorId'];
-        String creatorName = 'Unknown Driver';
+    if (_userRole == 'driver' && tripData['creatorId'] == currentUserId) {
+      // Driver: Fetch trip where they are the creator
+      String creatorName = _currentUserData?['name'] ?? 'Unknown Driver';
 
-        try {
-          final userDoc = await FirebaseFirestore.instance
-              .collection('users')
-              .doc(creatorId)
-              .get();
-          if (userDoc.exists) {
-            creatorName = userDoc.data()?['name'] ?? 'Unknown Driver';
+      Map<String, dynamic>? carData;
+      try {
+        final carQuery = await FirebaseFirestore.instance
+            .collection('cars')
+            .where('ownerId', isEqualTo: currentUserId)
+            .limit(1)
+            .get();
+        if (carQuery.docs.isNotEmpty) {
+          carData = carQuery.docs.first.data();
+        }
+      } catch (e) {
+        print(
+            '[ERROR] Failed to fetch car data for $currentUserId: $e at ${DateTime.now()}');
+      }
+
+      LatLng? originLatLng;
+      try {
+        final originQuery = await FirebaseFirestore.instance
+            .collection('locations')
+            .where('name', isEqualTo: tripData['origin'])
+            .limit(1)
+            .get();
+        if (originQuery.docs.isNotEmpty) {
+          final originData = originQuery.docs.first.data();
+          originLatLng = LatLng(
+            (originData['latitude'] as num).toDouble(),
+            (originData['longitude'] as num).toDouble(),
+          );
+        }
+      } catch (e) {
+        print(
+            '[ERROR] Failed to fetch origin coordinates for ${tripData['origin']}: $e at ${DateTime.now()}');
+      }
+
+      LatLng? destinationLatLng;
+      try {
+        final destinationQuery = await FirebaseFirestore.instance
+            .collection('locations')
+            .where('name', isEqualTo: tripData['destination'])
+            .limit(1)
+            .get();
+        if (destinationQuery.docs.isNotEmpty) {
+          final destinationData = destinationQuery.docs.first.data();
+          destinationLatLng = LatLng(
+            (destinationData['latitude'] as num).toDouble(),
+            (destinationData['longitude'] as num).toDouble(),
+          );
+        }
+      } catch (e) {
+        print(
+            '[ERROR] Failed to fetch destination coordinates for ${tripData['destination']}: $e at ${DateTime.now()}');
+      }
+
+      final departureTimestamp = tripData['departureTime'];
+      DateTime? departureTime;
+      if (departureTimestamp is Timestamp) {
+        departureTime = departureTimestamp.toDate();
+      }
+
+      matchedTrip = {
+        'tripId': doc.id,
+        'status': tripData['status'],
+        'origin': tripData['origin'],
+        'destination': tripData['destination'],
+        'departureTime': departureTime,
+        'creatorName': creatorName,
+        'creatorId': tripData['creatorId'],
+        'car': carData,
+        'originLatLng': originLatLng,
+        'destinationLatLng': destinationLatLng,
+      };
+    } else {
+      // Passenger: Fetch trip where they are a passenger
+      final passengers = tripData['passengers'] as List<dynamic>? ?? [];
+      for (final p in passengers) {
+        final map = p as Map<String, dynamic>;
+        if (map['passengerId'] == currentUserId &&
+            (map['status'] == 'joined' || map['status'] == 'accepted')) {
+          print('[DEBUG] Trip ${doc.id} matched for user at ${DateTime.now()}');
+          final creatorId = tripData['creatorId'];
+          String creatorName = 'Unknown Driver';
+
+          try {
+            final userDoc = await FirebaseFirestore.instance
+                .collection('users')
+                .doc(creatorId)
+                .get();
+            if (userDoc.exists) {
+              creatorName = userDoc.data()?['name'] ?? 'Unknown Driver';
+            }
+          } catch (e) {
+            print(
+                '[ERROR] Failed to fetch creatorName for $creatorId: $e at ${DateTime.now()}');
           }
-        } catch (e) {
-          print(
-              '[ERROR] Failed to fetch creatorName for $creatorId: $e at ${DateTime.now()}');
-        }
 
-        Map<String, dynamic>? carData;
-        try {
-          final carQuery = await FirebaseFirestore.instance
-              .collection('cars')
-              .where('ownerId', isEqualTo: creatorId)
-              .limit(1)
-              .get();
-          if (carQuery.docs.isNotEmpty) {
-            carData = carQuery.docs.first.data();
+          Map<String, dynamic>? carData;
+          try {
+            final carQuery = await FirebaseFirestore.instance
+                .collection('cars')
+                .where('ownerId', isEqualTo: creatorId)
+                .limit(1)
+                .get();
+            if (carQuery.docs.isNotEmpty) {
+              carData = carQuery.docs.first.data();
+            }
+          } catch (e) {
+            print(
+                '[ERROR] Failed to fetch car data for $creatorId: $e at ${DateTime.now()}');
           }
-        } catch (e) {
-          print(
-              '[ERROR] Failed to fetch car data for $creatorId: $e at ${DateTime.now()}');
-        }
 
-        LatLng? originLatLng;
-        try {
-          final originQuery = await FirebaseFirestore.instance
-              .collection('locations')
-              .where('name', isEqualTo: tripData['origin'])
-              .limit(1)
-              .get();
-          if (originQuery.docs.isNotEmpty) {
-            final originData = originQuery.docs.first.data();
-            originLatLng = LatLng(
-              (originData['latitude'] as num).toDouble(),
-              (originData['longitude'] as num).toDouble(),
-            );
+          LatLng? originLatLng;
+          try {
+            final originQuery = await FirebaseFirestore.instance
+                .collection('locations')
+                .where('name', isEqualTo: tripData['origin'])
+                .limit(1)
+                .get();
+            if (originQuery.docs.isNotEmpty) {
+              final originData = originQuery.docs.first.data();
+              originLatLng = LatLng(
+                (originData['latitude'] as num).toDouble(),
+                (originData['longitude'] as num).toDouble(),
+              );
+            }
+          } catch (e) {
+            print(
+                '[ERROR] Failed to fetch origin coordinates for ${tripData['origin']}: $e at ${DateTime.now()}');
           }
-        } catch (e) {
-          print(
-              '[ERROR] Failed to fetch origin coordinates for ${tripData['origin']}: $e at ${DateTime.now()}');
-        }
 
-        LatLng? destinationLatLng;
-        try {
-          final destinationQuery = await FirebaseFirestore.instance
-              .collection('locations')
-              .where('name', isEqualTo: tripData['destination'])
-              .limit(1)
-              .get();
-          if (destinationQuery.docs.isNotEmpty) {
-            final destinationData = destinationQuery.docs.first.data();
-            destinationLatLng = LatLng(
-              (destinationData['latitude'] as num).toDouble(),
-              (destinationData['longitude'] as num).toDouble(),
-            );
+          LatLng? destinationLatLng;
+          try {
+            final destinationQuery = await FirebaseFirestore.instance
+                .collection('locations')
+                .where('name', isEqualTo: tripData['destination'])
+                .limit(1)
+                .get();
+            if (destinationQuery.docs.isNotEmpty) {
+              final destinationData = destinationQuery.docs.first.data();
+              destinationLatLng = LatLng(
+                (destinationData['latitude'] as num).toDouble(),
+                (destinationData['longitude'] as num).toDouble(),
+              );
+            }
+          } catch (e) {
+            print(
+                '[ERROR] Failed to fetch destination coordinates for ${tripData['destination']}: $e at ${DateTime.now()}');
           }
-        } catch (e) {
-          print(
-              '[ERROR] Failed to fetch destination coordinates for ${tripData['destination']}: $e at ${DateTime.now()}');
-        }
 
-        final departureTimestamp = tripData['departureTime'];
-        DateTime? departureTime;
-        if (departureTimestamp is Timestamp) {
-          departureTime = departureTimestamp.toDate();
-        }
+          final departureTimestamp = tripData['departureTime'];
+          DateTime? departureTime;
+          if (departureTimestamp is Timestamp) {
+            departureTime = departureTimestamp.toDate();
+          }
 
-        matchedTrip = {
-          'tripId': doc.id,
-          'status': map['status'],
-          'origin': tripData['origin'],
-          'destination': tripData['destination'],
-          'departureTime': departureTime,
-          'creatorName': creatorName,
-          'creatorId': tripData['creatorId'],
-          'car': carData,
-          'originLatLng': originLatLng,
-          'destinationLatLng': destinationLatLng,
-        };
-        break;
+          matchedTrip = {
+            'tripId': doc.id,
+            'status': map['status'],
+            'origin': tripData['origin'],
+            'destination': tripData['destination'],
+            'departureTime': departureTime,
+            'creatorName': creatorName,
+            'creatorId': tripData['creatorId'],
+            'car': carData,
+            'originLatLng': originLatLng,
+            'destinationLatLng': destinationLatLng,
+          };
+          break;
+        }
       }
     }
 
@@ -445,7 +525,6 @@ class _SearchRideWaitingDriverWidgetState
 
   @override
   Widget build(BuildContext context) {
-    // print(_userTrips[0]['creatorId']);
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -456,8 +535,7 @@ class _SearchRideWaitingDriverWidgetState
           child: Column(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 10.0, vertical: 10.0),
+                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
                 color: FlutterFlowTheme.of(context).secondaryBackground,
                 child: Row(
                   children: [
@@ -587,13 +665,13 @@ class _SearchRideWaitingDriverWidgetState
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    _userTrips.isNotEmpty
+                                    _userRole == 'driver'
                                         ? Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                _userTrips[0]['creatorName'] ??
+                                                _currentUserData?['name'] ??
                                                     'Unknown Driver',
                                                 style:
                                                     FlutterFlowTheme.of(context)
@@ -607,7 +685,9 @@ class _SearchRideWaitingDriverWidgetState
                                                         ),
                                               ),
                                               Text(
-                                                _userTrips[0]['car'] != null
+                                                _userTrips.isNotEmpty &&
+                                                        _userTrips[0]['car'] !=
+                                                            null
                                                     ? '${_userTrips[0]['car']['plateNumber']}, ${_userTrips[0]['car']['brand']} ${_userTrips[0]['car']['model']}, ${_userTrips[0]['car']['color']}'
                                                     : 'Car info unavailable',
                                                 style:
@@ -624,7 +704,49 @@ class _SearchRideWaitingDriverWidgetState
                                               ),
                                             ],
                                           )
-                                        : const Text('No trip data available'),
+                                        : _userTrips.isNotEmpty
+                                            ? Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    _userTrips[0]
+                                                            ['creatorName'] ??
+                                                        'Unknown Driver',
+                                                    style: FlutterFlowTheme.of(
+                                                            context)
+                                                        .bodyMedium
+                                                        .override(
+                                                          fontFamily: 'Inter',
+                                                          fontSize: 18.0,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          letterSpacing: 0.0,
+                                                        ),
+                                                  ),
+                                                  Text(
+                                                    _userTrips[0]['car'] != null
+                                                        ? '${_userTrips[0]['car']['plateNumber']}, ${_userTrips[0]['car']['brand']} ${_userTrips[0]['car']['model']}, ${_userTrips[0]['car']['color']}'
+                                                        : 'Car info unavailable',
+                                                    style:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .bodyMedium
+                                                            .override(
+                                                              fontFamily:
+                                                                  'Inter',
+                                                              fontSize: 14.0,
+                                                              color:
+                                                                  FlutterFlowTheme
+                                                                          .of(
+                                                                              context)
+                                                                      .secondaryText,
+                                                              letterSpacing: 0.0,
+                                                            ),
+                                                  ),
+                                                ],
+                                              )
+                                            : const Text('No trip data available'),
                                   ],
                                 ),
                               ),
@@ -637,7 +759,9 @@ class _SearchRideWaitingDriverWidgetState
                                 ),
                                 child: Text(
                                   'Driver',
-                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .override(
                                         fontFamily: 'Inter',
                                         color: FlutterFlowTheme.of(context)
                                             .primaryBackground,

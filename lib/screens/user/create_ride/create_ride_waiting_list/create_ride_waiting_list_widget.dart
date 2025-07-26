@@ -26,10 +26,12 @@ class CreateRideWaitingListWidget extends StatefulWidget {
   static String routePath = '/createRideWaitingList';
 
   @override
-  State<CreateRideWaitingListWidget> createState() => _CreateRideWaitingListWidgetState();
+  State<CreateRideWaitingListWidget> createState() =>
+      _CreateRideWaitingListWidgetState();
 }
 
-class _CreateRideWaitingListWidgetState extends State<CreateRideWaitingListWidget> with WidgetsBindingObserver {
+class _CreateRideWaitingListWidgetState
+    extends State<CreateRideWaitingListWidget> with WidgetsBindingObserver {
   bool isLoading = true;
   late CreateRideWaitingListModel _model;
   late Future<DocumentSnapshot<Map<String, dynamic>>> _rideFuture;
@@ -42,7 +44,8 @@ class _CreateRideWaitingListWidgetState extends State<CreateRideWaitingListWidge
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _rideFuture = FirebaseFirestore.instance.collection('trips').doc(widget.rideId).get();
+    _rideFuture =
+        FirebaseFirestore.instance.collection('trips').doc(widget.rideId).get();
     _model = createModel(context, () => CreateRideWaitingListModel());
     _loadTrips();
   }
@@ -82,7 +85,8 @@ class _CreateRideWaitingListWidgetState extends State<CreateRideWaitingListWidge
     final tripSnapshot =
         await FirebaseFirestore.instance.collection('trips').get();
 
-    print('[DEBUG] Total trips fetched from Firestore: ${tripSnapshot.docs.length}');
+    print(
+        '[DEBUG] Total trips fetched from Firestore: ${tripSnapshot.docs.length}');
 
     final matchedTrips = <Map<String, dynamic>>[];
 
@@ -375,8 +379,7 @@ class _CreateRideWaitingListWidgetState extends State<CreateRideWaitingListWidge
                                                     ? fromSnap.data!.docs.first
                                                     : null;
                                                 final fromAddress =
-                                                    fromDoc?.data()[
-                                                            'name'] ??
+                                                    fromDoc?.data()['name'] ??
                                                         originName;
 
                                                 // 🔗 Now lookup TO location in `locations`
@@ -407,10 +410,9 @@ class _CreateRideWaitingListWidgetState extends State<CreateRideWaitingListWidge
                                                         ? toSnap
                                                             .data!.docs.first
                                                         : null;
-                                                    final toAddress = toDoc
-                                                                ?.data()[
-                                                            'name'] ??
-                                                        destinationName;
+                                                    final toAddress =
+                                                        toDoc?.data()['name'] ??
+                                                            destinationName;
 
                                                     return Text(
                                                       '$fromAddress to $toAddress',
@@ -771,7 +773,8 @@ class _CreateRideWaitingListWidgetState extends State<CreateRideWaitingListWidge
                                 child: FFButtonWidget(
                                   onPressed: () async {
                                     // Read the trip doc live from Firestore
-                                    final tripDoc = await FirebaseFirestore.instance
+                                    final tripDoc = await FirebaseFirestore
+                                        .instance
                                         .collection('trips')
                                         .doc(widget.rideId)
                                         .get();
@@ -782,7 +785,8 @@ class _CreateRideWaitingListWidgetState extends State<CreateRideWaitingListWidge
                                         context: context,
                                         builder: (context) => const AlertDialog(
                                           title: Text('Trip not found'),
-                                          content: Text('This ride does not exist.'),
+                                          content:
+                                              Text('This ride does not exist.'),
                                         ),
                                       );
                                       return;
@@ -792,18 +796,25 @@ class _CreateRideWaitingListWidgetState extends State<CreateRideWaitingListWidge
                                     final passengers = data['passengers'] ?? [];
 
                                     // Check for accepted passengers in the passengers array
-                                    final hasAcceptedPassenger = (passengers as List)
-                                        .any((p) => p['status']?.toString().toLowerCase() == 'accepted');
+                                    final hasAcceptedPassenger =
+                                        (passengers as List).any((p) =>
+                                            p['status']
+                                                ?.toString()
+                                                .toLowerCase() ==
+                                            'accepted');
 
                                     if (!hasAcceptedPassenger) {
                                       showDialog(
                                         context: context,
                                         builder: (context) => AlertDialog(
-                                          title: const Text('No passenger accepted'),
-                                          content: const Text('You must have at least one accepted passenger before starting the ride.'),
+                                          title: const Text(
+                                              'No passenger accepted'),
+                                          content: const Text(
+                                              'You must have at least one accepted passenger before starting the ride.'),
                                           actions: [
                                             TextButton(
-                                              onPressed: () => Navigator.of(context).pop(),
+                                              onPressed: () =>
+                                                  Navigator.of(context).pop(),
                                               child: const Text('OK'),
                                             ),
                                           ],
@@ -826,10 +837,12 @@ class _CreateRideWaitingListWidgetState extends State<CreateRideWaitingListWidge
                                         context: context,
                                         builder: (context) => AlertDialog(
                                           title: const Text('Error'),
-                                          content: Text('Failed to update trip status: $e'),
+                                          content: Text(
+                                              'Failed to update trip status: $e'),
                                           actions: [
                                             TextButton(
-                                              onPressed: () => Navigator.of(context).pop(),
+                                              onPressed: () =>
+                                                  Navigator.of(context).pop(),
                                               child: const Text('OK'),
                                             ),
                                           ],

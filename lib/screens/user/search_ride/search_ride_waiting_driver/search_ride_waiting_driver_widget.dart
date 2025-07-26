@@ -24,10 +24,12 @@ class SearchRideWaitingDriverWidget extends StatefulWidget {
   static String routePath = '/searchRideWaitingDriver';
 
   @override
-  State<SearchRideWaitingDriverWidget> createState() => _SearchRideWaitingDriverWidgetState();
+  State<SearchRideWaitingDriverWidget> createState() =>
+      _SearchRideWaitingDriverWidgetState();
 }
 
-class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverWidget> {
+class _SearchRideWaitingDriverWidgetState
+    extends State<SearchRideWaitingDriverWidget> {
   late SearchRideWaitingDriverModel _model;
   List<Map<String, dynamic>> _userTrips = [];
   bool isLoading = true;
@@ -65,12 +67,17 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
     }
 
     try {
-      final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
       if (userDoc.exists) {
         _userRole = userDoc.data()?['userRole']?.toString().toLowerCase();
-        print('[DEBUG] User role: $_userRole for UID: ${user.uid} at ${DateTime.now()}');
+        print(
+            '[DEBUG] User role: $_userRole for UID: ${user.uid} at ${DateTime.now()}');
       } else {
-        print('[DEBUG] User doc does not exist for UID: ${user.uid} at ${DateTime.now()}');
+        print(
+            '[DEBUG] User doc does not exist for UID: ${user.uid} at ${DateTime.now()}');
       }
     } catch (e) {
       print('[ERROR] Failed to fetch user role: $e at ${DateTime.now()}');
@@ -90,25 +97,30 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
   }
 
   void _setupTripStatusListener() {
-    print('[DEBUG] Setting up Firestore listener for trip ${widget.rideId} at ${DateTime.now()}');
+    print(
+        '[DEBUG] Setting up Firestore listener for trip ${widget.rideId} at ${DateTime.now()}');
     _tripSubscription = FirebaseFirestore.instance
         .collection('trips')
         .doc(widget.rideId)
         .snapshots()
         .listen((snapshot) {
       if (!snapshot.exists || snapshot.data() == null) {
-        print('[DEBUG] Trip ${widget.rideId} does not exist or has no data at ${DateTime.now()}');
+        print(
+            '[DEBUG] Trip ${widget.rideId} does not exist or has no data at ${DateTime.now()}');
         return;
       }
       final tripData = snapshot.data()!;
-      print('[DEBUG] Trip ${widget.rideId} status: ${tripData['status']} at ${DateTime.now()}');
+      print(
+          '[DEBUG] Trip ${widget.rideId} status: ${tripData['status']} at ${DateTime.now()}');
       if (tripData['status'] == 'finished' && !_hasNavigated) {
-        print('[DEBUG] Triggering dialog for finished trip ${widget.rideId} at ${DateTime.now()}');
+        print(
+            '[DEBUG] Triggering dialog for finished trip ${widget.rideId} at ${DateTime.now()}');
         _hasNavigated = true;
         _showTripFinishedAlert();
       }
     }, onError: (error) {
-      print('[ERROR] Trip listener error for ${widget.rideId}: $error at ${DateTime.now()}');
+      print(
+          '[ERROR] Trip listener error for ${widget.rideId}: $error at ${DateTime.now()}');
     });
   }
 
@@ -127,7 +139,8 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                 CreateRideCompleteWidget.routeName,
                 queryParameters: {'rideId': widget.rideId},
               ).then((_) {
-                print('[DEBUG] Successfully navigated to SearchRideCompleteWidget with rideId: ${widget.rideId} at ${DateTime.now()}');
+                print(
+                    '[DEBUG] Successfully navigated to SearchRideCompleteWidget with rideId: ${widget.rideId} at ${DateTime.now()}');
               }).catchError((error) {
                 print('[ERROR] Navigation failed: $error at ${DateTime.now()}');
               });
@@ -142,12 +155,17 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
   Future<List<Map<String, dynamic>>> _fetchUserTrips() async {
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
     if (currentUserId == null) {
-      print('[DEBUG] No user signed in — returning empty list at ${DateTime.now()}');
+      print(
+          '[DEBUG] No user signed in — returning empty list at ${DateTime.now()}');
       return [];
     }
 
-    print('[DEBUG] Fetching trip ${widget.rideId} for user: $currentUserId at ${DateTime.now()}');
-    final doc = await FirebaseFirestore.instance.collection('trips').doc(widget.rideId).get();
+    print(
+        '[DEBUG] Fetching trip ${widget.rideId} for user: $currentUserId at ${DateTime.now()}');
+    final doc = await FirebaseFirestore.instance
+        .collection('trips')
+        .doc(widget.rideId)
+        .get();
 
     if (!doc.exists) {
       print('[DEBUG] Trip ${widget.rideId} not found at ${DateTime.now()}');
@@ -160,18 +178,23 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
 
     for (final p in passengers) {
       final map = p as Map<String, dynamic>;
-      if (map['passengerId'] == currentUserId && (map['status'] == 'joined' || map['status'] == 'accepted')) {
+      if (map['passengerId'] == currentUserId &&
+          (map['status'] == 'joined' || map['status'] == 'accepted')) {
         print('[DEBUG] Trip ${doc.id} matched for user at ${DateTime.now()}');
         final creatorId = tripData['creatorId'];
         String creatorName = 'Unknown Driver';
 
         try {
-          final userDoc = await FirebaseFirestore.instance.collection('users').doc(creatorId).get();
+          final userDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(creatorId)
+              .get();
           if (userDoc.exists) {
             creatorName = userDoc.data()?['name'] ?? 'Unknown Driver';
           }
         } catch (e) {
-          print('[ERROR] Failed to fetch creatorName for $creatorId: $e at ${DateTime.now()}');
+          print(
+              '[ERROR] Failed to fetch creatorName for $creatorId: $e at ${DateTime.now()}');
         }
 
         Map<String, dynamic>? carData;
@@ -185,7 +208,8 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
             carData = carQuery.docs.first.data();
           }
         } catch (e) {
-          print('[ERROR] Failed to fetch car data for $creatorId: $e at ${DateTime.now()}');
+          print(
+              '[ERROR] Failed to fetch car data for $creatorId: $e at ${DateTime.now()}');
         }
 
         LatLng? originLatLng;
@@ -203,7 +227,8 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
             );
           }
         } catch (e) {
-          print('[ERROR] Failed to fetch origin coordinates for ${tripData['origin']}: $e at ${DateTime.now()}');
+          print(
+              '[ERROR] Failed to fetch origin coordinates for ${tripData['origin']}: $e at ${DateTime.now()}');
         }
 
         LatLng? destinationLatLng;
@@ -221,7 +246,8 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
             );
           }
         } catch (e) {
-          print('[ERROR] Failed to fetch destination coordinates for ${tripData['destination']}: $e at ${DateTime.now()}');
+          print(
+              '[ERROR] Failed to fetch destination coordinates for ${tripData['destination']}: $e at ${DateTime.now()}');
         }
 
         final departureTimestamp = tripData['departureTime'];
@@ -279,26 +305,39 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
     if (_mapController != null && _markers.isNotEmpty) {
       final bounds = _computeBounds();
       if (bounds != null) {
-        _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50.0));
-      } else if (_userTrips.isNotEmpty && _userTrips[0]['originLatLng'] != null) {
-        _mapController!.animateCamera(CameraUpdate.newLatLng(_userTrips[0]['originLatLng'] as LatLng));
+        _mapController!
+            .animateCamera(CameraUpdate.newLatLngBounds(bounds, 50.0));
+      } else if (_userTrips.isNotEmpty &&
+          _userTrips[0]['originLatLng'] != null) {
+        _mapController!.animateCamera(
+            CameraUpdate.newLatLng(_userTrips[0]['originLatLng'] as LatLng));
       }
     }
   }
 
   LatLngBounds? _computeBounds() {
-    if (_userTrips.isEmpty || _userTrips[0]['originLatLng'] == null || _userTrips[0]['destinationLatLng'] == null) {
+    if (_userTrips.isEmpty ||
+        _userTrips[0]['originLatLng'] == null ||
+        _userTrips[0]['destinationLatLng'] == null) {
       return null;
     }
     final origin = _userTrips[0]['originLatLng'] as LatLng;
     final destination = _userTrips[0]['destinationLatLng'] as LatLng;
     final southWest = LatLng(
-      origin.latitude < destination.latitude ? origin.latitude : destination.latitude,
-      origin.longitude < destination.longitude ? origin.longitude : destination.longitude,
+      origin.latitude < destination.latitude
+          ? origin.latitude
+          : destination.latitude,
+      origin.longitude < destination.longitude
+          ? origin.longitude
+          : destination.longitude,
     );
     final northEast = LatLng(
-      origin.latitude > destination.latitude ? origin.latitude : destination.latitude,
-      origin.longitude > destination.longitude ? origin.longitude : destination.longitude,
+      origin.latitude > destination.latitude
+          ? origin.latitude
+          : destination.latitude,
+      origin.longitude > destination.longitude
+          ? origin.longitude
+          : destination.longitude,
     );
     return LatLngBounds(southwest: southWest, northeast: northEast);
   }
@@ -329,7 +368,8 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
           child: Column(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 10.0, vertical: 10.0),
                 color: FlutterFlowTheme.of(context).secondaryBackground,
                 child: Row(
                   children: [
@@ -373,7 +413,9 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                         padding: const EdgeInsets.only(left: 10.0),
                         child: Text(
                           'Starting The Ride',
-                          style: FlutterFlowTheme.of(context).headlineSmall.override(
+                          style: FlutterFlowTheme.of(context)
+                              .headlineSmall
+                              .override(
                                 fontFamily: 'Inter Tight',
                                 fontSize: 20.0,
                                 letterSpacing: 0.0,
@@ -391,7 +433,8 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                     padding: const EdgeInsets.only(top: 20.0),
                     decoration: BoxDecoration(
                       color: FlutterFlowTheme.of(context).secondaryBackground,
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(20.0)),
+                      borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(20.0)),
                       boxShadow: const [
                         BoxShadow(
                           blurRadius: 4.0,
@@ -408,13 +451,17 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                               ? const Center(child: CircularProgressIndicator())
                               : GoogleMap(
                                   initialCameraPosition: CameraPosition(
-                                    target: _userTrips.isNotEmpty && _userTrips[0]['originLatLng'] != null
-                                        ? _userTrips[0]['originLatLng'] as LatLng
+                                    target: _userTrips.isNotEmpty &&
+                                            _userTrips[0]['originLatLng'] !=
+                                                null
+                                        ? _userTrips[0]['originLatLng']
+                                            as LatLng
                                         : const LatLng(3.1390, 101.6869),
                                     zoom: 14.0,
                                   ),
                                   markers: _markers,
-                                  onMapCreated: (GoogleMapController controller) {
+                                  onMapCreated:
+                                      (GoogleMapController controller) {
                                     _mapController = controller;
                                     _updateMapMarkers();
                                   },
@@ -428,7 +475,8 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                           color: Colors.grey,
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10.0, vertical: 10.0),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
@@ -436,7 +484,8 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                                 width: 55.0,
                                 height: 55.0,
                                 decoration: BoxDecoration(
-                                  color: FlutterFlowTheme.of(context).secondaryText,
+                                  color: FlutterFlowTheme.of(context)
+                                      .secondaryText,
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(
@@ -452,27 +501,38 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                                   children: [
                                     _userTrips.isNotEmpty
                                         ? Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                _userTrips[0]['creatorName'] ?? 'Unknown Driver',
-                                                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                      fontFamily: 'Inter',
-                                                      fontSize: 18.0,
-                                                      fontWeight: FontWeight.w600,
-                                                      letterSpacing: 0.0,
-                                                    ),
+                                                _userTrips[0]['creatorName'] ??
+                                                    'Unknown Driver',
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .bodyMedium
+                                                        .override(
+                                                          fontFamily: 'Inter',
+                                                          fontSize: 18.0,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          letterSpacing: 0.0,
+                                                        ),
                                               ),
                                               Text(
                                                 _userTrips[0]['car'] != null
                                                     ? '${_userTrips[0]['car']['plateNumber']}, ${_userTrips[0]['car']['brand']} ${_userTrips[0]['car']['model']}, ${_userTrips[0]['car']['color']}'
                                                     : 'Car info unavailable',
-                                                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                      fontFamily: 'Inter',
-                                                      fontSize: 14.0,
-                                                      color: FlutterFlowTheme.of(context).secondaryText,
-                                                      letterSpacing: 0.0,
-                                                    ),
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .bodyMedium
+                                                        .override(
+                                                          fontFamily: 'Inter',
+                                                          fontSize: 14.0,
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .secondaryText,
+                                                          letterSpacing: 0.0,
+                                                        ),
                                               ),
                                             ],
                                           )
@@ -481,7 +541,8 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                                 ),
                               ),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10.0, vertical: 5.0),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFF00275C),
                                   borderRadius: BorderRadius.circular(24.0),
@@ -490,7 +551,8 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                                   'Driver',
                                   style: FlutterFlowTheme.of(context).bodyMedium.override(
                                         fontFamily: 'Inter',
-                                        color: FlutterFlowTheme.of(context).primaryBackground,
+                                        color: FlutterFlowTheme.of(context)
+                                            .primaryBackground,
                                         fontSize: 12.0,
                                         fontWeight: FontWeight.bold,
                                         letterSpacing: 0.0,
@@ -501,18 +563,23 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10.0, vertical: 10.0),
                           child: Row(
                             children: [
                               Expanded(
                                 child: FFButtonWidget(
-                                  onPressed: () => print('Message button pressed'),
+                                  onPressed: () =>
+                                      print('Message button pressed'),
                                   text: 'Message to Driver',
                                   options: FFButtonOptions(
                                     height: 40.0,
-                                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16.0),
                                     color: const Color(0xFFF6F7FA),
-                                    textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                                    textStyle: FlutterFlowTheme.of(context)
+                                        .titleSmall
+                                        .override(
                                           fontFamily: 'Inter Tight',
                                           color: const Color(0xFF9D9FA0),
                                           letterSpacing: 0.0,
@@ -538,7 +605,8 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                         ),
                         if (_userRole == 'driver')
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10.0, vertical: 10.0),
                             child: FFButtonWidget(
                               onPressed: () async {
                                 try {
@@ -554,19 +622,23 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                                       'rideId': widget.rideId,
                                     },
                                   ).then((_) {
-                                    print('[DEBUG] Successfully navigated to CreateRideCompleteWidget with rideId: ${widget.rideId} at ${DateTime.now()}');
+                                    print(
+                                        '[DEBUG] Successfully navigated to CreateRideCompleteWidget with rideId: ${widget.rideId} at ${DateTime.now()}');
                                   }).catchError((error) {
-                                    print('[ERROR] Navigation failed: $error at ${DateTime.now()}');
+                                    print(
+                                        '[ERROR] Navigation failed: $error at ${DateTime.now()}');
                                   });
                                 } catch (e) {
                                   showDialog(
                                     context: context,
                                     builder: (context) => AlertDialog(
                                       title: const Text('Error'),
-                                      content: Text('Failed to update trip status: $e'),
+                                      content: Text(
+                                          'Failed to update trip status: $e'),
                                       actions: [
                                         TextButton(
-                                          onPressed: () => Navigator.of(context).pop(),
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(),
                                           child: const Text('OK'),
                                         ),
                                       ],
@@ -579,9 +651,12 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                                 width: double.infinity,
                                 height: 40.0,
                                 color: const Color.fromARGB(255, 49, 94, 255),
-                                textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                                textStyle: FlutterFlowTheme.of(context)
+                                    .titleSmall
+                                    .override(
                                       fontFamily: 'Inter Tight',
-                                      color: FlutterFlowTheme.of(context).primaryBackground,
+                                      color: FlutterFlowTheme.of(context)
+                                          .primaryBackground,
                                       letterSpacing: 0.0,
                                     ),
                                 borderRadius: BorderRadius.circular(8.0),

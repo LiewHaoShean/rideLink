@@ -42,6 +42,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final userId = context.watch<UserProvider>().userId ?? '';
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -575,7 +576,14 @@ class _HomeWidgetState extends State<HomeWidget> {
                         hoverColor: Colors.transparent,
                         highlightColor: Colors.transparent,
                         onTap: () async {
-                          context.pushNamed(AdminSecurityWidget.routeName);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AdminSecurityWidget(
+                                userId: userId,
+                              ),
+                            ),
+                          );
                         },
                         child: Row(
                           mainAxisSize: MainAxisSize.max,
@@ -648,7 +656,14 @@ class _HomeWidgetState extends State<HomeWidget> {
                                   size: 24.0,
                                 ),
                                 onPressed: () {
-                                  print('IconButton pressed ...');
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => AdminSecurityWidget(
+                                        userId: userId,
+                                      ),
+                                    ),
+                                  );
                                 },
                               ),
                             ),

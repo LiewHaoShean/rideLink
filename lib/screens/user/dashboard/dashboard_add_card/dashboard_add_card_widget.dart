@@ -1,3 +1,5 @@
+import 'package:ride_link_carpooling/models/card.dart';
+
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -10,8 +12,13 @@ import 'package:provider/provider.dart';
 import 'dashboard_add_card_model.dart';
 export 'dashboard_add_card_model.dart';
 
+import 'package:ride_link_carpooling/providers/card_provider.dart';
+import '../dashboard_wallet/dashboard_wallet_widget.dart';
+
 class DashboardAddCardWidget extends StatefulWidget {
-  const DashboardAddCardWidget({super.key});
+  final String userId;
+  const DashboardAddCardWidget({Key? key, required this.userId})
+      : super(key: key);
 
   static String routeName = 'dashboardAddCard';
   static String routePath = '/dashboardAddCard';
@@ -40,6 +47,7 @@ class _DashboardAddCardWidgetState extends State<DashboardAddCardWidget> {
     _model.textFieldFocusNode3 ??= FocusNode();
 
     _model.switchValue = true;
+    print(widget.userId);
   }
 
   @override
@@ -547,8 +555,6 @@ class _DashboardAddCardWidgetState extends State<DashboardAddCardWidget> {
                                                         decoration:
                                                             InputDecoration(
                                                           isDense: true,
-                                                          labelText:
-                                                              'Card Number',
                                                           labelStyle:
                                                               FlutterFlowTheme.of(
                                                                       context)
@@ -576,6 +582,7 @@ class _DashboardAddCardWidgetState extends State<DashboardAddCardWidget> {
                                                                         .labelMedium
                                                                         .fontStyle,
                                                                   ),
+                                                          hintText: "XX/XX",
                                                           hintStyle:
                                                               FlutterFlowTheme.of(
                                                                       context)
@@ -753,7 +760,7 @@ class _DashboardAddCardWidgetState extends State<DashboardAddCardWidget> {
                                                                         .labelMedium
                                                                         .fontStyle,
                                                                   ),
-                                                          hintText: 'Last Name',
+                                                          hintText: 'XXX',
                                                           hintStyle:
                                                               FlutterFlowTheme.of(
                                                                       context)
@@ -968,8 +975,68 @@ class _DashboardAddCardWidgetState extends State<DashboardAddCardWidget> {
                                   children: [
                                     Expanded(
                                       child: FFButtonWidget(
-                                        onPressed: () {
-                                          print('Button pressed ...');
+                                        onPressed: () async {
+                                          final cardNumber = _model
+                                                  .textController1?.text
+                                                  .trim() ??
+                                              '';
+                                          final expiryDate = _model
+                                                  .textController2?.text
+                                                  .trim() ??
+                                              '';
+                                          final cvv = _model
+                                                  .textController3?.text
+                                                  .trim() ??
+                                              '';
+
+                                          if (cardNumber.isEmpty ||
+                                              expiryDate.isEmpty ||
+                                              cvv.isEmpty) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(SnackBar(
+                                                    content: Text(
+                                                        'Please fill out all fields!')));
+                                            return;
+                                          }
+                                          final cardModel = CardModel(
+                                              cardId: '',
+                                              userId: widget.userId,
+                                              cardNumber: cardNumber,
+                                              expiryDate: expiryDate,
+                                              cvv: cvv);
+
+                                          try {
+                                            await context
+                                                .read<CardProvider>()
+                                                .createCard(cardModel);
+                                            // Show success pop-up
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    DashboardWalletWidget(
+                                                        userId: widget.userId),
+                                              ),
+                                            );
+                                          } catch (e) {
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) => AlertDialog(
+                                                title: Text('Error'),
+                                                content: Text(
+                                                    'Failed to add card. Please try again.'),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                    },
+                                                    child: Text('Try Again'),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          }
                                         },
                                         text: 'Save',
                                         options: FFButtonOptions(

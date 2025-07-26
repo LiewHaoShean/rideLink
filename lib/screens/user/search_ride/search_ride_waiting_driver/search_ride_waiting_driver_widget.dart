@@ -124,7 +124,7 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
             onPressed: () {
               Navigator.of(dialogContext).pop();
               context.pushNamed(
-                SearchRideCompleteWidget.routeName,
+                CreateRideCompleteWidget.routeName,
                 queryParameters: {'rideId': widget.rideId},
               ).then((_) {
                 print('[DEBUG] Successfully navigated to SearchRideCompleteWidget with rideId: ${widget.rideId} at ${DateTime.now()}');
@@ -487,7 +487,7 @@ class _SearchRideWaitingDriverWidgetState extends State<SearchRideWaitingDriverW
                                   borderRadius: BorderRadius.circular(24.0),
                                 ),
                                 child: Text(
-                                  _userRole == 'driver' ? 'Driver' : 'Passenger',
+                                  'Driver',
                                   style: FlutterFlowTheme.of(context).bodyMedium.override(
                                         fontFamily: 'Inter',
                                         color: FlutterFlowTheme.of(context).primaryBackground,

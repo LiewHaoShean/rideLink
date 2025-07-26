@@ -1,6 +1,6 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ride_link_carpooling/models/trip.dart';
-
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -13,7 +13,6 @@ import 'package:provider/provider.dart';
 import 'search_ride_result_model.dart';
 export 'search_ride_result_model.dart';
 import 'package:ride_link_carpooling/models/location.dart';
-
 import 'package:ride_link_carpooling/screens/user/search_ride/ride_card.dart';
 import 'package:ride_link_carpooling/services/ride_service.dart';
 
@@ -45,95 +44,90 @@ class _SearchRideResultWidgetState extends State<SearchRideResultWidget> {
   bool isLoading = true;
   final scaffoldKey = GlobalKey<ScaffoldState>();
   List<Trip> trips = [];
+  StreamSubscription<QuerySnapshot>? _tripsSubscription;
 
   @override
   void initState() {
     super.initState();
-    final RideService _rideService = RideService();
-    late Future<List<Map<String, dynamic>>> _searchResults;
-
     _model = createModel(context, () => SearchRideResultModel());
     _fetchTrips();
   }
 
-  Future<void> _fetchTrips() async {
-    try {
-      final resultDocs = await RideService().searchRides(
-        from: widget.from.name,
-        to: widget.to.name,
-        date: widget.date,
-        time: widget.time,
-        seatsNeeded: widget.seats,
-      );
-
-      List<Trip> tripsToShow = [];
-
-      if (resultDocs.isEmpty) {
-        // Fallback: get all trips
-        final allTripsSnapshot = await FirebaseFirestore.instance.collection('trips').get();
-        tripsToShow = allTripsSnapshot.docs.map((doc) {
+  void _fetchTrips() {
+    print('[DEBUG] Setting up Firestore stream for scheduled trips at ${DateTime.now()}');
+    _tripsSubscription = FirebaseFirestore.instance
+        .collection('trips')
+        .where('status', isEqualTo: 'scheduled')
+        .snapshots()
+        .listen((snapshot) async {
+      try {
+        List<Trip> tripsToShow = snapshot.docs.map((doc) {
           final data = doc.data() as Map<String, dynamic>;
           data['rideId'] = doc.id;
           return Trip.fromJson(data);
         }).toList();
-      } else {
-        tripsToShow = resultDocs.map((doc) {
-          return Trip.fromJson(doc);
-        }).toList();
-      }
 
-      // ✅ Enrich each Trip — keep rideId!
-      final List<Trip> enrichedTrips = [];
+        // Enrich each Trip with creator details
+        final List<Trip> enrichedTrips = [];
+        for (final trip in tripsToShow) {
+          final creatorUid = trip.creatorId;
+          String creatorName = 'Unknown';
+          String creatorGender = 'male';
 
-      for (final trip in tripsToShow) {
-        final creatorUid = trip.creatorId;
-
-        String creatorName = 'Unknown';
-        String creatorGender = 'male';
-
-        if (creatorUid.isNotEmpty) {
-          final userDoc = await FirebaseFirestore.instance
-              .collection('users')
-              .doc(creatorUid)
-              .get();
-
-          if (userDoc.exists) {
-            creatorName = userDoc.data()?['name'] ?? 'Unknown';
-            creatorGender = userDoc.data()?['gender'] ?? 'male';
+          if (creatorUid.isNotEmpty) {
+            try {
+              final userDoc = await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(creatorUid)
+                  .get();
+              if (userDoc.exists) {
+                creatorName = userDoc.data()?['name'] ?? 'Unknown';
+                creatorGender = userDoc.data()?['gender'] ?? 'male';
+              }
+            } catch (e) {
+              print('[ERROR] Failed to fetch creator details for $creatorUid: $e at ${DateTime.now()}');
+            }
           }
+
+          // Keep rideId when copying trip
+          final enrichedTrip = Trip(
+            rideId: trip.rideId,
+            creatorId: trip.creatorId,
+            origin: trip.origin,
+            destination: trip.destination,
+            departureTime: trip.departureTime,
+            availableSeats: trip.availableSeats,
+            pricePerSeat: trip.pricePerSeat,
+            passengers: trip.passengers,
+            status: trip.status,
+          );
+
+          enrichedTrips.add(enrichedTrip);
         }
 
-        // Keep rideId when copying trip!
-        final enrichedTrip = Trip(
-          rideId: trip.rideId,
-          creatorId: trip.creatorId,
-          origin: trip.origin,
-          destination: trip.destination,
-          departureTime: trip.departureTime,
-          availableSeats: trip.availableSeats,
-          pricePerSeat: trip.pricePerSeat,
-          passengers: trip.passengers,
-          status: trip.status,
-        );
-
-        enrichedTrips.add(enrichedTrip);
+        setState(() {
+          trips = enrichedTrips;
+          isLoading = false;
+          print('[DEBUG] Stream updated with ${trips.length} scheduled trips at ${DateTime.now()}');
+        });
+      } catch (e) {
+        print('[ERROR] Error processing stream snapshot: $e at ${DateTime.now()}');
+        setState(() {
+          isLoading = false;
+        });
       }
-      setState(() {
-        trips = enrichedTrips;
-        isLoading = false;
-      });
-    } catch (e) {
-      debugPrint('Error fetching trips: $e');
+    }, onError: (error) {
+      print('[ERROR] Stream error: $error at ${DateTime.now()}');
       setState(() {
         isLoading = false;
       });
-    }
+    });
   }
 
   @override
   void dispose() {
+    _tripsSubscription?.cancel();
     _model.dispose();
-
     super.dispose();
   }
 
@@ -144,8 +138,9 @@ class _SearchRideResultWidgetState extends State<SearchRideResultWidget> {
     }
 
     if (trips.isEmpty) {
-      return const Center(child: Text('No rides found.'));
+      return const Center(child: Text('No scheduled rides found.'));
     }
+
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -170,8 +165,7 @@ class _SearchRideResultWidgetState extends State<SearchRideResultWidget> {
                         color: FlutterFlowTheme.of(context).secondaryBackground,
                       ),
                       child: Padding(
-                        padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 1.0, 0.0),
+                        padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 1.0, 0.0),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -197,12 +191,10 @@ class _SearchRideResultWidgetState extends State<SearchRideResultWidget> {
                       child: Container(
                         height: 85.5,
                         decoration: BoxDecoration(
-                          color:
-                              FlutterFlowTheme.of(context).secondaryBackground,
+                          color: FlutterFlowTheme.of(context).secondaryBackground,
                         ),
                         child: Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
-                              10.0, 0.0, 0.0, 0.0),
+                          padding: EdgeInsetsDirectional.fromSTEB(10.0, 0.0, 0.0, 0.0),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -210,65 +202,41 @@ class _SearchRideResultWidgetState extends State<SearchRideResultWidget> {
                                 children: [
                                   Text(
                                     widget.from.name,
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
+                                    style: FlutterFlowTheme.of(context).bodyMedium.override(
                                           font: GoogleFonts.inter(
                                             fontWeight: FontWeight.w600,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
+                                            fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                                           ),
                                           fontSize: 16.0,
                                           letterSpacing: 0.0,
                                           fontWeight: FontWeight.w600,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
+                                          fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                                         ),
                                   ),
                                   Text(
                                     ' to ',
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
+                                    style: FlutterFlowTheme.of(context).bodyMedium.override(
                                           font: GoogleFonts.inter(
                                             fontWeight: FontWeight.w600,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
+                                            fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                                           ),
                                           fontSize: 16.0,
                                           letterSpacing: 0.0,
                                           fontWeight: FontWeight.w600,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
+                                          fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                                         ),
                                   ),
                                   Text(
                                     widget.to.name,
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
+                                    style: FlutterFlowTheme.of(context).bodyMedium.override(
                                           font: GoogleFonts.inter(
                                             fontWeight: FontWeight.w600,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
+                                            fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                                           ),
                                           fontSize: 16.0,
                                           letterSpacing: 0.0,
                                           fontWeight: FontWeight.w600,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
+                                          fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                                         ),
                                   ),
                                 ],
@@ -292,55 +260,50 @@ class _SearchRideResultWidgetState extends State<SearchRideResultWidget> {
                     child: SingleChildScrollView(
                       child: Column(
                         children: [
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: trips.length,
-                          itemBuilder: (context, index) {
-                            final trip = trips[index];
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: trips.length,
+                            itemBuilder: (context, index) {
+                              final trip = trips[index];
+                              final String formattedTime = TimeOfDay.fromDateTime(trip.departureTime).format(context);
 
-                            final String formattedTime = TimeOfDay.fromDateTime(trip.departureTime).format(context);
+                              return FutureBuilder<DocumentSnapshot>(
+                                future: FirebaseFirestore.instance.collection('users').doc(trip.creatorId).get(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState == ConnectionState.waiting) {
+                                    return const SizedBox(
+                                      height: 80,
+                                      child: Center(child: CircularProgressIndicator()),
+                                    );
+                                  }
 
-                            return FutureBuilder<DocumentSnapshot>(
-                              future: FirebaseFirestore.instance
-                                  .collection('users')
-                                  .doc(trip.creatorId)
-                                  .get(),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState == ConnectionState.waiting) {
-                                  return const SizedBox(
-                                    height: 80,
-                                    child: Center(child: CircularProgressIndicator()),
+                                  if (snapshot.hasError) {
+                                    return const SizedBox(
+                                      height: 80,
+                                      child: Center(child: Text('Error loading driver info')),
+                                    );
+                                  }
+
+                                  final userData = snapshot.data?.data() as Map<String, dynamic>?;
+                                  final creatorName = userData?['name'] ?? 'Unknown';
+                                  final creatorGender = userData?['gender'] ?? 'male';
+
+                                  return RideCard(
+                                    tripId: trip.rideId,
+                                    time: formattedTime,
+                                    fromName: trip.origin,
+                                    toName: trip.destination,
+                                    driverName: creatorName,
+                                    gender: creatorGender,
+                                    price: trip.pricePerSeat,
+                                    creatorId: trip.creatorId,
+                                    seatNeeded: widget.seats,
                                   );
-                                }
-
-                                if (snapshot.hasError) {
-                                  return const SizedBox(
-                                    height: 80,
-                                    child: Center(child: Text('Error loading driver info')),
-                                  );
-                                }
-
-                                final userData = snapshot.data?.data() as Map<String, dynamic>?;
-
-                                final creatorName = userData?['name'] ?? 'Unknown';
-                                final creatorGender = userData?['gender'] ?? 'male';
-
-                                return RideCard(
-                                  tripId: trip.rideId,
-                                  time: formattedTime,
-                                  fromName: trip.origin,
-                                  toName: trip.destination,
-                                  driverName: creatorName,
-                                  gender: creatorGender,
-                                  price: trip.pricePerSeat,
-                                  creatorId: trip.creatorId,
-                                  seatNeeded: widget.seats,
-                                );
-                              },
-                            );
-                          },
-                        ),  
+                                },
+                              );
+                            },
+                          ),
                         ],
                       ),
                     ),

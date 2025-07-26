@@ -566,11 +566,13 @@ class _MessageMainWidgetState extends State<MessageMainWidget>
                                                               chatId = await context
                                                                   .read<
                                                                       ChatProvider>()
-                                                                  .createCustomerServiceChat(
+                                                                  .createChat(
                                                                     senderId: widget
                                                                         .senderId,
                                                                     receiverId:
-                                                                        "iTnxKsFflkebIjjAxkRuz8rTdOI2", // Customer Service ID
+                                                                        "iTnxKsFflkebIjjAxkRuz8rTdOI2", //adminId
+                                                                    isAdmin:
+                                                                        true,
                                                                   );
                                                               Navigator.push(
                                                                 context,
@@ -784,10 +786,7 @@ class _MessageMainWidgetState extends State<MessageMainWidget>
                                                                               String chatId;
                                                                               final String? _customerServiceChatId = await context.read<ChatProvider>().getCustomerServiceChatId(widget.senderId);
                                                                               if (_customerServiceChatId == null) {
-                                                                                chatId = await context.read<ChatProvider>().createCustomerServiceChat(
-                                                                                      senderId: widget.senderId,
-                                                                                      receiverId: "iTnxKsFflkebIjjAxkRuz8rTdOI2", // Customer Service ID
-                                                                                    );
+                                                                                chatId = await context.read<ChatProvider>().createChat(senderId: widget.senderId, receiverId: "iTnxKsFflkebIjjAxkRuz8rTdOI2", isAdmin: true);
                                                                                 Navigator.push(
                                                                                   context,
                                                                                   MaterialPageRoute(

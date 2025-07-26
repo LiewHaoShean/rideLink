@@ -29,7 +29,6 @@ class UserProvider with ChangeNotifier {
 
     try {
       _users = await _userService.readAllUsers();
-      print(_users);
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -53,6 +52,8 @@ class UserProvider with ChangeNotifier {
   // Get user by ID
   UserModel? getUserById(String uid) {
     try {
+      print("here");
+      print(_users);
       return _users.firstWhere((user) => user.uid == uid);
     } catch (e) {
       print("Error:");
@@ -98,7 +99,7 @@ class UserProvider with ChangeNotifier {
   }
 
   // Add credit to a user
-  Future<void> addCredit(String userId, int amount) async {
+  Future<void> addCredit(String userId, double amount) async {
     try {
       await _userService.addCredit(userId, amount);
       // Optionally update the local user list
@@ -113,8 +114,43 @@ class UserProvider with ChangeNotifier {
     }
   }
 
+  //add profit
+  Future<void> addProfit(String userId, double amount) async {
+    print(userId);
+    print(amount);
+    try {
+      await _userService.addProfit(userId, amount);
+      // Optionally update the local user list
+      final user = _users.firstWhere((u) => u.uid == userId);
+      if (user != null) {
+        user.profit += amount;
+        notifyListeners();
+      }
+    } catch (e) {
+      print("error: ");
+      _error = e.toString();
+      print(_error);
+      notifyListeners();
+    }
+  }
+
+  Future<bool> withdrawCredit(String userId, double amount) async {
+    try {
+      bool success = await _userService.withdrawCredit(userId, amount);
+      if (success) {
+        // Optionally update local user if you want, or just rely on Firestore
+        notifyListeners();
+      }
+      return success;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
   //Withdraw
-  Future<bool> withdrawProfit(String userId, int amount) async {
+  Future<bool> withdrawProfit(String userId, double amount) async {
     try {
       bool success = await _userService.withdrawProfit(userId, amount);
       if (success) {
@@ -129,7 +165,6 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-  // Update user details by ID
   Future<bool> updateUserDetailsById({
     required String userId,
     String? name,

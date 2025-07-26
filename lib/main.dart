@@ -209,7 +209,8 @@ class _NavBarPageState extends State<NavBarPage> {
                 print(
                     '[DEBUG] Triggering dialog for trip ${change.doc.id} at ${DateTime.now()}');
                 _navigatedTrips.add(change.doc.id);
-                _showTripStartedAlert(change.doc.id);
+                _showTripStartedAlert(
+                    change.doc.id, user.uid, tripData['creatorId']);
               }
             }
           }, onError: (error) {
@@ -220,7 +221,8 @@ class _NavBarPageState extends State<NavBarPage> {
     });
   }
 
-  void _showTripStartedAlert(String rideId) {
+  void _showTripStartedAlert(
+      String rideId, String senderId, String receiverId) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -233,7 +235,11 @@ class _NavBarPageState extends State<NavBarPage> {
               Navigator.of(dialogContext).pop();
               context.pushNamed(
                 SearchRideWaitingDriverWidget.routeName,
-                queryParameters: {'rideId': rideId},
+                queryParameters: {
+                  'rideId': rideId,
+                  'senderId': senderId,
+                  'receiverId': receiverId
+                },
               ).then((_) {
                 print(
                     '[DEBUG] Successfully navigated to SearchRideWaitingDriverWidget with rideId: $rideId at ${DateTime.now()}');
@@ -241,7 +247,11 @@ class _NavBarPageState extends State<NavBarPage> {
                 print('[ERROR] Navigation failed: $error at ${DateTime.now()}');
                 MyApp.of(context)._router.pushNamed(
                   SearchRideWaitingDriverWidget.routeName,
-                  queryParameters: {'rideId': rideId},
+                  queryParameters: {
+                    'rideId': rideId,
+                    'senderId': senderId,
+                    'receiverId': receiverId
+                  },
                 );
                 print(
                     '[DEBUG] Fallback navigation attempted with rideId: $rideId at ${DateTime.now()}');

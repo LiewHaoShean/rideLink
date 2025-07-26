@@ -6,7 +6,6 @@ class UserService {
   Future<List<UserModel>> readAllUsers() async {
     final querySnapshot =
         await FirebaseFirestore.instance.collection('users').get();
-
     if (querySnapshot.docs.isEmpty) {
       return [];
     }
@@ -50,23 +49,58 @@ class UserService {
     return UserModel.fromJson(data);
   }
 
+  double _parseDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is int) return value.toDouble();
+    if (value is double) return value;
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
+  }
+
   // Add credit to a user
-  Future<void> addCredit(String userId, int amount) async {
+  Future<void> addCredit(String userId, double amount) async {
     final docRef = FirebaseFirestore.instance.collection('users').doc(userId);
     final doc = await docRef.get();
     if (!doc.exists) return;
     final data = doc.data()!;
-    int currentCredit = (data['credit'] ?? 0) as int;
+    double currentCredit = (data['credit'] ?? 0.0) as double;
     await docRef.update({'credit': currentCredit + amount});
   }
 
-  // Withdraw profit from a user
-  Future<bool> withdrawProfit(String userId, int amount) async {
+  //add profit
+  Future<void> addProfit(String userId, double amount) async {
+    final docRef = FirebaseFirestore.instance.collection('users').doc(userId);
+    final doc = await docRef.get();
+    if (!doc.exists) return;
+    final data = doc.data()!;
+    print("service: ");
+    print(data);
+    double currentProfit = _parseDouble(data['profit']);
+    await docRef.update({'profit': currentProfit + amount});
+  }
+
+  //withdraw credit
+  Future<bool> withdrawCredit(String userId, double amount) async {
     final docRef = FirebaseFirestore.instance.collection('users').doc(userId);
     final doc = await docRef.get();
     if (!doc.exists) return false;
     final data = doc.data()!;
-    int currentProfit = (data['profit'] ?? 0) as int;
+    double currentCredit = _parseDouble(data['credit']);
+    if (currentCredit < amount) {
+      // Not enough credit, do not deduct
+      return false;
+    }
+    await docRef.update({'credit': currentCredit - amount});
+    return true;
+  }
+
+  // Withdraw profit from a user
+  Future<bool> withdrawProfit(String userId, double amount) async {
+    final docRef = FirebaseFirestore.instance.collection('users').doc(userId);
+    final doc = await docRef.get();
+    if (!doc.exists) return false;
+    final data = doc.data()!;
+    double currentProfit = _parseDouble(data['profit']);
     if (currentProfit < amount) {
       // Not enough profit, do not deduct
       return false;
@@ -86,23 +120,25 @@ class UserService {
     try {
       final docRef = FirebaseFirestore.instance.collection('users').doc(userId);
       final doc = await docRef.get();
-      
+
       if (!doc.exists) {
         return false;
       }
 
       Map<String, dynamic> updateData = {};
-      
+
       if (name != null) updateData['name'] = name;
       if (phone != null) updateData['phone'] = phone;
-      if (icNumber != null) updateData['nic'] = icNumber; // nic field in Firestore corresponds to icNumber
+      if (icNumber != null)
+        updateData['nic'] =
+            icNumber; // nic field in Firestore corresponds to icNumber
       if (gender != null) updateData['gender'] = gender;
 
       if (updateData.isNotEmpty) {
         await docRef.update(updateData);
         return true;
       }
-      
+
       return false;
     } catch (e) {
       print('Error updating user details: $e');

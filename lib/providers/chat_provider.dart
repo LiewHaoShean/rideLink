@@ -50,23 +50,46 @@ class ChatProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<String> createCustomerServiceChat(
-      {required String senderId, required String receiverId}) async {
+  Future<String> createChat(
+      {required String senderId,
+      required String receiverId,
+      required bool isAdmin}) async {
     String chatId = nanoid();
     final chat = Chat(
         chatId: chatId,
         participants: [senderId, receiverId],
         lastUpdated: DateTime.now(),
-        isAdmin: true
-        // Add other fields as needed
-        );
+        isAdmin: isAdmin);
     await _chatService.createChat(chat);
-    // Optionally reload chats
-    // await loadChatsByUserId(senderId);
     return chatId;
   }
 
   Future<String?> getCustomerServiceChatId(String userId) async {
     return await _chatService.getAdminChatIdByUser(userId);
+  }
+
+  Future<String?> searchChatByReceiverAndSenderId({
+    required String senderId,
+    required String receiverId,
+  }) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final chatId = await _chatService.searchChatByReceiverAndSenderId(
+        senderId: senderId,
+        receiverId: receiverId,
+      );
+
+      return chatId;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return null;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 }

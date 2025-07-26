@@ -537,12 +537,93 @@ class _DashboardWalletWidgetState extends State<DashboardWalletWidget> {
                                               }
 
                                               if (cardProvider.cards.isEmpty) {
-                                                return Center(
-                                                  child: Text(
-                                                    'No Cards found',
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium,
+                                                // return Center(
+                                                //   child: Text(
+                                                //     'No Cards found',
+                                                //     style: FlutterFlowTheme.of(
+                                                //             context)
+                                                //         .bodyMedium,
+                                                //   ),
+                                                // );
+                                                Padding(
+                                                  padding: EdgeInsetsDirectional
+                                                      .fromSTEB(0, 20, 0, 0),
+                                                  child: Column(
+                                                    mainAxisSize:
+                                                        MainAxisSize.max,
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Container(
+                                                        width: 300,
+                                                        height: 180,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color:
+                                                              Color(0xFF787878),
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(24),
+                                                        ),
+                                                        child: InkWell(
+                                                          splashColor: Colors
+                                                              .transparent,
+                                                          focusColor: Colors
+                                                              .transparent,
+                                                          hoverColor: Colors
+                                                              .transparent,
+                                                          highlightColor: Colors
+                                                              .transparent,
+                                                          onTap: () {
+                                                            Navigator.push(
+                                                              context,
+                                                              MaterialPageRoute(
+                                                                builder: (context) =>
+                                                                    DashboardAddCardWidget(
+                                                                        userId:
+                                                                            widget.userId),
+                                                              ),
+                                                            );
+                                                          },
+                                                          child: Column(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .max,
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .center,
+                                                            children: [
+                                                              FlutterFlowIconButton(
+                                                                borderRadius:
+                                                                    100,
+                                                                buttonSize: 40,
+                                                                fillColor: Color(
+                                                                    0xFFA2A2A2),
+                                                                icon: Icon(
+                                                                  Icons.add,
+                                                                  color: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .info,
+                                                                  size: 24,
+                                                                ),
+                                                                onPressed: () {
+                                                                  Navigator
+                                                                      .push(
+                                                                    context,
+                                                                    MaterialPageRoute(
+                                                                      builder: (context) =>
+                                                                          DashboardAddCardWidget(
+                                                                              userId: widget.userId),
+                                                                    ),
+                                                                  );
+                                                                },
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
                                                   ),
                                                 );
                                               }

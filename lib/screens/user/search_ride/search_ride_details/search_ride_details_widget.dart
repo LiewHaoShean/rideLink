@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:ride_link_carpooling/providers/chat_provider.dart';
 
 import 'search_ride_details_model.dart';
 export 'search_ride_details_model.dart';
@@ -32,7 +33,8 @@ class SearchRideDetailsWidget extends StatefulWidget {
   static String routePath = '/searchRideDetails';
 
   @override
-  State<SearchRideDetailsWidget> createState() => _SearchRideDetailsWidgetState();
+  State<SearchRideDetailsWidget> createState() =>
+      _SearchRideDetailsWidgetState();
 }
 
 class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
@@ -110,8 +112,10 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
       String formattedDate = 'N/A';
       String formattedTime = 'N/A';
 
-      final date = ride['date'] as Timestamp? ?? ride['departureTime'] as Timestamp?;
-      final time = ride['time'] as Timestamp? ?? ride['departureTime'] as Timestamp?;
+      final date =
+          ride['date'] as Timestamp? ?? ride['departureTime'] as Timestamp?;
+      final time =
+          ride['time'] as Timestamp? ?? ride['departureTime'] as Timestamp?;
 
       if (date != null) {
         formattedDate = DateFormat('EEE, d MMM yyyy').format(date.toDate());
@@ -140,7 +144,6 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
       print('Error loading ride details: $e');
     }
   }
-
 
   @override
   void dispose() {
@@ -1185,14 +1188,79 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                 MainAxisSize
                                                                     .max,
                                                             children: [
-                                                              Icon(
-                                                                Icons
-                                                                    .arrow_forward_ios_sharp,
-                                                                color: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .secondaryText,
-                                                                size: 28,
-                                                              ),
+                                                              InkWell(
+                                                                onTap:
+                                                                    () async {
+                                                                  String chatId;
+                                                                  final user =
+                                                                      FirebaseAuth
+                                                                          .instance
+                                                                          .currentUser;
+                                                                  final userId =
+                                                                      user?.uid;
+                                                                  final String? _existingChatId = await context
+                                                                      .read<
+                                                                          ChatProvider>()
+                                                                      .searchChatByReceiverAndSenderId(
+                                                                          senderId: userId ??
+                                                                              '',
+                                                                          receiverId:
+                                                                              creatorData?['uid']);
+                                                                  if (_existingChatId ==
+                                                                      null) {
+                                                                    chatId = await context.read<ChatProvider>().createChat(
+                                                                        senderId:
+                                                                            userId ??
+                                                                                '',
+                                                                        receiverId:
+                                                                            creatorData?[
+                                                                                'uid'],
+                                                                        isAdmin:
+                                                                            false);
+                                                                    Navigator
+                                                                        .push(
+                                                                      context,
+                                                                      MaterialPageRoute(
+                                                                        builder:
+                                                                            (context) =>
+                                                                                MessageDetailsWidget(
+                                                                          senderId:
+                                                                              userId ?? '',
+                                                                          chatId:
+                                                                              chatId,
+                                                                          receiverId:
+                                                                              creatorData?['uid'],
+                                                                        ),
+                                                                      ),
+                                                                    );
+                                                                  } else {
+                                                                    Navigator
+                                                                        .push(
+                                                                      context,
+                                                                      MaterialPageRoute(
+                                                                        builder:
+                                                                            (context) =>
+                                                                                MessageDetailsWidget(
+                                                                          senderId:
+                                                                              userId ?? '',
+                                                                          chatId:
+                                                                              _existingChatId,
+                                                                          receiverId:
+                                                                              creatorData?['uid'],
+                                                                        ),
+                                                                      ),
+                                                                    );
+                                                                  }
+                                                                },
+                                                                child: Icon(
+                                                                  Icons
+                                                                      .arrow_forward_ios_sharp,
+                                                                  color: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .secondaryText,
+                                                                  size: 28,
+                                                                ),
+                                                              )
                                                             ],
                                                           ),
                                                         ],
@@ -1354,61 +1422,68 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                       children: [
                         Expanded(
                           child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(10, 0, 10, 0),
+                            padding:
+                                EdgeInsetsDirectional.fromSTEB(10, 0, 10, 0),
                             child: FFButtonWidget(
-                            onPressed: () async {
-                              final currentUser = FirebaseAuth.instance.currentUser;
-                              if (currentUser == null) return;
+                              onPressed: () async {
+                                final currentUser =
+                                    FirebaseAuth.instance.currentUser;
+                                if (currentUser == null) return;
 
-                              // Get the original ride doc
-                              final rideDoc = await FirebaseFirestore.instance
-                                  .collection('trips')
-                                  .doc(widget.rideId)
-                                  .get();
+                                // Get the original ride doc
+                                final rideDoc = await FirebaseFirestore.instance
+                                    .collection('trips')
+                                    .doc(widget.rideId)
+                                    .get();
 
-                              if (!rideDoc.exists) {
-                                print('Ride not found!');
-                                return;
-                              }
+                                if (!rideDoc.exists) {
+                                  print('Ride not found!');
+                                  return;
+                                }
 
-                              final rideData = rideDoc.data();
-                              if (rideData == null) {
-                                print('Ride data is null!');
-                                return;
-                              }
+                                final rideData = rideDoc.data();
+                                if (rideData == null) {
+                                  print('Ride data is null!');
+                                  return;
+                                }
 
-                              // Existing passengers
-                              List<dynamic> existingPassengers = rideData['passengers'] ?? [];
+                                // Existing passengers
+                                List<dynamic> existingPassengers =
+                                    rideData['passengers'] ?? [];
 
-                              // Add this user to passengers
-                              existingPassengers.add({
-                                'passengerId': currentUser.uid,
-                                'status': 'joined',
-                              });
+                                // Add this user to passengers
+                                existingPassengers.add({
+                                  'passengerId': currentUser.uid,
+                                  'status': 'joined',
+                                });
 
-                              // Reduce availableSeats by 1 (or seatNeeded if you allow multiple)
-                              final currentSeats = rideData['availableSeats'] ?? rideData['seats'] ?? 0;
-                              final newSeats = currentSeats - (widget.seatNeeded ?? 1);
+                                // Reduce availableSeats by 1 (or seatNeeded if you allow multiple)
+                                final currentSeats =
+                                    rideData['availableSeats'] ??
+                                        rideData['seats'] ??
+                                        0;
+                                final newSeats =
+                                    currentSeats - (widget.seatNeeded ?? 1);
 
-                              // Update the same doc
-                              await FirebaseFirestore.instance
-                                  .collection('trips')
-                                  .doc(widget.rideId)
-                                  .update({
-                                'passengers': existingPassengers,
-                                'availableSeats': newSeats,
-                              });
+                                // Update the same doc
+                                await FirebaseFirestore.instance
+                                    .collection('trips')
+                                    .doc(widget.rideId)
+                                    .update({
+                                  'passengers': existingPassengers,
+                                  'availableSeats': newSeats,
+                                });
 
-                              // Navigate with the same rideId
-                              context.pushNamed(
-                                SearchRidePendingRideWidget.routeName,
-                                queryParameters: {
-                                  'creatorId': rideData['creatorId'] ?? '',
-                                  'rideId': rideDoc.id,
-                                  'carId': carData?['carId'] ?? '',
-                                },
-                              );
-                            },
+                                // Navigate with the same rideId
+                                context.pushNamed(
+                                  SearchRidePendingRideWidget.routeName,
+                                  queryParameters: {
+                                    'creatorId': rideData['creatorId'] ?? '',
+                                    'rideId': rideDoc.id,
+                                    'carId': carData?['carId'] ?? '',
+                                  },
+                                );
+                              },
                               text: 'Book for ride',
                               options: FFButtonOptions(
                                 height: 46.7,

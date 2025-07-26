@@ -251,7 +251,7 @@ class _CreateRideHomeWidgetState extends State<CreateRideHomeWidget> {
                                           return DropdownMenuItem<Location>(
                                             value: location,
                                             child: Text(
-                                              location.name, 
+                                              location.name,
                                               overflow: TextOverflow.ellipsis,
                                               style:
                                                   FlutterFlowTheme.of(context)
@@ -1183,12 +1183,18 @@ class _CreateRideHomeWidgetState extends State<CreateRideHomeWidget> {
                                                                   ),
                                                                   Column(
                                                                     mainAxisSize:
-                                                                        MainAxisSize.max,
+                                                                        MainAxisSize
+                                                                            .max,
                                                                     mainAxisAlignment:
-                                                                        MainAxisAlignment.center,
+                                                                        MainAxisAlignment
+                                                                            .center,
                                                                     children: [
                                                                       Padding(
-                                                                        padding: EdgeInsetsDirectional.fromSTEB(10,0,10,0),
+                                                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                                                            10,
+                                                                            0,
+                                                                            10,
+                                                                            0),
                                                                         child:
                                                                             Text(
                                                                           valueOrDefault<
@@ -1213,22 +1219,33 @@ class _CreateRideHomeWidgetState extends State<CreateRideHomeWidget> {
                                                                     ],
                                                                   ),
                                                                   Column(
-                                                                    mainAxisSize: MainAxisSize.max,
-                                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                                    mainAxisSize:
+                                                                        MainAxisSize
+                                                                            .max,
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .center,
                                                                     children: [
                                                                       FlutterFlowIconButton(
-                                                                        borderRadius: 8,
-                                                                        buttonSize: 40,
+                                                                        borderRadius:
+                                                                            8,
+                                                                        buttonSize:
+                                                                            40,
                                                                         icon:
-                                                                        const Icon(
-                                                                          Icons.add_circle,
-                                                                          color:  Color(0xFF00275C),
-                                                                          size: 24,
+                                                                            const Icon(
+                                                                          Icons
+                                                                              .add_circle,
+                                                                          color:
+                                                                              Color(0xFF00275C),
+                                                                          size:
+                                                                              24,
                                                                         ),
                                                                         onPressed:
                                                                             () async {
-                                                                          if (_model.seatNumber! < 4) {
-                                                                            _model.seatNumber = _model.seatNumber! + 1;
+                                                                          if (_model.seatNumber! <
+                                                                              4) {
+                                                                            _model.seatNumber =
+                                                                                _model.seatNumber! + 1;
                                                                             safeSetState(() {});
                                                                           } else {
                                                                             await showDialog(
@@ -1297,78 +1314,107 @@ class _CreateRideHomeWidgetState extends State<CreateRideHomeWidget> {
                             children: [
                               FFButtonWidget(
                                 onPressed: () async {
-                                  if (_model.selectedLocation1 != null && _model.selectedLocation2 != null) {
-                                    if (_model.datePicked1 != null && _model.datePicked2 != null) {
-                                      if (_model.textController3 != null && _model.textController3.text.trim().isNotEmpty) {
+                                  if (_model.selectedLocation1 != null &&
+                                      _model.selectedLocation2 != null) {
+                                    if (_model.datePicked1 != null &&
+                                        _model.datePicked2 != null) {
+                                      if (_model.textController3 != null &&
+                                          _model.textController3.text
+                                              .trim()
+                                              .isNotEmpty) {
                                         try {
-                                          final user = FirebaseAuth.instance.currentUser;
+                                          final user =
+                                              FirebaseAuth.instance.currentUser;
                                           if (user == null) {
-                                            throw Exception('User not logged in');
+                                            throw Exception(
+                                                'User not logged in');
                                           }
 
                                           // Check user role
-                                          final userDoc = await FirebaseFirestore.instance
-                                              .collection('users')
-                                              .doc(user.uid)
-                                              .get();
+                                          final userDoc =
+                                              await FirebaseFirestore.instance
+                                                  .collection('users')
+                                                  .doc(user.uid)
+                                                  .get();
 
-                                          final userRole = userDoc.data()?['userRole'] ?? 'passenger';
+                                          final userRole =
+                                              userDoc.data()?['userRole'] ??
+                                                  'passenger';
 
                                           if (userRole != 'driver') {
                                             // Not driver, redirect
-                                            context.pushNamed(DriverRegisterWidget.routeName);
+                                            context.pushNamed(
+                                                DriverRegisterWidget.routeName);
                                             return;
                                           }
 
                                           // 2️⃣ Check if driver has a verified car
-                                          final carsSnapshot = await FirebaseFirestore.instance
-                                              .collection('cars')
-                                              .where('ownerId', isEqualTo: user.uid)
-                                              .where('isVerified', isEqualTo: true)
-                                              .limit(1)
-                                              .get();
+                                          final carsSnapshot =
+                                              await FirebaseFirestore.instance
+                                                  .collection('cars')
+                                                  .where('ownerId',
+                                                      isEqualTo: user.uid)
+                                                  .where('isVerified',
+                                                      isEqualTo: true)
+                                                  .limit(1)
+                                                  .get();
 
                                           if (carsSnapshot.docs.isEmpty) {
                                             // No verified car, redirect
-                                            context.pushNamed(DriverRegisterWidget.routeName);
+                                            context.pushNamed(
+                                                DriverRegisterWidget.routeName);
                                             return;
                                           }
 
                                           // Both conditions passed — create ride
-                                          final docRef = await _model.createRide();
+                                          final docRef =
+                                              await _model.createRide();
 
                                           if (docRef != null) {
                                             context.pushNamed(
-                                              CreateRideWaitingListWidget.routeName,
+                                              CreateRideWaitingListWidget
+                                                  .routeName,
                                               extra: {'rideId': docRef.id},
                                             );
                                           } else {
-                                            ScaffoldMessenger.of(context).showSnackBar(
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
                                               const SnackBar(
-                                                content: Text('Failed to create ride. Please try again.'),
+                                                content: Text(
+                                                    'Failed to create ride. Please try again.'),
                                               ),
                                             );
                                           }
                                         } catch (e) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(content: Text('An error occurred: $e')),
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                                content: Text(
+                                                    'An error occurred: $e')),
                                           );
                                         }
                                       } else {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(content: Text('Please enter a price.')),
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                              content: Text(
+                                                  'Please enter a price.')),
                                         );
                                       }
                                     } else {
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
                                         const SnackBar(
-                                          content: Text('Please select a departure and return date.'),
+                                          content: Text(
+                                              'Please select a departure and return date.'),
                                         ),
                                       );
                                     }
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Please select both locations.')),
+                                      const SnackBar(
+                                          content: Text(
+                                              'Please select both locations.')),
                                     );
                                   }
                                 },

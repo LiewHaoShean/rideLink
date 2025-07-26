@@ -259,8 +259,10 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: SearchRideWaitingDriverWidget.routeName,
           path: SearchRideWaitingDriverWidget.routePath,
           builder: (context, params) => SearchRideWaitingDriverWidget(
-            rideId: params.getParam('rideId', ParamType.String) ?? '',
-          ),
+              rideId: params.getParam('rideId', ParamType.String) ?? '',
+              senderId: params.getParam('senderId', ParamType.String) ?? '',
+              receiverId:
+                  params.getParam('receiverId', ParamType.String) ?? ''),
         ),
         FFRoute(
           name: SearchRidePendingRideWidget.routeName,

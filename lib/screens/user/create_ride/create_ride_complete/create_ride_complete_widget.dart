@@ -1,11 +1,17 @@
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import 'package:ride_link_carpooling/models/transaction.dart';
 import 'dart:ui';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:ride_link_carpooling/providers/user_provider.dart';
+
+import 'package:ride_link_carpooling/providers/transaction_provider.dart';
 
 import 'create_ride_complete_model.dart';
 export 'create_ride_complete_model.dart';
@@ -24,7 +30,8 @@ class CreateRideCompleteWidget extends StatefulWidget {
   static String routePath = '/createRideComplete';
 
   @override
-  State<CreateRideCompleteWidget> createState() => _CreateRideCompleteWidgetState();
+  State<CreateRideCompleteWidget> createState() =>
+      _CreateRideCompleteWidgetState();
 }
 
 class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
@@ -32,7 +39,9 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
   Map<String, dynamic>? tripData;
   List<Map<String, dynamic>> passengersData = [];
   bool isLoading = true;
-  double? pricePerPassenger; 
+  double? pricePerPassenger;
+  double totalAmount = 0.0;
+  String? userRole;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -44,7 +53,8 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
 
   Future<void> fetchTrip() async {
     try {
-      final tripDoc = FirebaseFirestore.instance.collection('trips').doc(widget.rideId);
+      final tripDoc =
+          FirebaseFirestore.instance.collection('trips').doc(widget.rideId);
       final docSnapshot = await tripDoc.get();
 
       if (docSnapshot.exists) {
@@ -58,7 +68,10 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
           if (p['status'] == 'accepted') {
             acceptedPassengerCount++;
             final passengerId = p['passengerId'];
-            final userDoc = await FirebaseFirestore.instance.collection('users').doc(passengerId).get();
+            final userDoc = await FirebaseFirestore.instance
+                .collection('users')
+                .doc(passengerId)
+                .get();
             final userData = userDoc.exists ? userDoc.data() : null;
             passengersList.add({
               'passenger': p,
@@ -69,8 +82,22 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
 
         // Calculate price per passenger
         final pricePerSeat = (data['pricePerSeat'] as num?)?.toDouble() ?? 0.0;
-        final calculatedPrice = acceptedPassengerCount > 0 ? pricePerSeat / acceptedPassengerCount : 0.0;
+        final calculatedPrice = acceptedPassengerCount > 0
+            ? pricePerSeat / acceptedPassengerCount
+            : 0.0;
+        final user = FirebaseAuth.instance.currentUser;
+        final currentUserId = user?.uid;
+        final userModel =
+            context.read<UserProvider>().getUserById(currentUserId!);
+        userRole = userModel?.userRole;
 
+        if (userRole == 'driver') {
+          // Driver earns from all accepted passengers
+          totalAmount = pricePerSeat;
+        } else if (userRole == 'passenger') {
+          // Passenger pays for one seat
+          totalAmount = pricePerSeat / acceptedPassengerCount;
+        }
         setState(() {
           tripData = data;
           passengersData = passengersList;
@@ -123,7 +150,7 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
           top: true,
           child: SingleChildScrollView(
             child: Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(1, 0, 0, 0),
+              padding: EdgeInsetsDirectional.fromSTEB(1, 0, 0, 0),
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
@@ -368,55 +395,95 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
                                                       mainAxisSize:
                                                           MainAxisSize.max,
                                                       children: [
-
-                                                        StreamBuilder<DocumentSnapshot>(
-                                                          stream: FirebaseFirestore.instance.collection('trips').doc(widget.rideId).snapshots(),
-                                                          builder: (context, snapshot) {
-                                                            if (snapshot.connectionState == ConnectionState.waiting) {
-                                                              return const Center(child: CircularProgressIndicator());
+                                                        StreamBuilder<
+                                                            DocumentSnapshot>(
+                                                          stream:
+                                                              FirebaseFirestore
+                                                                  .instance
+                                                                  .collection(
+                                                                      'trips')
+                                                                  .doc(widget
+                                                                      .rideId)
+                                                                  .snapshots(),
+                                                          builder: (context,
+                                                              snapshot) {
+                                                            if (snapshot
+                                                                    .connectionState ==
+                                                                ConnectionState
+                                                                    .waiting) {
+                                                              return const Center(
+                                                                  child:
+                                                                      CircularProgressIndicator());
                                                             }
-                                                            if (snapshot.hasError || !snapshot.hasData || !snapshot.data!.exists) {
-                                                              return const Center(child: Text('No trip data available'));
+                                                            if (snapshot.hasError ||
+                                                                !snapshot
+                                                                    .hasData ||
+                                                                !snapshot.data!
+                                                                    .exists) {
+                                                              return const Center(
+                                                                  child: Text(
+                                                                      'No trip data available'));
                                                             }
 
-                                                            final data = snapshot.data!.data() as Map<String, dynamic>;
-                                                            final passengers = data['passengers'] as List<dynamic>? ?? [];
-                                                            final acceptedPassengerCount = passengers.where((p) => p['status'] == 'accepted').length;
-                                                            final pricePerSeat = (data['pricePerSeat'] as num?)?.toDouble() ?? 0.0;
-                                                            final pricePerPassenger = acceptedPassengerCount > 0 ? pricePerSeat / acceptedPassengerCount : 0.0;
+                                                            final data = snapshot
+                                                                    .data!
+                                                                    .data()
+                                                                as Map<String,
+                                                                    dynamic>;
+                                                            final passengers =
+                                                                data['passengers']
+                                                                        as List<
+                                                                            dynamic>? ??
+                                                                    [];
+                                                            final acceptedPassengerCount =
+                                                                passengers
+                                                                    .where((p) =>
+                                                                        p['status'] ==
+                                                                        'accepted')
+                                                                    .length;
+                                                            final pricePerSeat =
+                                                                (data['pricePerSeat']
+                                                                            as num?)
+                                                                        ?.toDouble() ??
+                                                                    0.0;
+                                                            final pricePerPassenger =
+                                                                acceptedPassengerCount >
+                                                                        0
+                                                                    ? pricePerSeat /
+                                                                        acceptedPassengerCount
+                                                                    : 0.0;
 
                                                             return Text(
                                                               '${pricePerPassenger.toStringAsFixed(2)}',
                                                               style: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .titleLarge
-                                                              .override(
-                                                                font: GoogleFonts
-                                                                    .interTight(
-                                                                  fontWeight: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .titleLarge
-                                                                      .fontWeight,
-                                                                  fontStyle: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .titleLarge
-                                                                      .fontStyle,
-                                                                ),
-                                                                letterSpacing:
-                                                                    0.0,
-                                                                fontWeight: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .titleLarge
-                                                                    .fontWeight,
-                                                                fontStyle: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .titleLarge
-                                                                    .fontStyle,
+                                                                      .of(context)
+                                                                  .titleLarge
+                                                                  .override(
+                                                                    font: GoogleFonts
+                                                                        .interTight(
+                                                                      fontWeight: FlutterFlowTheme.of(
+                                                                              context)
+                                                                          .titleLarge
+                                                                          .fontWeight,
+                                                                      fontStyle: FlutterFlowTheme.of(
+                                                                              context)
+                                                                          .titleLarge
+                                                                          .fontStyle,
+                                                                    ),
+                                                                    letterSpacing:
+                                                                        0.0,
+                                                                    fontWeight: FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .titleLarge
+                                                                        .fontWeight,
+                                                                    fontStyle: FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .titleLarge
+                                                                        .fontStyle,
                                                                   ),
                                                             );
                                                           },
                                                         ),
-
                                                       ],
                                                     ),
                                                   ],
@@ -699,6 +766,112 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
                                       10, 0, 10, 0),
                                   child: FFButtonWidget(
                                     onPressed: () async {
+                                      final user =
+                                          FirebaseAuth.instance.currentUser;
+                                      final userId = user?.uid;
+
+                                      // Get user role at button press
+                                      String? currentUserRole;
+                                      try {
+                                        final userModel = context
+                                            .read<UserProvider>()
+                                            .getUserById(userId!);
+                                        currentUserRole = userModel?.userRole;
+                                      } catch (e) {
+                                        // Fallback
+                                        final userDoc = await FirebaseFirestore
+                                            .instance
+                                            .collection('users')
+                                            .doc(userId)
+                                            .get();
+                                        currentUserRole =
+                                            userDoc.data()?['userRole'];
+                                      }
+
+                                      // Calculate amount based on role
+                                      double calculatedAmount = 0.0;
+                                      if (currentUserRole == 'driver') {
+                                        print("driver");
+                                        calculatedAmount = totalAmount;
+                                        await context
+                                            .read<UserProvider>()
+                                            .addProfit(
+                                                userId ?? '', calculatedAmount);
+
+                                        final transactionModel =
+                                            TransactionModel(
+                                          transactionId: '',
+                                          userId: userId ?? '',
+                                          amount: totalAmount,
+                                          type: currentUserRole ?? '',
+                                          rideId: widget.rideId,
+                                          timestamp: DateTime.now(),
+                                        );
+
+                                        await context
+                                            .read<TransactionProvider>()
+                                            .createTransaction(
+                                                transactionModel);
+                                      } else if (currentUserRole ==
+                                          'passenger') {
+                                        print("passenger");
+                                        calculatedAmount =
+                                            pricePerPassenger ?? 0.0;
+
+                                        bool success = await context
+                                            .read<UserProvider>()
+                                            .withdrawCredit(
+                                                userId ?? '', calculatedAmount);
+                                        // print(success);
+                                        if (!success) {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) => AlertDialog(
+                                              title: Text('Error'),
+                                              content: Text(
+                                                  'Failed to pay. You do not have sufficient balance to be paid!'),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: Text('Try Again'),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        } else {
+                                          showDialog(
+                                              context: context,
+                                              builder: (context) => AlertDialog(
+                                                    title: Text("Success"),
+                                                    content: Text(
+                                                        'Withdraw successfully!'),
+                                                    actions: [
+                                                      TextButton(
+                                                          onPressed: () {
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+                                                          },
+                                                          child: Text('Ok'))
+                                                    ],
+                                                  ));
+                                          final transactionModel =
+                                              TransactionModel(
+                                            transactionId: '',
+                                            userId: userId ?? '',
+                                            amount: totalAmount,
+                                            type: currentUserRole ?? '',
+                                            rideId: widget.rideId,
+                                            timestamp: DateTime.now(),
+                                          );
+                                          await context
+                                              .read<TransactionProvider>()
+                                              .createTransaction(
+                                                  transactionModel);
+                                        }
+                                      }
                                       context.pushNamed(
                                           CreateRideHomeWidget.routeName);
                                     },

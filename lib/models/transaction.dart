@@ -4,8 +4,8 @@ class TransactionModel {
   final String transactionId;
   final String? rideId;
   final String userId;
-  final int amount;
-  final String type; // 'ride', 'top-up', 'withdraw'
+  final double amount;
+  final String type; // 'rider', 'top-up', 'withdraw', 'passenger'
   final DateTime timestamp;
 
   TransactionModel({
@@ -22,7 +22,7 @@ class TransactionModel {
       transactionId: json['transactionId'],
       rideId: json['rideId'],
       userId: json['userId'],
-      amount: (json['amount'] as num).toInt(),
+      amount: (json['amount'] as num).toDouble(),
       type: json['type'],
       timestamp: (json['timestamp'] as Timestamp).toDate(),
     );

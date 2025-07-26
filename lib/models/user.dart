@@ -6,8 +6,8 @@ class UserModel {
   final String nic;
   final String? gender;
   final bool isEmailVerified;
-  int credit;
-  int profit;
+  double credit;
+  double profit;
   final String? phone;
 
   UserModel({
@@ -24,6 +24,14 @@ class UserModel {
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    double parseDouble(dynamic value) {
+      if (value == null) return 0.0;
+      if (value is int) return value.toDouble();
+      if (value is double) return value;
+      if (value is String) return double.tryParse(value) ?? 0.0;
+      return 0.0;
+    }
+
     return UserModel(
       uid: json['uid'],
       name: json['name'],
@@ -32,8 +40,8 @@ class UserModel {
       nic: json['nic'],
       phone: json['phone'],
       gender: json['gender'],
-      credit: json['credit'] ?? 0,
-      profit: json['profit'] ?? 0,
+      credit: parseDouble(json['credit']),
+      profit: parseDouble(json['profit']),
       isEmailVerified: json['isEmailVerified'] ?? false,
     );
   }

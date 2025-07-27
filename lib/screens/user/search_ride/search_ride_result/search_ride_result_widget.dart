@@ -70,7 +70,8 @@ class _SearchRideResultWidgetState extends State<SearchRideResultWidget> {
 
       if (resultDocs.isEmpty) {
         // Fallback: get all trips
-        final allTripsSnapshot = await FirebaseFirestore.instance.collection('trips').get();
+        final allTripsSnapshot =
+            await FirebaseFirestore.instance.collection('trips').get();
         tripsToShow = allTripsSnapshot.docs.map((doc) {
           final data = doc.data() as Map<String, dynamic>;
           data['rideId'] = doc.id;
@@ -288,59 +289,69 @@ class _SearchRideResultWidgetState extends State<SearchRideResultWidget> {
                     color: FlutterFlowTheme.of(context).secondaryBackground,
                   ),
                   child: Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(10.0, 0.0, 10.0, 0.0),
+                    padding:
+                        EdgeInsetsDirectional.fromSTEB(10.0, 0.0, 10.0, 0.0),
                     child: SingleChildScrollView(
                       child: Column(
                         children: [
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: trips.length,
-                          itemBuilder: (context, index) {
-                            final trip = trips[index];
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: trips.length,
+                            itemBuilder: (context, index) {
+                              final trip = trips[index];
 
-                            final String formattedTime = TimeOfDay.fromDateTime(trip.departureTime).format(context);
+                              final String formattedTime =
+                                  TimeOfDay.fromDateTime(trip.departureTime)
+                                      .format(context);
 
-                            return FutureBuilder<DocumentSnapshot>(
-                              future: FirebaseFirestore.instance
-                                  .collection('users')
-                                  .doc(trip.creatorId)
-                                  .get(),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState == ConnectionState.waiting) {
-                                  return const SizedBox(
-                                    height: 80,
-                                    child: Center(child: CircularProgressIndicator()),
+                              return FutureBuilder<DocumentSnapshot>(
+                                future: FirebaseFirestore.instance
+                                    .collection('users')
+                                    .doc(trip.creatorId)
+                                    .get(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return const SizedBox(
+                                      height: 80,
+                                      child: Center(
+                                          child: CircularProgressIndicator()),
+                                    );
+                                  }
+
+                                  if (snapshot.hasError) {
+                                    return const SizedBox(
+                                      height: 80,
+                                      child: Center(
+                                          child: Text(
+                                              'Error loading driver info')),
+                                    );
+                                  }
+
+                                  final userData = snapshot.data?.data()
+                                      as Map<String, dynamic>?;
+
+                                  final creatorName =
+                                      userData?['name'] ?? 'Unknown';
+                                  final creatorGender =
+                                      userData?['gender'] ?? 'male';
+
+                                  return RideCard(
+                                    tripId: trip.rideId,
+                                    time: formattedTime,
+                                    fromName: trip.origin,
+                                    toName: trip.destination,
+                                    driverName: creatorName,
+                                    gender: creatorGender,
+                                    price: trip.pricePerSeat,
+                                    creatorId: trip.creatorId,
+                                    seatNeeded: widget.seats,
                                   );
-                                }
-
-                                if (snapshot.hasError) {
-                                  return const SizedBox(
-                                    height: 80,
-                                    child: Center(child: Text('Error loading driver info')),
-                                  );
-                                }
-
-                                final userData = snapshot.data?.data() as Map<String, dynamic>?;
-
-                                final creatorName = userData?['name'] ?? 'Unknown';
-                                final creatorGender = userData?['gender'] ?? 'male';
-
-                                return RideCard(
-                                  tripId: trip.rideId,
-                                  time: formattedTime,
-                                  fromName: trip.origin,
-                                  toName: trip.destination,
-                                  driverName: creatorName,
-                                  gender: creatorGender,
-                                  price: trip.pricePerSeat,
-                                  creatorId: trip.creatorId,
-                                  seatNeeded: widget.seats,
-                                );
-                              },
-                            );
-                          },
-                        ),  
+                                },
+                              );
+                            },
+                          ),
                         ],
                       ),
                     ),

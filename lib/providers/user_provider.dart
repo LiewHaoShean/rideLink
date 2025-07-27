@@ -98,6 +98,24 @@ class UserProvider with ChangeNotifier {
     }
   }
 
+  Future<double> getUserCredit(String userId) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final credit = await _userService.getUserCredit(userId);
+      return credit;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return 0.0;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   // Add credit to a user
   Future<void> addCredit(String userId, double amount) async {
     try {
@@ -201,6 +219,49 @@ class UserProvider with ChangeNotifier {
             credit: currentUser.credit,
             profit: currentUser.profit,
             isEmailVerified: currentUser.isEmailVerified,
+          );
+          _users[userIndex] = updatedUser;
+        }
+        notifyListeners();
+      }
+
+      return success;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> updateUserSuspendStatus(String userId, bool isBanned) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      bool success =
+          await _userService.updateUserSuspendStatus(userId, isBanned);
+
+      if (success) {
+        // Update the local user list if the user exists in the list
+        final userIndex = _users.indexWhere((user) => user.uid == userId);
+        if (userIndex != -1) {
+          final currentUser = _users[userIndex];
+          final updatedUser = UserModel(
+            uid: currentUser.uid,
+            name: currentUser.name,
+            email: currentUser.email,
+            userRole: currentUser.userRole,
+            nic: currentUser.nic,
+            phone: currentUser.phone,
+            gender: currentUser.gender,
+            credit: currentUser.credit,
+            profit: currentUser.profit,
+            isEmailVerified: currentUser.isEmailVerified,
+            isBanned: isBanned, // Use the passed parameter
           );
           _users[userIndex] = updatedUser;
         }

@@ -53,4 +53,104 @@ class TransactionProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<TransactionModel?> getTransactionById(String transactionId) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final transaction =
+          await _transactionService.getTransactionById(transactionId);
+      return transaction;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return null;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Calculate total transaction amount
+  Future<double> calculateTotalTransactionAmount() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final totalAmount =
+          await _transactionService.calculateTotalTransactionAmount();
+      return totalAmount;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return 0.0;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Calculate total transaction amount by user ID
+  Future<double> calculateTotalTransactionAmountByUserId(String userId) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final totalAmount = await _transactionService
+          .calculateTotalTransactionAmountByUserId(userId);
+      return totalAmount;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return 0.0;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Calculate monthly transaction amount
+  Future<double> calculateMonthlyTransactionAmount() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final monthlyAmount =
+          await _transactionService.calculateMonthlyTransactionAmount();
+      return monthlyAmount;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return 0.0;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Calculate monthly transaction amount by user ID
+  Future<double> calculateMonthlyTransactionAmountByUserId(
+      String userId) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final monthlyAmount = await _transactionService
+          .calculateMonthlyTransactionAmountByUserId(userId);
+      return monthlyAmount;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return 0.0;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

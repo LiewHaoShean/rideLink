@@ -539,8 +539,12 @@ class _LoginPageWidgetState extends State<LoginPageWidget> {
                               if (userModel.userRole == 'admin') {
                                 context.pushNamed('home'); // Admin home page
                               } else {
-                                context.pushNamed(
-                                    'searchRideHome'); // Passenger page
+                                if (userModel.isBanned == true) {
+                                  context.pushNamed(FailPageWidget.routeName);
+                                } else {
+                                  context.pushNamed(
+                                      'searchRideHome'); // Passenger page
+                                }
                               }
                             } else {
                               // If user document doesn't exist, default to passenger

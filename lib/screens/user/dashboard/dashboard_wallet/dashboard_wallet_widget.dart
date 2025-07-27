@@ -4,6 +4,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'dart:ui';
 import '/index.dart';
+import '/main.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart'
     as smooth_page_indicator;
 import 'package:flutter/material.dart';
@@ -16,6 +17,7 @@ import 'dashboard_wallet_model.dart';
 export 'dashboard_wallet_model.dart';
 import 'package:ride_link_carpooling/providers/user_provider.dart';
 import 'package:ride_link_carpooling/providers/card_provider.dart';
+import '/main.dart';
 
 class DashboardWalletWidget extends StatefulWidget {
   final String userId;
@@ -87,7 +89,7 @@ class _DashboardWalletWidgetState extends State<DashboardWalletWidget> {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
         body: SafeArea(
           top: true,
           child: Column(
@@ -140,12 +142,13 @@ class _DashboardWalletWidgetState extends State<DashboardWalletWidget> {
                                             hoverColor: Colors.transparent,
                                             highlightColor: Colors.transparent,
                                             onTap: () async {
-                                              Navigator.push(
+                                              Navigator.pushReplacement(
                                                 context,
                                                 MaterialPageRoute(
                                                   builder: (context) =>
-                                                      DashboardHomeWidget(
-                                                    userId: widget.userId,
+                                                      NavBarPage(
+                                                    initialPage:
+                                                        'dashboardHome',
                                                   ),
                                                 ),
                                               );

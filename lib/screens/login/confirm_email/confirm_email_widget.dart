@@ -9,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'confirm_email_model.dart';
 export 'confirm_email_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ConfirmEmailWidget extends StatefulWidget {
   const ConfirmEmailWidget({super.key});
@@ -22,6 +23,7 @@ class ConfirmEmailWidget extends StatefulWidget {
 
 class _ConfirmEmailWidgetState extends State<ConfirmEmailWidget> {
   late ConfirmEmailModel _model;
+  bool isLoading = false;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -37,7 +39,6 @@ class _ConfirmEmailWidgetState extends State<ConfirmEmailWidget> {
   @override
   void dispose() {
     _model.dispose();
-
     super.dispose();
   }
 
@@ -90,7 +91,7 @@ class _ConfirmEmailWidgetState extends State<ConfirmEmailWidget> {
                       padding:
                           EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 0.0, 0.0),
                       child: Text(
-                        'Verify your Email',
+                        'Reset Your Password',
                         style:
                             FlutterFlowTheme.of(context).headlineSmall.override(
                                   font: GoogleFonts.roboto(
@@ -121,7 +122,7 @@ class _ConfirmEmailWidgetState extends State<ConfirmEmailWidget> {
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Text(
-                      'We will sent an OTP for verification purpose',
+                      'We will send a password reset link to your email',
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
                             font: GoogleFonts.inter(
                               fontWeight: FlutterFlowTheme.of(context)
@@ -280,18 +281,60 @@ class _ConfirmEmailWidgetState extends State<ConfirmEmailWidget> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         FFButtonWidget(
-                          onPressed: () async {
-                            context.pushNamed(
-                              VerificationPageWidget.routeName,
-                              queryParameters: {
-                                'type': serializeParam(
-                                  'resetPassword',
-                                  ParamType.String,
-                                ),
-                              }.withoutNulls,
-                            );
-                          },
-                          text: 'Confirm',
+                          onPressed: isLoading
+                              ? null
+                              : () async {
+                                  setState(() => isLoading = true);
+                                  try {
+                                    final email =
+                                        _model.emailTextFieldTextController.text
+                                            .trim();
+                                    if (email.isEmpty) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text('Please enter an email'),
+                                          duration: Duration(seconds: 3),
+                                        ),
+                                      );
+                                      return;
+                                    }
+                                    await FirebaseAuth.instance
+                                        .sendPasswordResetEmail(email: email);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content:
+                                            Text('Password reset email sent'),
+                                        duration: Duration(seconds: 3),
+                                      ),
+                                    );
+                                    context.pop();
+                                  } catch (e) {
+                                    String errorMessage =
+                                        'Failed to send reset email';
+                                    if (e is FirebaseAuthException) {
+                                      switch (e.code) {
+                                        case 'invalid-email':
+                                          errorMessage = 'Invalid email format';
+                                          break;
+                                        case 'user-not-found':
+                                          errorMessage =
+                                              'No user found for that email';
+                                          break;
+                                        default:
+                                          errorMessage = 'Error: ${e.message}';
+                                      }
+                                    }
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(errorMessage),
+                                        duration: Duration(seconds: 3),
+                                      ),
+                                    );
+                                  } finally {
+                                    setState(() => isLoading = false);
+                                  }
+                                },
+                          text: isLoading ? 'Sending...' : 'Send Reset Link',
                           options: FFButtonOptions(
                             width: 345.0,
                             height: 54.0,

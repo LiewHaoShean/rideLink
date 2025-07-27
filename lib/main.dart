@@ -183,8 +183,7 @@ class _NavBarPageState extends State<NavBarPage> {
         return;
       }
 
-      print(
-          '[DEBUG] Setting up Firestore listener for passenger trips at ${DateTime.now()}');
+      print('[DEBUG] Setting up Firestore listener for passenger trips at ${DateTime.now()}');
       _tripSubscription = FirebaseFirestore.instance
           .collection('trips')
           .where('passengers', arrayContainsAny: [
@@ -222,7 +221,7 @@ class _NavBarPageState extends State<NavBarPage> {
   }
 
   void _showTripStartedAlert(
-      String rideId, String senderId, String receiverId) {
+    String rideId, String senderId, String receiverId) {
     showDialog(
       context: context,
       barrierDismissible: false,

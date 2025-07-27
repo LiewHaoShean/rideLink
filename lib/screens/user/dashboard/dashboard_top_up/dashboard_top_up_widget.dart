@@ -1,4 +1,5 @@
 import 'package:ride_link_carpooling/models/transaction.dart';
+import '/index.dart';
 
 import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
@@ -655,13 +656,18 @@ class _DashboardTopUpCreditWidgetState
                                   actions: [
                                     TextButton(
                                       onPressed: () {
-                                        Navigator.of(context).pop();
+                                        Navigator.of(context)
+                                            .pop(); // Close the dialog
                                       },
                                       child: Text('Try Again'),
                                     ),
                                   ],
                                 ),
-                              );
+                              ).then((_) {
+                                // Navigate after the dialog is dismissed
+                                context
+                                    .pushNamed(DashboardWalletWidget.routeName);
+                              });
                             }
 
                             final transactionModel = TransactionModel(

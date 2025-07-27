@@ -9,6 +9,7 @@ class UserModel {
   double credit;
   double profit;
   final String? phone;
+  final bool isBanned;
 
   UserModel({
     required this.uid,
@@ -21,6 +22,7 @@ class UserModel {
     this.credit = 0,
     this.profit = 0,
     this.isEmailVerified = false,
+    this.isBanned = false,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -43,6 +45,7 @@ class UserModel {
       credit: parseDouble(json['credit']),
       profit: parseDouble(json['profit']),
       isEmailVerified: json['isEmailVerified'] ?? false,
+      isBanned: json['isBanned'] ?? false,
     );
   }
 
@@ -58,6 +61,7 @@ class UserModel {
       'credit': credit,
       'profit': profit,
       'isEmailVerified': isEmailVerified,
+      'isBanned': isBanned,
     };
   }
 }

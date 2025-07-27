@@ -63,7 +63,7 @@ class UserService {
     final doc = await docRef.get();
     if (!doc.exists) return;
     final data = doc.data()!;
-    double currentCredit = (data['credit'] ?? 0.0) as double;
+    double currentCredit = _parseDouble(data['credit']);
     await docRef.update({'credit': currentCredit + amount});
   }
 
@@ -142,6 +142,41 @@ class UserService {
       return false;
     } catch (e) {
       print('Error updating user details: $e');
+      return false;
+    }
+  }
+
+  Future<double> getUserCredit(String userId) async {
+    try {
+      final doc = FirebaseFirestore.instance.collection('users').doc(userId);
+      final docSnapshot = await doc.get();
+
+      if (!docSnapshot.exists) {
+        return 0.0; // Return 0 if user doesn't exist
+      }
+
+      final data = docSnapshot.data()!;
+      return _parseDouble(data['credit']);
+    } catch (e) {
+      print('Error getting user credit: $e');
+      return 0.0; // Return 0 on error
+    }
+  }
+
+  //ban user
+  Future<bool> updateUserSuspendStatus(String userId, bool isBanned) async {
+    try {
+      final docRef = FirebaseFirestore.instance.collection('users').doc(userId);
+      final doc = await docRef.get();
+
+      if (!doc.exists) {
+        return false;
+      }
+
+      await docRef.update({'isBanned': isBanned});
+      return true;
+    } catch (e) {
+      print('Error updating user ban status: $e');
       return false;
     }
   }

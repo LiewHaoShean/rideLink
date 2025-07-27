@@ -55,7 +55,7 @@ export 'screens/user/create_ride/license_verification/license_verification_widge
 export '/processing_page/processing_page_widget.dart' show ProcessingPageWidget;
 export 'screens/verification_success_page/verification_success_page_widget.dart'
     show VerificationSuccessPageWidget;
-export '/fail_page/fail_page_widget.dart' show FailPageWidget;
+export 'screens/login/fail_page/fail_page_widget.dart' show FailPageWidget;
 export 'screens/user/search_ride/search_ride_waiting_driver/search_ride_waiting_driver_widget.dart'
     show SearchRideWaitingDriverWidget;
 export 'screens/user/search_ride/search_ride_pending_ride/search_ride_pending_ride_widget.dart'
@@ -95,3 +95,4 @@ export 'screens/user/dashboard/dashboard_top_up/dashboard_top_up_widget.dart'
     show DashboardTopUpCreditWidget;
 export 'screens/user/dashboard/dashboard_withdraw/dashboard_withdraw_profit_widget.dart'
     show DashboardWithdrawProfitWidget;
+export 'screens/admin/home/home_widget.dart' show HomeWidget;

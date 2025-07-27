@@ -2,6 +2,8 @@ import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/index.dart';
+
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -29,6 +31,7 @@ class AdminUserDetailsWidget extends StatefulWidget {
 class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
   late AdminUserDetailsModel _model;
   CarInformation? _userVehicle;
+  bool _isBanned = false;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -133,7 +136,10 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
                                                     size: 24,
                                                   ),
                                                   onPressed: () async {
-                                                    context.safePop();
+                                                    // Navigate after the dialog is dismissed
+                                                    context.pushNamed(
+                                                        AdminUserManagementWidget
+                                                            .routeName);
                                                   },
                                                 ),
                                               ],
@@ -266,6 +272,7 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
                           }
 
                           final user = userProvider.getUserById(widget.userId);
+                          _isBanned = user?.isBanned ?? false;
                           if (user == null) {
                             return Center(
                               child: Text(
@@ -1730,10 +1737,133 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
                                   children: [
                                     Expanded(
                                       child: FFButtonWidget(
-                                        onPressed: () {
-                                          print('Button pressed ...');
-                                        },
-                                        text: 'Suspend',
+                                        onPressed: _isBanned
+                                            ? () async {
+                                                final userProvider =
+                                                    Provider.of<UserProvider>(
+                                                        context,
+                                                        listen: false);
+                                                bool success = await userProvider
+                                                    .updateUserSuspendStatus(
+                                                        widget.userId, false);
+
+                                                if (success) {
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (context) =>
+                                                        AlertDialog(
+                                                      title: Text("Success"),
+                                                      content: Text(
+                                                          'User unbanned successfully!'),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop(); // Close the dialog
+                                                          },
+                                                          child: Text('Ok'),
+                                                        )
+                                                      ],
+                                                    ),
+                                                  ).then((_) {
+                                                    // Navigate using GoRouter or FlutterFlow context
+                                                    context.pushNamed(
+                                                        AdminUserManagementWidget
+                                                            .routeName);
+                                                  });
+                                                } else {
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (context) =>
+                                                        AlertDialog(
+                                                      title: Text('Error'),
+                                                      content: Text(
+                                                          'Failed to unban user. Please try again.'),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop(); // Close the dialog
+                                                          },
+                                                          child:
+                                                              Text('Try Again'),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ).then((_) {
+                                                    // Navigate after the dialog is dismissed
+                                                    context.pushNamed(
+                                                        AdminUserManagementWidget
+                                                            .routeName);
+                                                  });
+                                                }
+                                              }
+                                            : () async {
+                                                final userProvider =
+                                                    Provider.of<UserProvider>(
+                                                        context,
+                                                        listen: false);
+                                                bool success = await userProvider
+                                                    .updateUserSuspendStatus(
+                                                        widget.userId, true);
+
+                                                if (success) {
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (context) =>
+                                                        AlertDialog(
+                                                      title: Text("Success"),
+                                                      content: Text(
+                                                          'User banned successfully!'),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop(); // Close the dialog
+                                                          },
+                                                          child: Text('Ok'),
+                                                        )
+                                                      ],
+                                                    ),
+                                                  ).then((_) {
+                                                    // Navigate using GoRouter or FlutterFlow context
+                                                    context.pushNamed(
+                                                        AdminUserManagementWidget
+                                                            .routeName);
+                                                  });
+                                                } else {
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (context) =>
+                                                        AlertDialog(
+                                                      title: Text('Error'),
+                                                      content: Text(
+                                                          'Failed to ban user. Please try again.'),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop(); // Close the dialog
+                                                          },
+                                                          child:
+                                                              Text('Try Again'),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ).then((_) {
+                                                    // Navigate after the dialog is dismissed
+                                                    context.pushNamed(
+                                                        AdminUserManagementWidget
+                                                            .routeName);
+                                                  });
+                                                }
+                                              },
+                                        text:
+                                            _isBanned ? 'Unsuspend' : 'Suspend',
                                         options: FFButtonOptions(
                                           height: 50,
                                           padding:
@@ -1742,7 +1872,9 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
                                           iconPadding:
                                               EdgeInsetsDirectional.fromSTEB(
                                                   0, 0, 0, 0),
-                                          color: Color(0xFFFF313E),
+                                          color: _isBanned
+                                              ? Color(0xFF00265C)
+                                              : Color(0xFFFF313E),
                                           textStyle: FlutterFlowTheme.of(
                                                   context)
                                               .titleSmall

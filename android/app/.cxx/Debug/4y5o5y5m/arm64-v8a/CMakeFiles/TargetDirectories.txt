@@ -1,0 +1,2 @@
+C:/Users/june0/Documents/APU/DEGREE/SEM 2/Mobile App Engineering/rideLink/android/app/.cxx/Debug/4y5o5y5m/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/june0/Documents/APU/DEGREE/SEM 2/Mobile App Engineering/rideLink/android/app/.cxx/Debug/4y5o5y5m/arm64-v8a/CMakeFiles/rebuild_cache.dir

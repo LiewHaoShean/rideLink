@@ -203,12 +203,15 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: DashboardTransactionsWidget.routeName,
           path: DashboardTransactionsWidget.routePath,
-          builder: (context, params) => DashboardTransactionsWidget(),
+          builder: (context, params) => DashboardTransactionsWidget(
+              userId: params.getParam('userId', ParamType.String) ?? ''),
         ),
         FFRoute(
           name: DashboardTransactionDetailsWidget.routeName,
           path: DashboardTransactionDetailsWidget.routePath,
-          builder: (context, params) => DashboardTransactionDetailsWidget(),
+          builder: (context, params) => DashboardTransactionDetailsWidget(
+              transactionId:
+                  params.getParam('transactionId', ParamType.String) ?? ''),
         ),
         FFRoute(
           name: DashboardChangePasswordWidget.routeName,

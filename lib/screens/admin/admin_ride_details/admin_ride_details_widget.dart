@@ -1179,9 +1179,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                                         ),
                                         Text(
                                           "RM " +
-                                              (trip.pricePerSeat *
-                                                      trip.passengers.length)
-                                                  .toString(),
+                                              (trip.pricePerSeat).toString(),
                                           style: FlutterFlowTheme.of(context)
                                               .titleLarge
                                               .override(

@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:ride_link_carpooling/flutter_flow/flutter_flow_theme.dart';
 import 'package:ride_link_carpooling/flutter_flow/flutter_flow_util.dart';
+import 'package:ride_link_carpooling/index.dart';
 import 'package:ride_link_carpooling/screens/user/search_ride/search_ride_details/search_ride_details_widget.dart';
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:ride_link_carpooling/providers/user_provider.dart';
 
 class RideCard extends StatelessWidget {
   final String tripId; // Unique identifier for the trip
@@ -35,14 +40,47 @@ class RideCard extends StatelessWidget {
       child: InkWell(
         splashColor: Colors.transparent,
         onTap: () async {
-          context.pushNamed(
-            SearchRideDetailsWidget.routeName,
-            queryParameters: {
-              'rideId': tripId, 
-              'creatorId': creatorId,
-              'seatNeeded': seatNeeded.toString(),
-            },
-          );
+          final user = FirebaseAuth.instance.currentUser;
+          final userId = user?.uid;
+          final double userCredit =
+              await context.read<UserProvider>().getUserCredit(userId ?? '');
+
+          if (userCredit < price) {
+            showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                      title: Text("Failed"),
+                      content: Text(
+                          'U do not have sufficient balance! Please top up your credit first!'),
+                      actions: [
+                        TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Text('Ok'))
+                      ],
+                    )).then((_) {
+              // Navigate after the dialog is dismissed
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DashboardWalletWidget(
+                    userId: userId ?? '',
+                  ),
+                ),
+              );
+            });
+            ;
+          } else {
+            context.pushNamed(
+              SearchRideDetailsWidget.routeName,
+              queryParameters: {
+                'rideId': tripId,
+                'creatorId': creatorId,
+                'seatNeeded': seatNeeded.toString(),
+              },
+            );
+          }
         },
         child: Container(
           decoration: BoxDecoration(
@@ -91,8 +129,7 @@ class RideCard extends StatelessWidget {
                           width: 2,
                           height: 35,
                           child: DecoratedBox(
-                            decoration:
-                                BoxDecoration(color: Color(0xFF00275C)),
+                            decoration: BoxDecoration(color: Color(0xFF00275C)),
                           ),
                         ),
                         SizedBox(height: 5),
@@ -113,21 +150,25 @@ class RideCard extends StatelessWidget {
                         children: [
                           Text(
                             fromName,
-                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              font: GoogleFonts.inter(
-                                fontWeight: FontWeight.w600,
-                              ),
-                              color: const Color(0xFF00265C),
-                            ),
+                            style: FlutterFlowTheme.of(context)
+                                .bodyMedium
+                                .override(
+                                  font: GoogleFonts.inter(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  color: const Color(0xFF00265C),
+                                ),
                           ),
                           Text(
                             toName,
-                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              font: GoogleFonts.inter(
-                                fontWeight: FontWeight.w600,
-                              ),
-                              color: const Color(0xFF00265C),
-                            ),
+                            style: FlutterFlowTheme.of(context)
+                                .bodyMedium
+                                .override(
+                                  font: GoogleFonts.inter(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  color: const Color(0xFF00265C),
+                                ),
                           ),
                         ],
                       ),
@@ -179,7 +220,9 @@ class RideCard extends StatelessWidget {
                             gender == 'male'
                                 ? Icons.male_rounded
                                 : Icons.female_rounded,
-                              color: gender == 'male' ? FlutterFlowTheme.of(context).secondary : Colors.pink,
+                            color: gender == 'male'
+                                ? FlutterFlowTheme.of(context).secondary
+                                : Colors.pink,
                             size: 30,
                           ),
                         ],

@@ -41,6 +41,13 @@ class _AdminRideManagementWidgetState extends State<AdminRideManagementWidget> {
     _model.textController ??= TextEditingController();
     _model.textFieldFocusNode ??= FocusNode();
 
+    // Add listener to text controller for real-time filtering
+    _model.textController!.addListener(() {
+      setState(() {
+        // This will trigger a rebuild and apply the filter
+      });
+    });
+
     loadTrips();
   }
 
@@ -50,6 +57,7 @@ class _AdminRideManagementWidgetState extends State<AdminRideManagementWidget> {
 
   @override
   void dispose() {
+    _model.textController?.dispose();
     _model.dispose();
 
     super.dispose();
@@ -117,7 +125,7 @@ class _AdminRideManagementWidgetState extends State<AdminRideManagementWidget> {
                 ),
               ),
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(0.0, 30.0, 0.0, 5.0),
+                padding: EdgeInsetsDirectional.fromSTEB(0.0, 15.0, 0.0, 5.0),
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -264,7 +272,7 @@ class _AdminRideManagementWidgetState extends State<AdminRideManagementWidget> {
                     child: FlutterFlowDropDown<String>(
                       controller: _model.dropDownValueController ??=
                           FormFieldController<String>(null),
-                      options: ['Ongoing', 'Upcoming', 'Completed', 'Cancel'],
+                      options: ['Ongoing', 'Upcoming', 'Finished', 'Cancel'],
                       onChanged: (val) =>
                           safeSetState(() => _model.dropDownValue = val),
                       width: 200.0,
@@ -412,8 +420,12 @@ class _AdminRideManagementWidgetState extends State<AdminRideManagementWidget> {
                                 if (_model.textController.text.isNotEmpty) {
                                   filteredTrips = tripProvider
                                       .searchTrips(_model.textController.text);
-                                  print(_model.textController.text);
-                                  print(filteredTrips);
+                                  print(
+                                      "Filtering trips with query: ${_model.textController.text}");
+                                  print(
+                                      "Total trips: ${tripProvider.trips.length}");
+                                  print(
+                                      "Filtered trips: ${filteredTrips.length}");
                                 }
 
                                 if (_model.dropDownValue != null &&

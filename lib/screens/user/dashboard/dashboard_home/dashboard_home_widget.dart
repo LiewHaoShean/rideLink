@@ -1456,14 +1456,15 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
                                                                             children: [
                                                                               Text(
                                                                                 transaction.type,
-                                                                                style: FlutterFlowTheme.of(context).headlineSmall.override(
-                                                                                      font: GoogleFonts.interTight(
-                                                                                        fontWeight: FlutterFlowTheme.of(context).headlineSmall.fontWeight,
-                                                                                        fontStyle: FlutterFlowTheme.of(context).headlineSmall.fontStyle,
+                                                                                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                                                      font: GoogleFonts.inter(
+                                                                                        fontWeight: FontWeight.w500,
+                                                                                        fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                                                                                       ),
+                                                                                      fontSize: 22,
                                                                                       letterSpacing: 0.0,
-                                                                                      fontWeight: FlutterFlowTheme.of(context).headlineSmall.fontWeight,
-                                                                                      fontStyle: FlutterFlowTheme.of(context).headlineSmall.fontStyle,
+                                                                                      fontWeight: FontWeight.normal,
+                                                                                      fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                                                                                     ),
                                                                               ),
                                                                             ],
@@ -1502,7 +1503,8 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
                                                                   Expanded(
                                                                     child:
                                                                         Container(
-                                                                      width: 90,
+                                                                      width:
+                                                                          100,
                                                                       height:
                                                                           100,
                                                                       decoration:
@@ -1580,9 +1582,18 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
                                                                   Colors
                                                                       .transparent,
                                                               onTap: () async {
-                                                                context.pushNamed(
-                                                                    DashboardTransactionsWidget
-                                                                        .routeName);
+                                                                Navigator.push(
+                                                                  context,
+                                                                  MaterialPageRoute(
+                                                                    builder: (context) =>
+                                                                        DashboardTransactionsWidget(
+                                                                            userId:
+                                                                                widget.userId),
+                                                                  ),
+                                                                );
+                                                                // context.pushNamed(
+                                                                //     DashboardTransactionsWidget
+                                                                //         .routeName);
                                                               },
                                                               child: Text(
                                                                 'See All Transactions',

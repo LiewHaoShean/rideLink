@@ -66,8 +66,8 @@ class _DashboardTransactionDetailsWidgetState
         Provider.of<TransactionProvider>(context, listen: false);
     transaction =
         await transactionProvider.getTransactionById(widget.transactionId);
-    print("here");
-    print(widget.transactionId);
+    // print("here");
+    // print(widget.transactionId);
     setState(() {});
   }
 
@@ -1008,6 +1008,45 @@ class _DashboardTransactionDetailsWidgetState
                                                                 ),
                                                               ],
                                                             ),
+                                                            SizedBox(height: 4),
+                                                            transaction?.userId ==
+                                                                    driver?.uid
+                                                                ? Row(
+                                                                    mainAxisSize:
+                                                                        MainAxisSize
+                                                                            .max,
+                                                                    children: [
+                                                                      Container(
+                                                                        padding: EdgeInsets.symmetric(
+                                                                            horizontal:
+                                                                                8,
+                                                                            vertical:
+                                                                                4),
+                                                                        decoration:
+                                                                            BoxDecoration(
+                                                                          color:
+                                                                              Color(0xFF00265C),
+                                                                          borderRadius:
+                                                                              BorderRadius.circular(12),
+                                                                        ),
+                                                                        child:
+                                                                            Text(
+                                                                          "    You    ",
+                                                                          style: FlutterFlowTheme.of(context)
+                                                                              .bodySmall
+                                                                              .override(
+                                                                                font: GoogleFonts.inter(
+                                                                                  fontWeight: FontWeight.w500,
+                                                                                ),
+                                                                                color: Colors.white,
+                                                                                fontSize: 10,
+                                                                              ),
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  )
+                                                                : SizedBox
+                                                                    .shrink(),
                                                           ],
                                                         ),
                                                       ),

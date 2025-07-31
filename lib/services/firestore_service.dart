@@ -4,8 +4,6 @@ import '../models/car_information.dart';
 import '../models/trip.dart';
 import '../models/booking.dart';
 import '../models/transaction.dart';
-import '../models/review.dart';
-import '../models/balance.dart';
 
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -33,10 +31,8 @@ class FirestoreService {
   }
 
   Future<List<CarInformation>> getCarsByOwner(String ownerId) async {
-    final snapshot = await _db
-        .collection('cars')
-        .where('ownerId', isEqualTo: ownerId)
-        .get();
+    final snapshot =
+        await _db.collection('cars').where('ownerId', isEqualTo: ownerId).get();
 
     print("Firestore returned ${snapshot.docs.length} docs");
     return snapshot.docs
@@ -86,32 +82,5 @@ class FirestoreService {
     return snapshot.docs
         .map((doc) => TransactionModel.fromJson(doc.data()))
         .toList();
-  }
-
-  /// REVIEWS
-  Future<void> addReview(Review review) async {
-    await _db.collection('reviews').doc(review.reviewId).set(review.toJson());
-  }
-
-  Future<List<Review>> getReviewsForRider(String riderId) async {
-    final snapshot = await _db
-        .collection('reviews')
-        .where('riderId', isEqualTo: riderId)
-        .get();
-
-    return snapshot.docs.map((doc) => Review.fromJson(doc.data())).toList();
-  }
-
-  /// BALANCE
-  Future<void> updateBalance(Balance balance) async {
-    await _db.collection('balances').doc(balance.userId).set(balance.toJson());
-  }
-
-  Future<Balance?> getBalance(String userId) async {
-    final doc = await _db.collection('balances').doc(userId).get();
-    if (doc.exists) {
-      return Balance.fromJson(doc.data()!);
-    }
-    return null;
   }
 }

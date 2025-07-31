@@ -258,16 +258,18 @@ class _DashboardTransactionsWidgetState
                                         hoverColor: Colors.transparent,
                                         highlightColor: Colors.transparent,
                                         onTap: () async {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  DashboardTransactionDetailsWidget(
-                                                transactionId:
-                                                    transaction.transactionId,
+                                          if (transaction.rideId != null) {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    DashboardTransactionDetailsWidget(
+                                                  transactionId:
+                                                      transaction.transactionId,
+                                                ),
                                               ),
-                                            ),
-                                          );
+                                            );
+                                          }
                                         },
                                         child: Row(
                                           mainAxisSize: MainAxisSize.max,

@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 
 class CreateRideCompleteModel
     extends FlutterFlowModel<CreateRideCompleteWidget> {
+  double? ratingBarValue;
   @override
   void initState(BuildContext context) {}
 

@@ -1,4 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:ride_link_carpooling/models/rating.dart';
+import 'package:ride_link_carpooling/providers/vehicle_provider.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -10,9 +12,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:ride_link_carpooling/providers/user_provider.dart';
 import 'package:ride_link_carpooling/providers/transaction_provider.dart';
+import 'package:ride_link_carpooling/providers/rating_provider.dart';
 import 'create_ride_complete_model.dart';
 export 'create_ride_complete_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:ride_link_carpooling/models/user.dart';
+import 'package:ride_link_carpooling/models/car_information.dart';
 
 class CreateRideCompleteWidget extends StatefulWidget {
   final String rideId;
@@ -38,6 +44,9 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
   double? pricePerPassenger;
   double totalAmount = 0.0;
   String? userRole;
+  UserModel? driver;
+  CarInformation? car;
+  double? selectedRating;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -46,6 +55,16 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
     super.initState();
     _model = CreateRideCompleteModel();
     fetchTrip();
+    selectedRating = _model.ratingBarValue ?? 3.0;
+  }
+
+  void handleRatingChange(double rating) {
+    setState(() {
+      selectedRating = rating;
+      _model.ratingBarValue = rating;
+    });
+
+    print('Rating selected: $rating');
   }
 
   Future<void> fetchTrip() async {
@@ -58,6 +77,8 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
         final data = docSnapshot.data()!;
         final passengers = data['passengers'] as List<dynamic>? ?? [];
         List<Map<String, dynamic>> passengersList = [];
+        UserModel? currentDriver;
+        CarInformation? currentDriverCar;
         int acceptedPassengerCount = 0;
 
         // Fetch passenger data and count accepted passengers
@@ -90,6 +111,12 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
           totalAmount = pricePerSeat;
           pricePerPassenger = 0.0; // Not used for drivers
         } else if (userRole == 'passenger') {
+          final currentDriverId = data['creatorId'];
+          currentDriver =
+              await context.read<UserProvider>().getUserById(currentDriverId);
+          currentDriverCar = await context
+              .read<VehicleProvider>()
+              .getUserVehicle(currentDriverId);
           // Passenger pays pricePerSeat divided by number of accepted passengers
           pricePerPassenger = acceptedPassengerCount > 0
               ? pricePerSeat / acceptedPassengerCount
@@ -100,6 +127,8 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
         setState(() {
           tripData = data;
           passengersData = passengersList;
+          driver = currentDriver;
+          car = currentDriverCar;
           isLoading = false;
         });
       } else {
@@ -135,6 +164,7 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
 
   @override
   Widget build(BuildContext context) {
+    print(tripData);
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -681,6 +711,255 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
                                     ),
                                   ],
                                 ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        width: 100,
+                                        height: 18.89,
+                                        decoration: BoxDecoration(
+                                          color: FlutterFlowTheme.of(context)
+                                              .secondaryBackground,
+                                        ),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.max,
+                                          children: [
+                                            Divider(
+                                              thickness: 0.5,
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .alternate,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        width: 100,
+                                        height: 70,
+                                        decoration: BoxDecoration(
+                                          color: FlutterFlowTheme.of(context)
+                                              .secondaryBackground,
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.max,
+                                          children: [
+                                            Column(
+                                              mainAxisSize: MainAxisSize.max,
+                                              children: [
+                                                Expanded(
+                                                  child: Container(
+                                                    width: 64.48,
+                                                    height: 100,
+                                                    decoration: BoxDecoration(
+                                                      color: FlutterFlowTheme
+                                                              .of(context)
+                                                          .secondaryBackground,
+                                                    ),
+                                                    child: Padding(
+                                                      padding:
+                                                          EdgeInsetsDirectional
+                                                              .fromSTEB(
+                                                                  0, 0, 1, 0),
+                                                      child: Row(
+                                                        mainAxisSize:
+                                                            MainAxisSize.max,
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          Container(
+                                                            width: 55,
+                                                            height: 55,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: FlutterFlowTheme
+                                                                      .of(context)
+                                                                  .secondaryText,
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          100),
+                                                            ),
+                                                            child: Row(
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .max,
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .center,
+                                                              children: [
+                                                                Icon(
+                                                                  Icons.person,
+                                                                  color: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .primaryBackground,
+                                                                  size: 35,
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Column(
+                                              mainAxisSize: MainAxisSize.max,
+                                              children: [
+                                                Expanded(
+                                                  child: Container(
+                                                    width: 309.99,
+                                                    height: 100,
+                                                    decoration: BoxDecoration(
+                                                      color: FlutterFlowTheme
+                                                              .of(context)
+                                                          .secondaryBackground,
+                                                    ),
+                                                    child: Padding(
+                                                      padding:
+                                                          EdgeInsetsDirectional
+                                                              .fromSTEB(
+                                                                  5, 0, 0, 0),
+                                                      child: Column(
+                                                        mainAxisSize:
+                                                            MainAxisSize.max,
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          Row(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .max,
+                                                            children: [
+                                                              Text(
+                                                                driver?.name ??
+                                                                    '',
+                                                                style: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .titleMedium
+                                                                    .override(
+                                                                      font: GoogleFonts
+                                                                          .interTight(
+                                                                        fontWeight: FlutterFlowTheme.of(context)
+                                                                            .titleMedium
+                                                                            .fontWeight,
+                                                                        fontStyle: FlutterFlowTheme.of(context)
+                                                                            .titleMedium
+                                                                            .fontStyle,
+                                                                      ),
+                                                                      letterSpacing:
+                                                                          0.0,
+                                                                      fontWeight: FlutterFlowTheme.of(
+                                                                              context)
+                                                                          .titleMedium
+                                                                          .fontWeight,
+                                                                      fontStyle: FlutterFlowTheme.of(
+                                                                              context)
+                                                                          .titleMedium
+                                                                          .fontStyle,
+                                                                    ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          Row(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .max,
+                                                            children: [
+                                                              Text(
+                                                                car != null
+                                                                    ? '${car?.plateNumber}, ${car?.model}'
+                                                                    : 'Car Info Unavailable',
+                                                                style: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .bodyMedium
+                                                                    .override(
+                                                                      font: GoogleFonts
+                                                                          .inter(
+                                                                        fontWeight: FlutterFlowTheme.of(context)
+                                                                            .bodyMedium
+                                                                            .fontWeight,
+                                                                        fontStyle: FlutterFlowTheme.of(context)
+                                                                            .bodyMedium
+                                                                            .fontStyle,
+                                                                      ),
+                                                                      color: FlutterFlowTheme.of(
+                                                                              context)
+                                                                          .secondaryText,
+                                                                      letterSpacing:
+                                                                          0.0,
+                                                                      fontWeight: FlutterFlowTheme.of(
+                                                                              context)
+                                                                          .bodyMedium
+                                                                          .fontWeight,
+                                                                      fontStyle: FlutterFlowTheme.of(
+                                                                              context)
+                                                                          .bodyMedium
+                                                                          .fontStyle,
+                                                                    ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    RatingBar.builder(
+                                      onRatingUpdate: (newValue) {
+                                        safeSetState(() {
+                                          _model.ratingBarValue = newValue;
+                                        });
+
+                                        // Handle the rating change here
+                                        print('Rating changed to: $newValue');
+
+                                        // You can also store it in a variable
+                                        double rating = newValue;
+
+                                        // Or call a method to handle the rating
+                                        handleRatingChange(newValue);
+                                      },
+                                      itemBuilder: (context, index) => Icon(
+                                        Icons.star_rounded,
+                                        color: FlutterFlowTheme.of(context)
+                                            .warning,
+                                      ),
+                                      direction: Axis.horizontal,
+                                      initialRating: _model.ratingBarValue ??=
+                                          3,
+                                      unratedColor:
+                                          FlutterFlowTheme.of(context).accent1,
+                                      itemCount: 5,
+                                      itemSize: 30,
+                                      glowColor:
+                                          FlutterFlowTheme.of(context).warning,
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
                           ),
@@ -751,7 +1030,8 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
                                             .read<TransactionProvider>()
                                             .createTransaction(
                                                 transactionModel);
-                                      } else if (currentUserRole == 'passenger') {
+                                      } else if (currentUserRole ==
+                                          'passenger') {
                                         bool success = await context
                                             .read<UserProvider>()
                                             .withdrawCredit(
@@ -775,22 +1055,6 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
                                           );
                                           return;
                                         } else {
-                                          showDialog(
-                                            context: context,
-                                            builder: (context) => AlertDialog(
-                                              title: Text("Success"),
-                                              content: Text(
-                                                  'Withdraw successfully!'),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () {
-                                                    Navigator.of(context).pop();
-                                                  },
-                                                  child: Text('Ok'),
-                                                ),
-                                              ],
-                                            ),
-                                          );
                                           final transactionModel =
                                               TransactionModel(
                                             transactionId: '',
@@ -804,6 +1068,16 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
                                               .read<TransactionProvider>()
                                               .createTransaction(
                                                   transactionModel);
+                                          final ratingModel = Rating(
+                                              ratingId: '',
+                                              userId: userId,
+                                              driverId: driver?.uid ?? '',
+                                              tripId: widget.rideId,
+                                              datetime: DateTime.now(),
+                                              rating: selectedRating ?? 0.0);
+                                          await context
+                                              .read<RatingProvider>()
+                                              .createRating(ratingModel);
                                         }
                                       }
                                       context.pushNamed(

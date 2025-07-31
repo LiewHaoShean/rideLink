@@ -249,14 +249,12 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => ProcessingPageWidget(),
         ),
         FFRoute(
-          name: VerificationSuccessPageWidget.routeName,
-          path: VerificationSuccessPageWidget.routePath,
-          builder: (context, params) => VerificationSuccessPageWidget(),
-        ),
-        FFRoute(
           name: FailPageWidget.routeName,
           path: FailPageWidget.routePath,
-          builder: (context, params) => FailPageWidget(),
+          builder: (context, params) => FailPageWidget(
+              title: params.getParam('title', ParamType.String) ?? '',
+              description:
+                  params.getParam('description', ParamType.String) ?? ''),
         ),
         FFRoute(
           name: SearchRideWaitingDriverWidget.routeName,
@@ -321,7 +319,8 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: AdminDriverVerificationDetailsWidget.routeName,
           path: AdminDriverVerificationDetailsWidget.routePath,
-          builder: (context, params) => AdminDriverVerificationDetailsWidget(),
+          builder: (context, params) => AdminDriverVerificationDetailsWidget(
+              licenseId: params.getParam('licenseId', ParamType.String) ?? ''),
         ),
         FFRoute(
           name: AdminFinanceWidget.routeName,

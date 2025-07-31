@@ -4,6 +4,7 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'dart:ui';
+import '/main.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -12,7 +13,11 @@ import 'fail_page_model.dart';
 export 'fail_page_model.dart';
 
 class FailPageWidget extends StatefulWidget {
-  const FailPageWidget({super.key});
+  final String title;
+  final String description;
+  const FailPageWidget(
+      {Key? key, required this.title, required this.description})
+      : super(key: key);
 
   static String routeName = 'failPage';
   static String routePath = '/failPage';
@@ -122,7 +127,7 @@ class _FailPageWidgetState extends State<FailPageWidget> {
                                           MainAxisAlignment.center,
                                       children: [
                                         Text(
-                                          'Login Failed',
+                                          widget.title,
                                           style: FlutterFlowTheme.of(context)
                                               .headlineMedium
                                               .override(
@@ -162,7 +167,7 @@ class _FailPageWidgetState extends State<FailPageWidget> {
                                       children: [
                                         Expanded(
                                           child: Text(
-                                            'Opps your account has been banned due to inappropriate action!',
+                                            widget.description,
                                             textAlign: TextAlign.center,
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium
@@ -227,8 +232,19 @@ class _FailPageWidgetState extends State<FailPageWidget> {
                                 Expanded(
                                   child: FFButtonWidget(
                                     onPressed: () {
-                                      context
-                                          .pushNamed(LoginPageWidget.routeName);
+                                      if (widget.title == "Login Failed") {
+                                        context.pushNamed(
+                                            LoginPageWidget.routeName);
+                                      } else {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => NavBarPage(
+                                              initialPage: 'searchRideHome',
+                                            ),
+                                          ),
+                                        );
+                                      }
                                     },
                                     text: 'Return',
                                     options: FFButtonOptions(

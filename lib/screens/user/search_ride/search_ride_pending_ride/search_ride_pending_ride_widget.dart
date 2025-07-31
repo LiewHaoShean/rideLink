@@ -36,10 +36,12 @@ class SearchRidePendingRideWidget extends StatefulWidget {
   static String routePath = '/searchRidePendingRide';
 
   @override
-  State<SearchRidePendingRideWidget> createState() => _SearchRidePendingRideWidgetState();
+  State<SearchRidePendingRideWidget> createState() =>
+      _SearchRidePendingRideWidgetState();
 }
 
-class _SearchRidePendingRideWidgetState extends State<SearchRidePendingRideWidget> {
+class _SearchRidePendingRideWidgetState
+    extends State<SearchRidePendingRideWidget> {
   bool? isPassenger; // null = loading, true = in ride, false = not in ride
   bool isLoading = true;
   late SearchRidePendingRideModel _model;
@@ -56,6 +58,7 @@ class _SearchRidePendingRideWidgetState extends State<SearchRidePendingRideWidge
     _model = createModel(context, () => SearchRidePendingRideModel());
     _fetchUserTrips();
     _loadTrips();
+    print("bruhh");
   }
 
   Future<void> _loadTrips() async {
@@ -76,10 +79,12 @@ class _SearchRidePendingRideWidgetState extends State<SearchRidePendingRideWidge
 
     print('[DEBUG] Fetching trips for user: $currentUserId');
 
-    final tripSnapshot = await FirebaseFirestore.instance.collection('trips')
-    .where('status', whereNotIn: ['ongoing', 'finished']).get();
+    final tripSnapshot = await FirebaseFirestore.instance
+        .collection('trips')
+        .where('status', whereNotIn: ['ongoing', 'finished']).get();
 
-    print('[DEBUG] Total trips fetched from Firestore: ${tripSnapshot.docs.length}');
+    print(
+        '[DEBUG] Total trips fetched from Firestore: ${tripSnapshot.docs.length}');
 
     final matchedTrips = <Map<String, dynamic>>[];
 
@@ -97,7 +102,10 @@ class _SearchRidePendingRideWidgetState extends State<SearchRidePendingRideWidge
           String creatorName = 'Unknown Driver';
 
           try {
-            final userDoc = await FirebaseFirestore.instance.collection('users').doc(creatorId).get();
+            final userDoc = await FirebaseFirestore.instance
+                .collection('users')
+                .doc(creatorId)
+                .get();
             if (userDoc.exists) {
               creatorName = userDoc.data()?['name'] ?? 'Unknown Driver';
             }
@@ -170,9 +178,8 @@ class _SearchRidePendingRideWidgetState extends State<SearchRidePendingRideWidge
           ),
         );
 
-        await _loadTrips(); // Refresh trip list 
+        await _loadTrips(); // Refresh trip list
       }
-
     } catch (e) {
       print('Error cancelling booking: $e');
 
@@ -194,7 +201,6 @@ class _SearchRidePendingRideWidgetState extends State<SearchRidePendingRideWidge
       }
     }
   }
-
 
   @override
   void dispose() {
@@ -391,7 +397,6 @@ class _SearchRidePendingRideWidgetState extends State<SearchRidePendingRideWidge
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-
                       Container(
                         width: 394.5,
                         decoration: BoxDecoration(
@@ -399,31 +404,39 @@ class _SearchRidePendingRideWidgetState extends State<SearchRidePendingRideWidge
                               FlutterFlowTheme.of(context).secondaryBackground,
                         ),
                         child: Row(
-
-
                           children: matchedTrips.map((trip) {
-                            final isCurrentUser = true; // because this trip is already filtered for current user
+                            final isCurrentUser =
+                                true; // because this trip is already filtered for current user
                             final status = trip['status'] ?? 'unknown';
                             final tripId = trip['tripId'];
                             final origin = trip['origin'] ?? 'Unknown Origin';
-                            final destination = trip['destination'] ?? 'Unknown Destination';
-                            final departureTime = trip['departureTime'] as DateTime?;
-                            final date = departureTime != null ? dateFormat.format(departureTime) : 'Unknown Date';
-                            final time = departureTime != null ? timeFormat.format(departureTime) : 'Unknown Time';
-                            final creatorName = trip['creatorName'] ?? 'Unknown Driver';
+                            final destination =
+                                trip['destination'] ?? 'Unknown Destination';
+                            final departureTime =
+                                trip['departureTime'] as DateTime?;
+                            final date = departureTime != null
+                                ? dateFormat.format(departureTime)
+                                : 'Unknown Date';
+                            final time = departureTime != null
+                                ? timeFormat.format(departureTime)
+                                : 'Unknown Time';
+                            final creatorName =
+                                trip['creatorName'] ?? 'Unknown Driver';
 
                             return Container(
                               width: 350,
                               padding: const EdgeInsets.all(16),
-                              margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                              margin: const EdgeInsets.symmetric(
+                                  vertical: 8, horizontal: 16),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF00275C),
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: const Color(0xFF00275C), width: 2),
+                                border: Border.all(
+                                    color: const Color(0xFF00275C), width: 2),
                               ),
                               child: Padding(
                                 padding: const EdgeInsets.all(8),
-                                  child: Column(
+                                child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
@@ -483,16 +496,21 @@ class _SearchRidePendingRideWidgetState extends State<SearchRidePendingRideWidge
                                       Align(
                                         alignment: Alignment.center,
                                         child: Padding(
-                                          padding: const EdgeInsets.only(top: 12),
+                                          padding:
+                                              const EdgeInsets.only(top: 12),
                                           child: FFButtonWidget(
                                             onPressed: () async {
-                                              await _cancelBooking(tripId, FirebaseAuth.instance.currentUser!.uid);
+                                              await _cancelBooking(
+                                                  tripId,
+                                                  FirebaseAuth.instance
+                                                      .currentUser!.uid);
                                             },
                                             text: 'Cancel Request',
                                             options: FFButtonOptions(
                                               width: 300,
                                               height: 40,
-                                              color: const Color(0xFFFF5963), // custom button color
+                                              color: const Color(
+                                                  0xFFFF5963), // custom button color
                                               textStyle:
                                                   FlutterFlowTheme.of(context)
                                                       .titleSmall
@@ -501,17 +519,17 @@ class _SearchRidePendingRideWidgetState extends State<SearchRidePendingRideWidge
                                                             FontWeight.bold,
                                                         color: Colors.white,
                                                       ),
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                             ),
                                           ),
                                         ),
                                       ),
                                   ],
                                 ),
-                                ),
-                              );
+                              ),
+                            );
                           }).toList(),
-
                         ),
                       ),
                     ]),

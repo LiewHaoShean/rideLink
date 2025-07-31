@@ -7,6 +7,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:ride_link_carpooling/providers/card_provider.dart';
 import 'package:ride_link_carpooling/providers/chat_provider.dart';
+import 'package:ride_link_carpooling/providers/license_provider.dart';
 import 'package:ride_link_carpooling/providers/message_provider.dart';
 import 'package:ride_link_carpooling/providers/transaction_provider.dart';
 import 'package:ride_link_carpooling/providers/trip_provider.dart';
@@ -20,6 +21,7 @@ import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/user_provider.dart';
 import 'providers/vehicle_provider.dart';
+import 'providers/rating_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,7 +41,9 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ChatProvider()),
         ChangeNotifierProvider(create: (_) => MessageProvider()),
         ChangeNotifierProvider(create: (_) => CardProvider()),
-        ChangeNotifierProvider(create: (_) => TransactionProvider())
+        ChangeNotifierProvider(create: (_) => TransactionProvider()),
+        ChangeNotifierProvider(create: (_) => LicenseProvider()),
+        ChangeNotifierProvider(create: (_) => RatingProvider())
       ],
       child: const MyApp(),
     ),
@@ -183,7 +187,8 @@ class _NavBarPageState extends State<NavBarPage> {
         return;
       }
 
-      print('[DEBUG] Setting up Firestore listener for passenger trips at ${DateTime.now()}');
+      print(
+          '[DEBUG] Setting up Firestore listener for passenger trips at ${DateTime.now()}');
       _tripSubscription = FirebaseFirestore.instance
           .collection('trips')
           .where('passengers', arrayContainsAny: [
@@ -221,7 +226,7 @@ class _NavBarPageState extends State<NavBarPage> {
   }
 
   void _showTripStartedAlert(
-    String rideId, String senderId, String receiverId) {
+      String rideId, String senderId, String receiverId) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -280,10 +285,100 @@ class _NavBarPageState extends State<NavBarPage> {
       body: _currentPage ?? tabs[_currentPageName],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
-        onTap: (i) => safeSetState(() {
-          _currentPage = null;
-          _currentPageName = tabs.keys.toList()[i];
-        }),
+        onTap: (i) async {
+          final selectedPage = tabs.keys.toList()[i];
+
+          // Check if user is trying to access createRideHome
+          if (selectedPage == 'createRideHome') {
+            try {
+              final user = FirebaseAuth.instance.currentUser;
+              if (user == null) {
+                // User not logged in, redirect to login
+                context.pushNamed(LoginPageWidget.routeName);
+                return;
+              }
+
+              // Check if user has a verified car
+              final carsSnapshot = await FirebaseFirestore.instance
+                  .collection('cars')
+                  .where('ownerId', isEqualTo: user.uid)
+                  .limit(1)
+                  .get();
+
+              if (carsSnapshot.docs.isEmpty) {
+                // No verified car, redirect to driver register
+                context.pushNamed(DriverRegisterWidget.routeName);
+                return;
+              }
+
+              final carDoc = carsSnapshot.docs.first;
+              final carData = carDoc.data() as Map<String, dynamic>;
+
+              final licenseStatus = await context
+                  .read<LicenseProvider>()
+                  .getLicenseStatusByUserId(user.uid);
+              print(licenseStatus);
+              switch (licenseStatus.toLowerCase()) {
+                case 'pending':
+                  context.pushNamed(ProcessingPageWidget.routeName);
+                case 'rejected':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FailPageWidget(
+                        title: "Application Failed!",
+                        description:
+                            "Unfortunately, your application has been rejected.",
+                      ),
+                    ),
+                  );
+                case 'verified':
+                  final bool isInformed = await context
+                      .read<LicenseProvider>()
+                      .getLicenseIsInformedStatus(user.uid);
+                  if (!isInformed) {
+                    await context
+                        .read<LicenseProvider>()
+                        .changeLicenseInformedStatus(user.uid, true);
+                    context.pushNamed(
+                      SuccessPageWidget.routeName,
+                      queryParameters: {
+                        'title': serializeParam(
+                          'Verification Passed',
+                          ParamType.String,
+                        ),
+                        'description': serializeParam(
+                          'You are allowed to create with us!',
+                          ParamType.String,
+                        ),
+                      }.withoutNulls,
+                    );
+                    // await context
+                    //     .read<LicenseProvider>()
+                    //     .changeLicenseInformedStatus(user.uid, true);
+                  }
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => NavBarPage(
+                        initialPage: 'createRideHome',
+                      ),
+                    ),
+                  );
+              }
+            } catch (e) {
+              print('Error checking car verification: $e');
+              // On error, still redirect to driver register for safety
+              context.pushNamed(DriverRegisterWidget.routeName);
+              return;
+            }
+          }
+
+          safeSetState(() {
+            _currentPage = null;
+            _currentPageName = selectedPage;
+          });
+        },
         backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
         selectedItemColor: const Color(0xFF00275C),
         unselectedItemColor: FlutterFlowTheme.of(context).secondaryText,

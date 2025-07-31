@@ -8,9 +8,19 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'admin_driver_verification_details_model.dart';
 export 'admin_driver_verification_details_model.dart';
+import 'package:ride_link_carpooling/models/license.dart';
+import 'package:ride_link_carpooling/providers/license_provider.dart';
+import 'package:ride_link_carpooling/models/car_information.dart';
+import 'package:ride_link_carpooling/providers/vehicle_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ride_link_carpooling/models/user.dart';
+import 'package:ride_link_carpooling/providers/user_provider.dart';
 
 class AdminDriverVerificationDetailsWidget extends StatefulWidget {
-  const AdminDriverVerificationDetailsWidget({super.key});
+  final String licenseId;
+  const AdminDriverVerificationDetailsWidget(
+      {Key? key, required this.licenseId})
+      : super(key: key);
 
   static String routeName = 'adminDriverVerificationDetails';
   static String routePath = '/adminDriverVerificationDetails';
@@ -23,6 +33,8 @@ class AdminDriverVerificationDetailsWidget extends StatefulWidget {
 class _AdminDriverVerificationDetailsWidgetState
     extends State<AdminDriverVerificationDetailsWidget> {
   late AdminDriverVerificationDetailsModel _model;
+  License? _license;
+  CarInformation? _userVehicle;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -30,6 +42,7 @@ class _AdminDriverVerificationDetailsWidgetState
   void initState() {
     super.initState();
     _model = createModel(context, () => AdminDriverVerificationDetailsModel());
+    _fetchLicenseDetails();
   }
 
   @override
@@ -37,6 +50,21 @@ class _AdminDriverVerificationDetailsWidgetState
     _model.dispose();
 
     super.dispose();
+  }
+
+  Future<void> _fetchLicenseDetails() async {
+    final licenseProvider = context.read<LicenseProvider>();
+    final license =
+        await licenseProvider.getLicenseByLicenseId(widget.licenseId);
+    setState(() {
+      _license = license;
+    });
+    print(license?.userId);
+    final vehicleProvider = context.read<VehicleProvider>();
+    final vehicle = await vehicleProvider.getUserVehicle(license?.userId ?? '');
+    setState(() {
+      _userVehicle = vehicle;
+    });
   }
 
   @override
@@ -170,7 +198,7 @@ class _AdminDriverVerificationDetailsWidgetState
                         ),
                         child: Padding(
                           padding: EdgeInsetsDirectional.fromSTEB(
-                              0.0, 10.0, 0.0, 0.0),
+                              25.0, 10.0, 0.0, 0.0),
                           child: Column(
                             mainAxisSize: MainAxisSize.max,
                             children: [
@@ -303,7 +331,8 @@ class _AdminDriverVerificationDetailsWidgetState
                                                         MainAxisSize.max,
                                                     children: [
                                                       Text(
-                                                        'Perodua Iris',
+                                                        _userVehicle?.brand ??
+                                                            '',
                                                         style:
                                                             FlutterFlowTheme.of(
                                                                     context)
@@ -438,7 +467,8 @@ class _AdminDriverVerificationDetailsWidgetState
                                                         MainAxisSize.max,
                                                     children: [
                                                       Text(
-                                                        'idk',
+                                                        _userVehicle?.model ??
+                                                            '',
                                                         style:
                                                             FlutterFlowTheme.of(
                                                                     context)
@@ -573,7 +603,9 @@ class _AdminDriverVerificationDetailsWidgetState
                                                         MainAxisSize.max,
                                                     children: [
                                                       Text(
-                                                        '2023',
+                                                        _userVehicle?.year
+                                                                .toString() ??
+                                                            '',
                                                         style:
                                                             FlutterFlowTheme.of(
                                                                     context)
@@ -708,7 +740,8 @@ class _AdminDriverVerificationDetailsWidgetState
                                                         MainAxisSize.max,
                                                     children: [
                                                       Text(
-                                                        'Shit green',
+                                                        _userVehicle?.color ??
+                                                            '',
                                                         style:
                                                             FlutterFlowTheme.of(
                                                                     context)
@@ -843,7 +876,8 @@ class _AdminDriverVerificationDetailsWidgetState
                                                         MainAxisSize.max,
                                                     children: [
                                                       Text(
-                                                        'JUY6693',
+                                                        _userVehicle?.brand ??
+                                                            '',
                                                         style:
                                                             FlutterFlowTheme.of(
                                                                     context)
@@ -978,7 +1012,7 @@ class _AdminDriverVerificationDetailsWidgetState
                                                         MainAxisSize.max,
                                                     children: [
                                                       Text(
-                                                        'WDD1771872W000322',
+                                                        _userVehicle?.vin ?? '',
                                                         style:
                                                             FlutterFlowTheme.of(
                                                                     context)
@@ -1053,8 +1087,30 @@ class _AdminDriverVerificationDetailsWidgetState
                                   children: [
                                     Flexible(
                                       child: FFButtonWidget(
-                                        onPressed: () {
-                                          print('Button pressed ...');
+                                        onPressed: () async {
+                                          final licenseProvider =
+                                              context.read<LicenseProvider>();
+
+                                          await licenseProvider
+                                              .updateLicenseStatus(
+                                                  _license?.licenseId ?? '',
+                                                  'verified');
+
+                                          await licenseProvider
+                                              .changeLicenseInformedStatus(
+                                                  _license?.userId ?? '',
+                                                  false);
+
+                                          await FirebaseFirestore.instance
+                                              .collection('cars')
+                                              .doc(_license?.vehicleId ?? '')
+                                              .update({'isVerified': true});
+
+                                          await context
+                                              .read<UserProvider>()
+                                              .changeUserRole(
+                                                  _license?.userId ?? '',
+                                                  'driver');
                                         },
                                         text: 'Accept',
                                         options: FFButtonOptions(
@@ -1120,8 +1176,19 @@ class _AdminDriverVerificationDetailsWidgetState
                                   children: [
                                     Flexible(
                                       child: FFButtonWidget(
-                                        onPressed: () {
-                                          print('Button pressed ...');
+                                        onPressed: () async {
+                                          final licenseProvider =
+                                              context.read<LicenseProvider>();
+
+                                          await licenseProvider
+                                              .updateLicenseStatus(
+                                                  _license?.licenseId ?? '',
+                                                  'rejected');
+
+                                          await licenseProvider
+                                              .changeLicenseInformedStatus(
+                                                  _license?.userId ?? '',
+                                                  false);
                                         },
                                         text: 'Reject',
                                         options: FFButtonOptions(

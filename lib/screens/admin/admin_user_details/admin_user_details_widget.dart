@@ -15,6 +15,7 @@ export 'admin_user_details_model.dart';
 import 'package:ride_link_carpooling/providers/user_provider.dart';
 import 'package:ride_link_carpooling/providers/vehicle_provider.dart';
 import 'package:ride_link_carpooling/models/car_information.dart';
+import 'package:ride_link_carpooling/providers/rating_provider.dart';
 
 class AdminUserDetailsWidget extends StatefulWidget {
   final String userId;
@@ -32,6 +33,7 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
   late AdminUserDetailsModel _model;
   CarInformation? _userVehicle;
   bool _isBanned = false;
+  double _rating = 0.0;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -40,18 +42,24 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
     super.initState();
     _model = createModel(context, () => AdminUserDetailsModel());
     _fetchUserVehicle();
+    _fetchUserRating();
   }
 
   Future<void> _fetchUserVehicle() async {
-    // print("FETCH VEHICLE START");
     final vehicleProvider = context.read<VehicleProvider>();
     final car = await vehicleProvider.getUserVehicle(widget.userId);
-    // print("FETCH VEHICLE END");
     setState(() {
       _userVehicle = car;
     });
-    print("Hereeee");
-    print(car);
+  }
+
+  Future<void> _fetchUserRating() async {
+    final ratingProvider = context.read<RatingProvider>();
+    final rating =
+        await ratingProvider.getAverageRatingByDriverId(widget.userId);
+    setState(() {
+      _rating = rating;
+    });
   }
 
   @override
@@ -63,7 +71,8 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    print("AdminUserDetailsWidget build called");
+    print("heyyy");
+    print(_rating);
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -458,36 +467,31 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
                                                                         ),
                                                                       ],
                                                                     ),
-                                                                    Row(
-                                                                      mainAxisSize:
-                                                                          MainAxisSize
-                                                                              .max,
-                                                                      children: [
-                                                                        RatingBar
-                                                                            .builder(
-                                                                          onRatingUpdate: (newValue) =>
-                                                                              safeSetState(() => _model.ratingBarValue = newValue),
-                                                                          itemBuilder: (context, index) =>
-                                                                              Icon(
-                                                                            Icons.star_rounded,
-                                                                            color:
-                                                                                FlutterFlowTheme.of(context).warning,
+                                                                    if (user.userRole ==
+                                                                        'driver')
+                                                                      Row(
+                                                                        mainAxisSize:
+                                                                            MainAxisSize.max,
+                                                                        children: [
+                                                                          RatingBarIndicator(
+                                                                            rating:
+                                                                                _rating, // Make sure this is a double
+                                                                            itemBuilder: (context, index) =>
+                                                                                Icon(
+                                                                              Icons.star_rounded,
+                                                                              color: FlutterFlowTheme.of(context).warning,
+                                                                            ),
+                                                                            itemCount:
+                                                                                5,
+                                                                            itemSize:
+                                                                                30,
+                                                                            unratedColor:
+                                                                                FlutterFlowTheme.of(context).accent1,
+                                                                            direction:
+                                                                                Axis.horizontal,
                                                                           ),
-                                                                          direction:
-                                                                              Axis.horizontal,
-                                                                          initialRating: _model.ratingBarValue ??=
-                                                                              3,
-                                                                          unratedColor:
-                                                                              FlutterFlowTheme.of(context).accent1,
-                                                                          itemCount:
-                                                                              5,
-                                                                          itemSize:
-                                                                              30,
-                                                                          glowColor:
-                                                                              FlutterFlowTheme.of(context).warning,
-                                                                        ),
-                                                                      ],
-                                                                    ),
+                                                                        ],
+                                                                      ),
                                                                   ],
                                                                 ),
                                                               ),
@@ -599,7 +603,7 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
                                                                           child:
                                                                               Container(
                                                                             width:
-                                                                                240,
+                                                                                261,
                                                                             height:
                                                                                 100,
                                                                             decoration:
@@ -710,7 +714,7 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
                                                                           child:
                                                                               Container(
                                                                             width:
-                                                                                240,
+                                                                                261,
                                                                             height:
                                                                                 100,
                                                                             decoration:
@@ -821,7 +825,7 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
                                                                           child:
                                                                               Container(
                                                                             width:
-                                                                                240,
+                                                                                261,
                                                                             height:
                                                                                 100,
                                                                             decoration:
@@ -932,7 +936,7 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
                                                                           child:
                                                                               Container(
                                                                             width:
-                                                                                240,
+                                                                                261,
                                                                             height:
                                                                                 100,
                                                                             decoration:
@@ -974,11 +978,680 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
                                               ),
                                             ],
                                           ),
-                                          Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            children: [
-                                              Expanded(
-                                                child: Container(
+                                          _userVehicle != null
+                                              ? Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.max,
+                                                  children: [
+                                                    Expanded(
+                                                      child: Container(
+                                                        width: 100,
+                                                        height: 316.23,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .secondaryBackground,
+                                                        ),
+                                                        child: Padding(
+                                                          padding:
+                                                              EdgeInsetsDirectional
+                                                                  .fromSTEB(0,
+                                                                      10, 0, 0),
+                                                          child: Column(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .max,
+                                                            children: [
+                                                              Padding(
+                                                                padding:
+                                                                    EdgeInsetsDirectional
+                                                                        .fromSTEB(
+                                                                            0,
+                                                                            0,
+                                                                            0,
+                                                                            10),
+                                                                child: Row(
+                                                                  mainAxisSize:
+                                                                      MainAxisSize
+                                                                          .max,
+                                                                  children: [
+                                                                    Text(
+                                                                      'Registered Vehicle',
+                                                                      style: FlutterFlowTheme.of(
+                                                                              context)
+                                                                          .headlineSmall
+                                                                          .override(
+                                                                            font:
+                                                                                GoogleFonts.interTight(
+                                                                              fontWeight: FlutterFlowTheme.of(context).headlineSmall.fontWeight,
+                                                                              fontStyle: FlutterFlowTheme.of(context).headlineSmall.fontStyle,
+                                                                            ),
+                                                                            letterSpacing:
+                                                                                0.0,
+                                                                            fontWeight:
+                                                                                FlutterFlowTheme.of(context).headlineSmall.fontWeight,
+                                                                            fontStyle:
+                                                                                FlutterFlowTheme.of(context).headlineSmall.fontStyle,
+                                                                          ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                              Row(
+                                                                mainAxisSize:
+                                                                    MainAxisSize
+                                                                        .max,
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Expanded(
+                                                                    child:
+                                                                        Container(
+                                                                      width:
+                                                                          100,
+                                                                      height:
+                                                                          40,
+                                                                      decoration:
+                                                                          BoxDecoration(
+                                                                        color: FlutterFlowTheme.of(context)
+                                                                            .secondaryBackground,
+                                                                      ),
+                                                                      child:
+                                                                          Row(
+                                                                        mainAxisSize:
+                                                                            MainAxisSize.max,
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.spaceBetween,
+                                                                        children: [
+                                                                          Column(
+                                                                            mainAxisSize:
+                                                                                MainAxisSize.max,
+                                                                            children: [
+                                                                              Expanded(
+                                                                                child: Container(
+                                                                                  width: 100,
+                                                                                  height: 100,
+                                                                                  decoration: BoxDecoration(
+                                                                                    color: FlutterFlowTheme.of(context).secondaryBackground,
+                                                                                  ),
+                                                                                  child: Padding(
+                                                                                    padding: EdgeInsetsDirectional.fromSTEB(5, 0, 0, 0),
+                                                                                    child: Row(
+                                                                                      mainAxisSize: MainAxisSize.max,
+                                                                                      mainAxisAlignment: MainAxisAlignment.start,
+                                                                                      children: [
+                                                                                        Text(
+                                                                                          'Brand',
+                                                                                          style: FlutterFlowTheme.of(context).titleLarge.override(
+                                                                                                font: GoogleFonts.interTight(
+                                                                                                  fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
+                                                                                                  fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
+                                                                                                ),
+                                                                                                letterSpacing: 0.0,
+                                                                                                fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
+                                                                                                fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
+                                                                                              ),
+                                                                                        ),
+                                                                                      ],
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                          Column(
+                                                                            mainAxisSize:
+                                                                                MainAxisSize.max,
+                                                                            children: [
+                                                                              Expanded(
+                                                                                child: Container(
+                                                                                  width: 261,
+                                                                                  height: 100,
+                                                                                  decoration: BoxDecoration(
+                                                                                    color: FlutterFlowTheme.of(context).secondaryBackground,
+                                                                                  ),
+                                                                                  child: Row(
+                                                                                    mainAxisSize: MainAxisSize.max,
+                                                                                    children: [
+                                                                                      Text(
+                                                                                        _userVehicle?.brand ?? 'No brand',
+                                                                                        style: FlutterFlowTheme.of(context).titleLarge.override(
+                                                                                              font: GoogleFonts.interTight(
+                                                                                                fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
+                                                                                                fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
+                                                                                              ),
+                                                                                              letterSpacing: 0.0,
+                                                                                              fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
+                                                                                              fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
+                                                                                            ),
+                                                                                      ),
+                                                                                    ],
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              Row(
+                                                                mainAxisSize:
+                                                                    MainAxisSize
+                                                                        .max,
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Expanded(
+                                                                    child:
+                                                                        Container(
+                                                                      width:
+                                                                          100,
+                                                                      height:
+                                                                          40,
+                                                                      decoration:
+                                                                          BoxDecoration(
+                                                                        color: FlutterFlowTheme.of(context)
+                                                                            .secondaryBackground,
+                                                                      ),
+                                                                      child:
+                                                                          Row(
+                                                                        mainAxisSize:
+                                                                            MainAxisSize.max,
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.spaceBetween,
+                                                                        children: [
+                                                                          Column(
+                                                                            mainAxisSize:
+                                                                                MainAxisSize.max,
+                                                                            children: [
+                                                                              Expanded(
+                                                                                child: Container(
+                                                                                  width: 100,
+                                                                                  height: 100,
+                                                                                  decoration: BoxDecoration(
+                                                                                    color: FlutterFlowTheme.of(context).secondaryBackground,
+                                                                                  ),
+                                                                                  child: Padding(
+                                                                                    padding: EdgeInsetsDirectional.fromSTEB(5, 0, 0, 0),
+                                                                                    child: Row(
+                                                                                      mainAxisSize: MainAxisSize.max,
+                                                                                      mainAxisAlignment: MainAxisAlignment.start,
+                                                                                      children: [
+                                                                                        Text(
+                                                                                          'Model',
+                                                                                          style: FlutterFlowTheme.of(context).titleLarge.override(
+                                                                                                font: GoogleFonts.interTight(
+                                                                                                  fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
+                                                                                                  fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
+                                                                                                ),
+                                                                                                letterSpacing: 0.0,
+                                                                                                fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
+                                                                                                fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
+                                                                                              ),
+                                                                                        ),
+                                                                                      ],
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                          Column(
+                                                                            mainAxisSize:
+                                                                                MainAxisSize.max,
+                                                                            children: [
+                                                                              Expanded(
+                                                                                child: Container(
+                                                                                  width: 261,
+                                                                                  height: 100,
+                                                                                  decoration: BoxDecoration(
+                                                                                    color: FlutterFlowTheme.of(context).secondaryBackground,
+                                                                                  ),
+                                                                                  child: Row(
+                                                                                    mainAxisSize: MainAxisSize.max,
+                                                                                    children: [
+                                                                                      Text(
+                                                                                        _userVehicle?.model ?? "No Model",
+                                                                                        style: FlutterFlowTheme.of(context).titleLarge.override(
+                                                                                              font: GoogleFonts.interTight(
+                                                                                                fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
+                                                                                                fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
+                                                                                              ),
+                                                                                              letterSpacing: 0.0,
+                                                                                              fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
+                                                                                              fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
+                                                                                            ),
+                                                                                      ),
+                                                                                    ],
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              Row(
+                                                                mainAxisSize:
+                                                                    MainAxisSize
+                                                                        .max,
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Expanded(
+                                                                    child:
+                                                                        Container(
+                                                                      width:
+                                                                          100,
+                                                                      height:
+                                                                          40,
+                                                                      decoration:
+                                                                          BoxDecoration(
+                                                                        color: FlutterFlowTheme.of(context)
+                                                                            .secondaryBackground,
+                                                                      ),
+                                                                      child:
+                                                                          Row(
+                                                                        mainAxisSize:
+                                                                            MainAxisSize.max,
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.spaceBetween,
+                                                                        children: [
+                                                                          Column(
+                                                                            mainAxisSize:
+                                                                                MainAxisSize.max,
+                                                                            children: [
+                                                                              Expanded(
+                                                                                child: Container(
+                                                                                  width: 100,
+                                                                                  height: 100,
+                                                                                  decoration: BoxDecoration(
+                                                                                    color: FlutterFlowTheme.of(context).secondaryBackground,
+                                                                                  ),
+                                                                                  child: Padding(
+                                                                                    padding: EdgeInsetsDirectional.fromSTEB(5, 0, 0, 0),
+                                                                                    child: Row(
+                                                                                      mainAxisSize: MainAxisSize.max,
+                                                                                      mainAxisAlignment: MainAxisAlignment.start,
+                                                                                      children: [
+                                                                                        Text(
+                                                                                          'Year',
+                                                                                          style: FlutterFlowTheme.of(context).titleLarge.override(
+                                                                                                font: GoogleFonts.interTight(
+                                                                                                  fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
+                                                                                                  fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
+                                                                                                ),
+                                                                                                letterSpacing: 0.0,
+                                                                                                fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
+                                                                                                fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
+                                                                                              ),
+                                                                                        ),
+                                                                                      ],
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                          Column(
+                                                                            mainAxisSize:
+                                                                                MainAxisSize.max,
+                                                                            children: [
+                                                                              Expanded(
+                                                                                child: Container(
+                                                                                  width: 261,
+                                                                                  height: 100,
+                                                                                  decoration: BoxDecoration(
+                                                                                    color: FlutterFlowTheme.of(context).secondaryBackground,
+                                                                                  ),
+                                                                                  child: Row(
+                                                                                    mainAxisSize: MainAxisSize.max,
+                                                                                    children: [
+                                                                                      Text(
+                                                                                        _userVehicle?.year.toString() ?? "No year",
+                                                                                        style: FlutterFlowTheme.of(context).titleLarge.override(
+                                                                                              font: GoogleFonts.interTight(
+                                                                                                fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
+                                                                                                fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
+                                                                                              ),
+                                                                                              letterSpacing: 0.0,
+                                                                                              fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
+                                                                                              fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
+                                                                                            ),
+                                                                                      ),
+                                                                                    ],
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              Row(
+                                                                mainAxisSize:
+                                                                    MainAxisSize
+                                                                        .max,
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Expanded(
+                                                                    child:
+                                                                        Container(
+                                                                      width:
+                                                                          100,
+                                                                      height:
+                                                                          40,
+                                                                      decoration:
+                                                                          BoxDecoration(
+                                                                        color: FlutterFlowTheme.of(context)
+                                                                            .secondaryBackground,
+                                                                      ),
+                                                                      child:
+                                                                          Row(
+                                                                        mainAxisSize:
+                                                                            MainAxisSize.max,
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.spaceBetween,
+                                                                        children: [
+                                                                          Column(
+                                                                            mainAxisSize:
+                                                                                MainAxisSize.max,
+                                                                            children: [
+                                                                              Expanded(
+                                                                                child: Container(
+                                                                                  width: 100,
+                                                                                  height: 100,
+                                                                                  decoration: BoxDecoration(
+                                                                                    color: FlutterFlowTheme.of(context).secondaryBackground,
+                                                                                  ),
+                                                                                  child: Padding(
+                                                                                    padding: EdgeInsetsDirectional.fromSTEB(5, 0, 0, 0),
+                                                                                    child: Row(
+                                                                                      mainAxisSize: MainAxisSize.max,
+                                                                                      mainAxisAlignment: MainAxisAlignment.start,
+                                                                                      children: [
+                                                                                        Text(
+                                                                                          'Colour',
+                                                                                          style: FlutterFlowTheme.of(context).titleLarge.override(
+                                                                                                font: GoogleFonts.interTight(
+                                                                                                  fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
+                                                                                                  fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
+                                                                                                ),
+                                                                                                letterSpacing: 0.0,
+                                                                                                fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
+                                                                                                fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
+                                                                                              ),
+                                                                                        ),
+                                                                                      ],
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                          Column(
+                                                                            mainAxisSize:
+                                                                                MainAxisSize.max,
+                                                                            children: [
+                                                                              Expanded(
+                                                                                child: Container(
+                                                                                  width: 261,
+                                                                                  height: 100,
+                                                                                  decoration: BoxDecoration(
+                                                                                    color: FlutterFlowTheme.of(context).secondaryBackground,
+                                                                                  ),
+                                                                                  child: Row(
+                                                                                    mainAxisSize: MainAxisSize.max,
+                                                                                    children: [
+                                                                                      Text(
+                                                                                        _userVehicle?.color ?? "No color",
+                                                                                        style: FlutterFlowTheme.of(context).titleLarge.override(
+                                                                                              font: GoogleFonts.interTight(
+                                                                                                fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
+                                                                                                fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
+                                                                                              ),
+                                                                                              letterSpacing: 0.0,
+                                                                                              fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
+                                                                                              fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
+                                                                                            ),
+                                                                                      ),
+                                                                                    ],
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              Row(
+                                                                mainAxisSize:
+                                                                    MainAxisSize
+                                                                        .max,
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Expanded(
+                                                                    child:
+                                                                        Container(
+                                                                      width:
+                                                                          100,
+                                                                      height:
+                                                                          40,
+                                                                      decoration:
+                                                                          BoxDecoration(
+                                                                        color: FlutterFlowTheme.of(context)
+                                                                            .secondaryBackground,
+                                                                      ),
+                                                                      child:
+                                                                          Row(
+                                                                        mainAxisSize:
+                                                                            MainAxisSize.max,
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.spaceBetween,
+                                                                        children: [
+                                                                          Column(
+                                                                            mainAxisSize:
+                                                                                MainAxisSize.max,
+                                                                            children: [
+                                                                              Expanded(
+                                                                                child: Container(
+                                                                                  width: 100,
+                                                                                  height: 100,
+                                                                                  decoration: BoxDecoration(
+                                                                                    color: FlutterFlowTheme.of(context).secondaryBackground,
+                                                                                  ),
+                                                                                  child: Padding(
+                                                                                    padding: EdgeInsetsDirectional.fromSTEB(5, 0, 0, 0),
+                                                                                    child: Row(
+                                                                                      mainAxisSize: MainAxisSize.max,
+                                                                                      mainAxisAlignment: MainAxisAlignment.start,
+                                                                                      children: [
+                                                                                        Text(
+                                                                                          'No. Plate',
+                                                                                          style: FlutterFlowTheme.of(context).titleLarge.override(
+                                                                                                font: GoogleFonts.interTight(
+                                                                                                  fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
+                                                                                                  fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
+                                                                                                ),
+                                                                                                letterSpacing: 0.0,
+                                                                                                fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
+                                                                                                fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
+                                                                                              ),
+                                                                                        ),
+                                                                                      ],
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                          Column(
+                                                                            mainAxisSize:
+                                                                                MainAxisSize.max,
+                                                                            children: [
+                                                                              Expanded(
+                                                                                child: Container(
+                                                                                  width: 261,
+                                                                                  height: 100,
+                                                                                  decoration: BoxDecoration(
+                                                                                    color: FlutterFlowTheme.of(context).secondaryBackground,
+                                                                                  ),
+                                                                                  child: Row(
+                                                                                    mainAxisSize: MainAxisSize.max,
+                                                                                    children: [
+                                                                                      Text(
+                                                                                        _userVehicle?.plateNumber ?? "No Plate Number",
+                                                                                        style: FlutterFlowTheme.of(context).titleLarge.override(
+                                                                                              font: GoogleFonts.interTight(
+                                                                                                fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
+                                                                                                fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
+                                                                                              ),
+                                                                                              letterSpacing: 0.0,
+                                                                                              fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
+                                                                                              fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
+                                                                                            ),
+                                                                                      ),
+                                                                                    ],
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              Row(
+                                                                mainAxisSize:
+                                                                    MainAxisSize
+                                                                        .max,
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Expanded(
+                                                                    child:
+                                                                        Container(
+                                                                      width:
+                                                                          100,
+                                                                      height:
+                                                                          40,
+                                                                      decoration:
+                                                                          BoxDecoration(
+                                                                        color: FlutterFlowTheme.of(context)
+                                                                            .secondaryBackground,
+                                                                      ),
+                                                                      child:
+                                                                          Row(
+                                                                        mainAxisSize:
+                                                                            MainAxisSize.max,
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.spaceBetween,
+                                                                        children: [
+                                                                          Column(
+                                                                            mainAxisSize:
+                                                                                MainAxisSize.max,
+                                                                            children: [
+                                                                              Expanded(
+                                                                                child: Container(
+                                                                                  width: 100,
+                                                                                  height: 100,
+                                                                                  decoration: BoxDecoration(
+                                                                                    color: FlutterFlowTheme.of(context).secondaryBackground,
+                                                                                  ),
+                                                                                  child: Padding(
+                                                                                    padding: EdgeInsetsDirectional.fromSTEB(5, 0, 0, 0),
+                                                                                    child: Row(
+                                                                                      mainAxisSize: MainAxisSize.max,
+                                                                                      mainAxisAlignment: MainAxisAlignment.start,
+                                                                                      children: [
+                                                                                        Text(
+                                                                                          'VIN',
+                                                                                          style: FlutterFlowTheme.of(context).titleLarge.override(
+                                                                                                font: GoogleFonts.interTight(
+                                                                                                  fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
+                                                                                                  fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
+                                                                                                ),
+                                                                                                letterSpacing: 0.0,
+                                                                                                fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
+                                                                                                fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
+                                                                                              ),
+                                                                                        ),
+                                                                                      ],
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                          Column(
+                                                                            mainAxisSize:
+                                                                                MainAxisSize.max,
+                                                                            children: [
+                                                                              Expanded(
+                                                                                child: Container(
+                                                                                  width: 261,
+                                                                                  height: 100,
+                                                                                  decoration: BoxDecoration(
+                                                                                    color: FlutterFlowTheme.of(context).secondaryBackground,
+                                                                                  ),
+                                                                                  child: Row(
+                                                                                    mainAxisSize: MainAxisSize.max,
+                                                                                    children: [
+                                                                                      Text(
+                                                                                        _userVehicle?.vin ?? "No VIN",
+                                                                                        style: FlutterFlowTheme.of(context).titleLarge.override(
+                                                                                              font: GoogleFonts.interTight(
+                                                                                                fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
+                                                                                                fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
+                                                                                              ),
+                                                                                              letterSpacing: 0.0,
+                                                                                              fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
+                                                                                              fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
+                                                                                            ),
+                                                                                      ),
+                                                                                    ],
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                )
+                                              : Container(
                                                   width: 100,
                                                   height: 316.23,
                                                   decoration: BoxDecoration(
@@ -986,728 +1659,7 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
                                                             context)
                                                         .secondaryBackground,
                                                   ),
-                                                  child: Padding(
-                                                    padding:
-                                                        EdgeInsetsDirectional
-                                                            .fromSTEB(
-                                                                0, 10, 0, 0),
-                                                    child: Column(
-                                                      mainAxisSize:
-                                                          MainAxisSize.max,
-                                                      children: [
-                                                        Padding(
-                                                          padding:
-                                                              EdgeInsetsDirectional
-                                                                  .fromSTEB(0,
-                                                                      0, 0, 10),
-                                                          child: Row(
-                                                            mainAxisSize:
-                                                                MainAxisSize
-                                                                    .max,
-                                                            children: [
-                                                              Text(
-                                                                'Registered Vehicle',
-                                                                style: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .headlineSmall
-                                                                    .override(
-                                                                      font: GoogleFonts
-                                                                          .interTight(
-                                                                        fontWeight: FlutterFlowTheme.of(context)
-                                                                            .headlineSmall
-                                                                            .fontWeight,
-                                                                        fontStyle: FlutterFlowTheme.of(context)
-                                                                            .headlineSmall
-                                                                            .fontStyle,
-                                                                      ),
-                                                                      letterSpacing:
-                                                                          0.0,
-                                                                      fontWeight: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .headlineSmall
-                                                                          .fontWeight,
-                                                                      fontStyle: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .headlineSmall
-                                                                          .fontStyle,
-                                                                    ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                        Row(
-                                                          mainAxisSize:
-                                                              MainAxisSize.max,
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            Expanded(
-                                                              child: Container(
-                                                                width: 100,
-                                                                height: 40,
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                  color: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .secondaryBackground,
-                                                                ),
-                                                                child: Row(
-                                                                  mainAxisSize:
-                                                                      MainAxisSize
-                                                                          .max,
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .spaceBetween,
-                                                                  children: [
-                                                                    Column(
-                                                                      mainAxisSize:
-                                                                          MainAxisSize
-                                                                              .max,
-                                                                      children: [
-                                                                        Expanded(
-                                                                          child:
-                                                                              Container(
-                                                                            width:
-                                                                                100,
-                                                                            height:
-                                                                                100,
-                                                                            decoration:
-                                                                                BoxDecoration(
-                                                                              color: FlutterFlowTheme.of(context).secondaryBackground,
-                                                                            ),
-                                                                            child:
-                                                                                Padding(
-                                                                              padding: EdgeInsetsDirectional.fromSTEB(5, 0, 0, 0),
-                                                                              child: Row(
-                                                                                mainAxisSize: MainAxisSize.max,
-                                                                                mainAxisAlignment: MainAxisAlignment.start,
-                                                                                children: [
-                                                                                  Text(
-                                                                                    'Brand',
-                                                                                    style: FlutterFlowTheme.of(context).titleLarge.override(
-                                                                                          font: GoogleFonts.interTight(
-                                                                                            fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
-                                                                                            fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
-                                                                                          ),
-                                                                                          letterSpacing: 0.0,
-                                                                                          fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
-                                                                                          fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
-                                                                                        ),
-                                                                                  ),
-                                                                                ],
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                    Column(
-                                                                      mainAxisSize:
-                                                                          MainAxisSize
-                                                                              .max,
-                                                                      children: [
-                                                                        Expanded(
-                                                                          child:
-                                                                              Container(
-                                                                            width:
-                                                                                240,
-                                                                            height:
-                                                                                100,
-                                                                            decoration:
-                                                                                BoxDecoration(
-                                                                              color: FlutterFlowTheme.of(context).secondaryBackground,
-                                                                            ),
-                                                                            child:
-                                                                                Row(
-                                                                              mainAxisSize: MainAxisSize.max,
-                                                                              children: [
-                                                                                Text(
-                                                                                  _userVehicle?.brand ?? 'No brand',
-                                                                                  style: FlutterFlowTheme.of(context).titleLarge.override(
-                                                                                        font: GoogleFonts.interTight(
-                                                                                          fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
-                                                                                          fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
-                                                                                        ),
-                                                                                        letterSpacing: 0.0,
-                                                                                        fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
-                                                                                        fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
-                                                                                      ),
-                                                                                ),
-                                                                              ],
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        Row(
-                                                          mainAxisSize:
-                                                              MainAxisSize.max,
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            Expanded(
-                                                              child: Container(
-                                                                width: 100,
-                                                                height: 40,
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                  color: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .secondaryBackground,
-                                                                ),
-                                                                child: Row(
-                                                                  mainAxisSize:
-                                                                      MainAxisSize
-                                                                          .max,
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .spaceBetween,
-                                                                  children: [
-                                                                    Column(
-                                                                      mainAxisSize:
-                                                                          MainAxisSize
-                                                                              .max,
-                                                                      children: [
-                                                                        Expanded(
-                                                                          child:
-                                                                              Container(
-                                                                            width:
-                                                                                100,
-                                                                            height:
-                                                                                100,
-                                                                            decoration:
-                                                                                BoxDecoration(
-                                                                              color: FlutterFlowTheme.of(context).secondaryBackground,
-                                                                            ),
-                                                                            child:
-                                                                                Padding(
-                                                                              padding: EdgeInsetsDirectional.fromSTEB(5, 0, 0, 0),
-                                                                              child: Row(
-                                                                                mainAxisSize: MainAxisSize.max,
-                                                                                mainAxisAlignment: MainAxisAlignment.start,
-                                                                                children: [
-                                                                                  Text(
-                                                                                    'Model',
-                                                                                    style: FlutterFlowTheme.of(context).titleLarge.override(
-                                                                                          font: GoogleFonts.interTight(
-                                                                                            fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
-                                                                                            fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
-                                                                                          ),
-                                                                                          letterSpacing: 0.0,
-                                                                                          fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
-                                                                                          fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
-                                                                                        ),
-                                                                                  ),
-                                                                                ],
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                    Column(
-                                                                      mainAxisSize:
-                                                                          MainAxisSize
-                                                                              .max,
-                                                                      children: [
-                                                                        Expanded(
-                                                                          child:
-                                                                              Container(
-                                                                            width:
-                                                                                240,
-                                                                            height:
-                                                                                100,
-                                                                            decoration:
-                                                                                BoxDecoration(
-                                                                              color: FlutterFlowTheme.of(context).secondaryBackground,
-                                                                            ),
-                                                                            child:
-                                                                                Row(
-                                                                              mainAxisSize: MainAxisSize.max,
-                                                                              children: [
-                                                                                Text(
-                                                                                  _userVehicle?.model ?? "No Model",
-                                                                                  style: FlutterFlowTheme.of(context).titleLarge.override(
-                                                                                        font: GoogleFonts.interTight(
-                                                                                          fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
-                                                                                          fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
-                                                                                        ),
-                                                                                        letterSpacing: 0.0,
-                                                                                        fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
-                                                                                        fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
-                                                                                      ),
-                                                                                ),
-                                                                              ],
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        Row(
-                                                          mainAxisSize:
-                                                              MainAxisSize.max,
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            Expanded(
-                                                              child: Container(
-                                                                width: 100,
-                                                                height: 40,
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                  color: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .secondaryBackground,
-                                                                ),
-                                                                child: Row(
-                                                                  mainAxisSize:
-                                                                      MainAxisSize
-                                                                          .max,
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .spaceBetween,
-                                                                  children: [
-                                                                    Column(
-                                                                      mainAxisSize:
-                                                                          MainAxisSize
-                                                                              .max,
-                                                                      children: [
-                                                                        Expanded(
-                                                                          child:
-                                                                              Container(
-                                                                            width:
-                                                                                100,
-                                                                            height:
-                                                                                100,
-                                                                            decoration:
-                                                                                BoxDecoration(
-                                                                              color: FlutterFlowTheme.of(context).secondaryBackground,
-                                                                            ),
-                                                                            child:
-                                                                                Padding(
-                                                                              padding: EdgeInsetsDirectional.fromSTEB(5, 0, 0, 0),
-                                                                              child: Row(
-                                                                                mainAxisSize: MainAxisSize.max,
-                                                                                mainAxisAlignment: MainAxisAlignment.start,
-                                                                                children: [
-                                                                                  Text(
-                                                                                    'Year',
-                                                                                    style: FlutterFlowTheme.of(context).titleLarge.override(
-                                                                                          font: GoogleFonts.interTight(
-                                                                                            fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
-                                                                                            fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
-                                                                                          ),
-                                                                                          letterSpacing: 0.0,
-                                                                                          fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
-                                                                                          fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
-                                                                                        ),
-                                                                                  ),
-                                                                                ],
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                    Column(
-                                                                      mainAxisSize:
-                                                                          MainAxisSize
-                                                                              .max,
-                                                                      children: [
-                                                                        Expanded(
-                                                                          child:
-                                                                              Container(
-                                                                            width:
-                                                                                240,
-                                                                            height:
-                                                                                100,
-                                                                            decoration:
-                                                                                BoxDecoration(
-                                                                              color: FlutterFlowTheme.of(context).secondaryBackground,
-                                                                            ),
-                                                                            child:
-                                                                                Row(
-                                                                              mainAxisSize: MainAxisSize.max,
-                                                                              children: [
-                                                                                Text(
-                                                                                  _userVehicle?.year.toString() ?? "No year",
-                                                                                  style: FlutterFlowTheme.of(context).titleLarge.override(
-                                                                                        font: GoogleFonts.interTight(
-                                                                                          fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
-                                                                                          fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
-                                                                                        ),
-                                                                                        letterSpacing: 0.0,
-                                                                                        fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
-                                                                                        fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
-                                                                                      ),
-                                                                                ),
-                                                                              ],
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        Row(
-                                                          mainAxisSize:
-                                                              MainAxisSize.max,
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            Expanded(
-                                                              child: Container(
-                                                                width: 100,
-                                                                height: 40,
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                  color: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .secondaryBackground,
-                                                                ),
-                                                                child: Row(
-                                                                  mainAxisSize:
-                                                                      MainAxisSize
-                                                                          .max,
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .spaceBetween,
-                                                                  children: [
-                                                                    Column(
-                                                                      mainAxisSize:
-                                                                          MainAxisSize
-                                                                              .max,
-                                                                      children: [
-                                                                        Expanded(
-                                                                          child:
-                                                                              Container(
-                                                                            width:
-                                                                                100,
-                                                                            height:
-                                                                                100,
-                                                                            decoration:
-                                                                                BoxDecoration(
-                                                                              color: FlutterFlowTheme.of(context).secondaryBackground,
-                                                                            ),
-                                                                            child:
-                                                                                Padding(
-                                                                              padding: EdgeInsetsDirectional.fromSTEB(5, 0, 0, 0),
-                                                                              child: Row(
-                                                                                mainAxisSize: MainAxisSize.max,
-                                                                                mainAxisAlignment: MainAxisAlignment.start,
-                                                                                children: [
-                                                                                  Text(
-                                                                                    'Colour',
-                                                                                    style: FlutterFlowTheme.of(context).titleLarge.override(
-                                                                                          font: GoogleFonts.interTight(
-                                                                                            fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
-                                                                                            fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
-                                                                                          ),
-                                                                                          letterSpacing: 0.0,
-                                                                                          fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
-                                                                                          fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
-                                                                                        ),
-                                                                                  ),
-                                                                                ],
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                    Column(
-                                                                      mainAxisSize:
-                                                                          MainAxisSize
-                                                                              .max,
-                                                                      children: [
-                                                                        Expanded(
-                                                                          child:
-                                                                              Container(
-                                                                            width:
-                                                                                240,
-                                                                            height:
-                                                                                100,
-                                                                            decoration:
-                                                                                BoxDecoration(
-                                                                              color: FlutterFlowTheme.of(context).secondaryBackground,
-                                                                            ),
-                                                                            child:
-                                                                                Row(
-                                                                              mainAxisSize: MainAxisSize.max,
-                                                                              children: [
-                                                                                Text(
-                                                                                  _userVehicle?.color ?? "No color",
-                                                                                  style: FlutterFlowTheme.of(context).titleLarge.override(
-                                                                                        font: GoogleFonts.interTight(
-                                                                                          fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
-                                                                                          fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
-                                                                                        ),
-                                                                                        letterSpacing: 0.0,
-                                                                                        fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
-                                                                                        fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
-                                                                                      ),
-                                                                                ),
-                                                                              ],
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        Row(
-                                                          mainAxisSize:
-                                                              MainAxisSize.max,
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            Expanded(
-                                                              child: Container(
-                                                                width: 100,
-                                                                height: 40,
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                  color: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .secondaryBackground,
-                                                                ),
-                                                                child: Row(
-                                                                  mainAxisSize:
-                                                                      MainAxisSize
-                                                                          .max,
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .spaceBetween,
-                                                                  children: [
-                                                                    Column(
-                                                                      mainAxisSize:
-                                                                          MainAxisSize
-                                                                              .max,
-                                                                      children: [
-                                                                        Expanded(
-                                                                          child:
-                                                                              Container(
-                                                                            width:
-                                                                                100,
-                                                                            height:
-                                                                                100,
-                                                                            decoration:
-                                                                                BoxDecoration(
-                                                                              color: FlutterFlowTheme.of(context).secondaryBackground,
-                                                                            ),
-                                                                            child:
-                                                                                Padding(
-                                                                              padding: EdgeInsetsDirectional.fromSTEB(5, 0, 0, 0),
-                                                                              child: Row(
-                                                                                mainAxisSize: MainAxisSize.max,
-                                                                                mainAxisAlignment: MainAxisAlignment.start,
-                                                                                children: [
-                                                                                  Text(
-                                                                                    'No. Plate',
-                                                                                    style: FlutterFlowTheme.of(context).titleLarge.override(
-                                                                                          font: GoogleFonts.interTight(
-                                                                                            fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
-                                                                                            fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
-                                                                                          ),
-                                                                                          letterSpacing: 0.0,
-                                                                                          fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
-                                                                                          fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
-                                                                                        ),
-                                                                                  ),
-                                                                                ],
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                    Column(
-                                                                      mainAxisSize:
-                                                                          MainAxisSize
-                                                                              .max,
-                                                                      children: [
-                                                                        Expanded(
-                                                                          child:
-                                                                              Container(
-                                                                            width:
-                                                                                240,
-                                                                            height:
-                                                                                100,
-                                                                            decoration:
-                                                                                BoxDecoration(
-                                                                              color: FlutterFlowTheme.of(context).secondaryBackground,
-                                                                            ),
-                                                                            child:
-                                                                                Row(
-                                                                              mainAxisSize: MainAxisSize.max,
-                                                                              children: [
-                                                                                Text(
-                                                                                  _userVehicle?.plateNumber ?? "No Plate Number",
-                                                                                  style: FlutterFlowTheme.of(context).titleLarge.override(
-                                                                                        font: GoogleFonts.interTight(
-                                                                                          fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
-                                                                                          fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
-                                                                                        ),
-                                                                                        letterSpacing: 0.0,
-                                                                                        fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
-                                                                                        fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
-                                                                                      ),
-                                                                                ),
-                                                                              ],
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        Row(
-                                                          mainAxisSize:
-                                                              MainAxisSize.max,
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            Expanded(
-                                                              child: Container(
-                                                                width: 100,
-                                                                height: 40,
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                  color: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .secondaryBackground,
-                                                                ),
-                                                                child: Row(
-                                                                  mainAxisSize:
-                                                                      MainAxisSize
-                                                                          .max,
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .spaceBetween,
-                                                                  children: [
-                                                                    Column(
-                                                                      mainAxisSize:
-                                                                          MainAxisSize
-                                                                              .max,
-                                                                      children: [
-                                                                        Expanded(
-                                                                          child:
-                                                                              Container(
-                                                                            width:
-                                                                                100,
-                                                                            height:
-                                                                                100,
-                                                                            decoration:
-                                                                                BoxDecoration(
-                                                                              color: FlutterFlowTheme.of(context).secondaryBackground,
-                                                                            ),
-                                                                            child:
-                                                                                Padding(
-                                                                              padding: EdgeInsetsDirectional.fromSTEB(5, 0, 0, 0),
-                                                                              child: Row(
-                                                                                mainAxisSize: MainAxisSize.max,
-                                                                                mainAxisAlignment: MainAxisAlignment.start,
-                                                                                children: [
-                                                                                  Text(
-                                                                                    'VIN',
-                                                                                    style: FlutterFlowTheme.of(context).titleLarge.override(
-                                                                                          font: GoogleFonts.interTight(
-                                                                                            fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
-                                                                                            fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
-                                                                                          ),
-                                                                                          letterSpacing: 0.0,
-                                                                                          fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
-                                                                                          fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
-                                                                                        ),
-                                                                                  ),
-                                                                                ],
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                    Column(
-                                                                      mainAxisSize:
-                                                                          MainAxisSize
-                                                                              .max,
-                                                                      children: [
-                                                                        Expanded(
-                                                                          child:
-                                                                              Container(
-                                                                            width:
-                                                                                240,
-                                                                            height:
-                                                                                100,
-                                                                            decoration:
-                                                                                BoxDecoration(
-                                                                              color: FlutterFlowTheme.of(context).secondaryBackground,
-                                                                            ),
-                                                                            child:
-                                                                                Row(
-                                                                              mainAxisSize: MainAxisSize.max,
-                                                                              children: [
-                                                                                Text(
-                                                                                  _userVehicle?.vin ?? "No VIN",
-                                                                                  style: FlutterFlowTheme.of(context).titleLarge.override(
-                                                                                        font: GoogleFonts.interTight(
-                                                                                          fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
-                                                                                          fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
-                                                                                        ),
-                                                                                        letterSpacing: 0.0,
-                                                                                        fontWeight: FlutterFlowTheme.of(context).titleLarge.fontWeight,
-                                                                                        fontStyle: FlutterFlowTheme.of(context).titleLarge.fontStyle,
-                                                                                      ),
-                                                                                ),
-                                                                              ],
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
+                                                )
                                         ],
                                       ),
                                     ),

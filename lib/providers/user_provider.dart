@@ -278,4 +278,43 @@ class UserProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> changeUserRole(String userId, String userRole) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      await _userService.changeUserRole(userId, userRole);
+
+      // Update the local user list if the user exists
+      final userIndex = _users.indexWhere((user) => user.uid == userId);
+      if (userIndex != -1) {
+        final currentUser = _users[userIndex];
+        final updatedUser = UserModel(
+          uid: currentUser.uid,
+          name: currentUser.name,
+          email: currentUser.email,
+          userRole: userRole, // Updated role
+          nic: currentUser.nic,
+          phone: currentUser.phone,
+          gender: currentUser.gender,
+          credit: currentUser.credit,
+          profit: currentUser.profit,
+          isEmailVerified: currentUser.isEmailVerified,
+          isBanned: currentUser.isBanned,
+        );
+        _users[userIndex] = updatedUser;
+      }
+
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      throw e; // Re-throw so the calling code can handle the error
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

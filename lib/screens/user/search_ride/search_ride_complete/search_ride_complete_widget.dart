@@ -118,6 +118,7 @@ class _SearchRideCompleteWidgetState extends State<SearchRideCompleteWidget> {
 
   @override
   Widget build(BuildContext context) {
+    print("hi");
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();

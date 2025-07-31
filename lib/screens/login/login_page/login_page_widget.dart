@@ -540,7 +540,16 @@ class _LoginPageWidgetState extends State<LoginPageWidget> {
                                 context.pushNamed('home'); // Admin home page
                               } else {
                                 if (userModel.isBanned == true) {
-                                  context.pushNamed(FailPageWidget.routeName);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => FailPageWidget(
+                                        title: "Login Failed",
+                                        description:
+                                            "Opps your account has been banned due to inappropriate action!",
+                                      ),
+                                    ),
+                                  );
                                 } else {
                                   context.pushNamed(
                                       'searchRideHome'); // Passenger page

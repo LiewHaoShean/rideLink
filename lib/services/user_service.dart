@@ -180,4 +180,19 @@ class UserService {
       return false;
     }
   }
+
+// Change user role
+  Future<void> changeUserRole(String userId, String userRole) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .update({'userRole': userRole});
+      print(
+          'User role changed successfully for user: $userId to role: $userRole');
+    } catch (e) {
+      print('Error changing user role: $e');
+      rethrow;
+    }
+  }
 }

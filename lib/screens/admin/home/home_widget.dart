@@ -273,97 +273,6 @@ class _HomeWidgetState extends State<HomeWidget> {
                         ),
                       ),
                     ),
-                    // Padding(
-                    //   padding:
-                    //       EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 20.0),
-                    //   child: InkWell(
-                    //     splashColor: Colors.transparent,
-                    //     focusColor: Colors.transparent,
-                    //     hoverColor: Colors.transparent,
-                    //     highlightColor: Colors.transparent,
-                    //     onTap: () async {
-                    //       context.pushNamed(
-                    //           AdminDriverVerificationWidget.routeName);
-                    //     },
-                    //     child: Row(
-                    //       mainAxisSize: MainAxisSize.max,
-                    //       children: [
-                    //         Padding(
-                    //           padding: EdgeInsetsDirectional.fromSTEB(
-                    //               15.0, 0.0, 0.0, 0.0),
-                    //           child: Container(
-                    //             width: 50.0,
-                    //             height: 50.0,
-                    //             decoration: BoxDecoration(
-                    //               color: FlutterFlowTheme.of(context).alternate,
-                    //               borderRadius: BorderRadius.circular(24.0),
-                    //               shape: BoxShape.rectangle,
-                    //             ),
-                    //             child: FlutterFlowIconButton(
-                    //               borderRadius: 30.0,
-                    //               buttonSize: 40.0,
-                    //               fillColor:
-                    //                   FlutterFlowTheme.of(context).alternate,
-                    //               icon: Icon(
-                    //                 Icons.edit_document,
-                    //                 color: Colors.black,
-                    //                 size: 24.0,
-                    //               ),
-                    //               onPressed: () {
-                    //                 print('IconButton pressed ...');
-                    //               },
-                    //             ),
-                    //           ),
-                    //         ),
-                    //         Container(
-                    //           width: 200.0,
-                    //           decoration: BoxDecoration(),
-                    //           child: Padding(
-                    //             padding: EdgeInsetsDirectional.fromSTEB(
-                    //                 15.0, 0.0, 0.0, 0.0),
-                    //             child: Text(
-                    //               'License Verification',
-                    //               style: FlutterFlowTheme.of(context)
-                    //                   .bodyLarge
-                    //                   .override(
-                    //                     font: GoogleFonts.inter(
-                    //                       fontWeight: FontWeight.w500,
-                    //                       fontStyle:
-                    //                           FlutterFlowTheme.of(context)
-                    //                               .bodyLarge
-                    //                               .fontStyle,
-                    //                     ),
-                    //                     letterSpacing: 0.0,
-                    //                     fontWeight: FontWeight.w500,
-                    //                     fontStyle: FlutterFlowTheme.of(context)
-                    //                         .bodyLarge
-                    //                         .fontStyle,
-                    //                   ),
-                    //             ),
-                    //           ),
-                    //         ),
-                    //         Padding(
-                    //           padding: EdgeInsetsDirectional.fromSTEB(
-                    //               80.0, 0.0, 0.0, 0.0),
-                    //           child: FlutterFlowIconButton(
-                    //             borderRadius: 8.0,
-                    //             buttonSize: 40.0,
-                    //             fillColor: FlutterFlowTheme.of(context)
-                    //                 .secondaryBackground,
-                    //             icon: Icon(
-                    //               Icons.navigate_next,
-                    //               color: Colors.black,
-                    //               size: 24.0,
-                    //             ),
-                    //             onPressed: () {
-                    //               print('IconButton pressed ...');
-                    //             },
-                    //           ),
-                    //         ),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
                     Padding(
                       padding:
                           EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 20.0),
@@ -373,8 +282,8 @@ class _HomeWidgetState extends State<HomeWidget> {
                         hoverColor: Colors.transparent,
                         highlightColor: Colors.transparent,
                         onTap: () async {
-                          context
-                              .pushNamed(AdminDriverVerificationWidget.routeName);
+                          context.pushNamed(
+                              AdminDriverVerificationWidget.routeName);
                         },
                         child: Row(
                           mainAxisSize: MainAxisSize.max,

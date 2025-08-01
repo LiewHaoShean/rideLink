@@ -64,6 +64,7 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
 
   @override
   Widget build(BuildContext context) {
+    print("Belllooo");
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -682,15 +683,16 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
                                             ),
                                           ],
                                         ),
-                                      ),),
+                                      ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
+                    ),
                   ],
                 ),
                 Row(
@@ -938,14 +940,19 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
                                             hoverColor: Colors.transparent,
                                             highlightColor: Colors.transparent,
                                             onTap: () async {
-                                              await FirebaseAuth.instance.signOut();
-                                              ScaffoldMessenger.of(context).showSnackBar(
+                                              await FirebaseAuth.instance
+                                                  .signOut();
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
                                                 SnackBar(
-                                                  content: Text('Logged out successfully'),
-                                                  duration: Duration(seconds: 3),
+                                                  content: Text(
+                                                      'Logged out successfully'),
+                                                  duration:
+                                                      Duration(seconds: 3),
                                                 ),
                                               );
-                                              context.goNamed(LoginPageWidget.routeName);
+                                              context.goNamed(
+                                                  LoginPageWidget.routeName);
                                             },
                                             child: Row(
                                               mainAxisSize: MainAxisSize.max,
@@ -1026,7 +1033,6 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
                                                             ),
                                                           ],
                                                         ),
-                                                        
                                                         Column(
                                                           mainAxisSize:
                                                               MainAxisSize.max,
@@ -1081,7 +1087,6 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
                                                             ),
                                                           ],
                                                         ),
-                                                        
                                                         Column(
                                                           mainAxisSize:
                                                               MainAxisSize.max,
@@ -1100,7 +1105,6 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
                                                             ),
                                                           ],
                                                         ),
-                                                      
                                                       ],
                                                     ),
                                                   ),
@@ -1197,7 +1201,6 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
                                                             ),
                                                           ],
                                                         ),
-                                                        
                                                         Column(
                                                           mainAxisSize:
                                                               MainAxisSize.max,
@@ -1252,7 +1255,6 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
                                                             ),
                                                           ],
                                                         ),
-                                                        
                                                         Column(
                                                           mainAxisSize:
                                                               MainAxisSize.max,
@@ -1603,12 +1605,10 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
                                                                     .override(
                                                                       font: GoogleFonts
                                                                           .interTight(
-                                                                        fontWeight: FlutterFlowTheme.of(
-                                                                            context)
+                                                                        fontWeight: FlutterFlowTheme.of(context)
                                                                             .titleSmall
                                                                             .fontWeight,
-                                                                        fontStyle: FlutterFlowTheme.of(
-                                                                            context)
+                                                                        fontStyle: FlutterFlowTheme.of(context)
                                                                             .titleSmall
                                                                             .fontStyle,
                                                                       ),

@@ -1,3 +1,5 @@
+import 'package:ride_link_carpooling/screens/user/dashboard/dashboard_home/dashboard_home_widget.dart';
+
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -6,6 +8,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '/main.dart';
 
 import 'dashboard_edit_vehicle_model.dart';
 export 'dashboard_edit_vehicle_model.dart';
@@ -13,6 +16,9 @@ export 'dashboard_edit_vehicle_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ride_link_carpooling/models/car_information.dart';
+
+import 'package:ride_link_carpooling/providers/license_provider.dart';
+import 'package:ride_link_carpooling/models/license.dart';
 
 class DashboardEditVehicleWidget extends StatefulWidget {
   const DashboardEditVehicleWidget({super.key});
@@ -54,6 +60,7 @@ class _DashboardEditVehicleWidgetState
     _model.emailTextFieldTextController6 ??= TextEditingController();
     _model.emailTextFieldFocusNode6 ??= FocusNode();
   }
+
   Future<void> createCar() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -62,7 +69,9 @@ class _DashboardEditVehicleWidgetState
 
     final brand = _model.emailTextFieldTextController1?.text.trim() ?? '';
     final model = _model.emailTextFieldTextController2?.text.trim() ?? '';
-    final year = int.tryParse(_model.emailTextFieldTextController4?.text.trim() ?? '0') ?? 0;
+    final year = int.tryParse(
+            _model.emailTextFieldTextController4?.text.trim() ?? '0') ??
+        0;
     final color = _model.emailTextFieldTextController4?.text.trim() ?? '';
     final plateNumber = _model.emailTextFieldTextController5?.text.trim() ?? '';
     final vin = _model.emailTextFieldTextController6?.text.trim() ?? '';
@@ -84,6 +93,7 @@ class _DashboardEditVehicleWidgetState
         .doc(carId)
         .set(carInfo.toJson());
   }
+
   @override
   void dispose() {
     _model.dispose();
@@ -163,7 +173,7 @@ class _DashboardEditVehicleWidgetState
                                                     size: 24,
                                                   ),
                                                   onPressed: () async {
-                                                    context.pushNamed('dashboardHome');
+                                                    context.safePop();
                                                   },
                                                 ),
                                               ],
@@ -1393,34 +1403,70 @@ class _DashboardEditVehicleWidgetState
                                         Expanded(
                                           child: FFButtonWidget(
                                             onPressed: () async {
-                                              final user = FirebaseAuth.instance.currentUser;
+                                              final user = FirebaseAuth
+                                                  .instance.currentUser;
                                               if (user == null) {
-                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
                                                   const SnackBar(
-                                                    content: Text('You must be logged in to register a vehicle.'),
+                                                    content: Text(
+                                                        'You must be logged in to register a vehicle.'),
                                                   ),
                                                 );
                                                 return;
                                               }
 
-                                              final brand = _model.emailTextFieldTextController1?.text.trim() ?? '';
-                                              final model = _model.emailTextFieldTextController2?.text.trim() ?? '';
-                                              final yearText = _model.emailTextFieldTextController3?.text.trim() ?? '';
-                                              final color = _model.emailTextFieldTextController4?.text.trim() ?? '';
-                                              final plateNumber = _model.emailTextFieldTextController5?.text.trim() ?? '';
-                                              final vin = _model.emailTextFieldTextController6?.text.trim() ?? '';
+                                              final brand = _model
+                                                      .emailTextFieldTextController1
+                                                      ?.text
+                                                      .trim() ??
+                                                  '';
+                                              final model = _model
+                                                      .emailTextFieldTextController2
+                                                      ?.text
+                                                      .trim() ??
+                                                  '';
+                                              final yearText = _model
+                                                      .emailTextFieldTextController3
+                                                      ?.text
+                                                      .trim() ??
+                                                  '';
+                                              final color = _model
+                                                      .emailTextFieldTextController4
+                                                      ?.text
+                                                      .trim() ??
+                                                  '';
+                                              final plateNumber = _model
+                                                      .emailTextFieldTextController5
+                                                      ?.text
+                                                      .trim() ??
+                                                  '';
+                                              final vin = _model
+                                                      .emailTextFieldTextController6
+                                                      ?.text
+                                                      .trim() ??
+                                                  '';
 
-                                              final year = int.tryParse(yearText) ?? 0;
+                                              final year =
+                                                  int.tryParse(yearText) ?? 0;
 
-                                              if (brand.isEmpty || model.isEmpty || plateNumber.isEmpty) {
-                                                ScaffoldMessenger.of(context).showSnackBar(
+                                              if (brand.isEmpty ||
+                                                  model.isEmpty ||
+                                                  plateNumber.isEmpty) {
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
                                                   const SnackBar(
-                                                    content: Text('Please fill in required fields.'),
+                                                    content: Text(
+                                                        'Please fill in required fields.'),
                                                   ),
                                                 );
                                                 return;
                                               }
-                                              final carId = FirebaseFirestore.instance.collection('cars').doc().id;
+                                              final carId = FirebaseFirestore
+                                                  .instance
+                                                  .collection('cars')
+                                                  .doc()
+                                                  .id;
 
                                               final car = CarInformation(
                                                 carId: carId,
@@ -1439,13 +1485,52 @@ class _DashboardEditVehicleWidgetState
                                                   .doc(carId)
                                                   .set(car.toJson());
 
-                                              ScaffoldMessenger.of(context).showSnackBar(
+                                              try {
+                                                final newLicense = License(
+                                                  licenseId: '',
+                                                  vehicleId: carId,
+                                                  userId: user.uid,
+                                                  status: 'pending',
+                                                  isInformed: true,
+                                                );
+
+                                                await context
+                                                    .read<LicenseProvider>()
+                                                    .createLicense(newLicense);
+                                                print(
+                                                    'License created successfully!');
+                                              } catch (e) {
+                                                print(
+                                                    'Error creating license: $e');
+                                                // Show error message to user
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                        'Error: ${e.toString()}'),
+                                                    backgroundColor: Colors.red,
+                                                  ),
+                                                );
+                                              }
+
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
                                                 const SnackBar(
-                                                  content: Text('Vehicle registered successfully!'),
+                                                  content: Text(
+                                                      'Driver registered successfully! It might take a while for approval!'),
                                                 ),
                                               );
 
-                                              context.pushNamed('dashboardHome');
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      NavBarPage(
+                                                    initialPage:
+                                                        'dashboardHome',
+                                                  ),
+                                                ),
+                                              );
                                             },
                                             text: 'Save',
                                             options: FFButtonOptions(

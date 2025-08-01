@@ -1,7 +1,17 @@
 # RideLink Carpooling
 
-A new Flutter project.
+RideLink is a mobile application designed to streamline carpooling by efficiently connecting drivers and passengers. Built with **FlutterFlow** and powered by **Firebase**, the app promotes sustainable commuting, cost-saving transportation, and an improved urban mobility experience.
 
-## Getting Started
+Tech Stack:
+- Frontend: FlutterFlow (Flutter-based visual builder)
+- Backend: Firebase (Firestore, Auth, Cloud Functions)
+- Platform: Android (iOS support can be added easily via FlutterFlow)
 
-FlutterFlow projects are built to run on the Flutter _stable_ release.
+Prerequisites
+- Flutter SDK (if exporting code from FlutterFlow)
+- Firebase account for backend setup
+
+git clone https://github.com/yourusername/ridelink.git
+cd ridelink
+flutter pub get
+flutter run

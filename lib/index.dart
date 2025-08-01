@@ -52,10 +52,9 @@ export 'screens/user/create_ride/vehicle_register/vehicle_register_widget.dart'
     show VehicleRegisterWidget;
 export 'screens/user/create_ride/license_verification/license_verification_widget.dart'
     show LicenseVerificationWidget;
-export '/processing_page/processing_page_widget.dart' show ProcessingPageWidget;
-export 'screens/verification_success_page/verification_success_page_widget.dart'
-    show VerificationSuccessPageWidget;
-export 'screens/login/fail_page/fail_page_widget.dart' show FailPageWidget;
+export 'screens/processing_page/processing_page_widget.dart'
+    show ProcessingPageWidget;
+export 'screens/fail_page/fail_page_widget.dart' show FailPageWidget;
 export 'screens/user/search_ride/search_ride_waiting_driver/search_ride_waiting_driver_widget.dart'
     show SearchRideWaitingDriverWidget;
 export 'screens/user/search_ride/search_ride_pending_ride/search_ride_pending_ride_widget.dart'

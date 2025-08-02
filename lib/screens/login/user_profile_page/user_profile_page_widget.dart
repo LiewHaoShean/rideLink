@@ -937,6 +937,7 @@ class _UserProfilePageWidgetState extends State<UserProfilePageWidget> {
                               name: fullName,
                               email: user.email ?? '',
                               userRole: 'passenger',
+                              phone: phone,
                               nic: nic,
                               gender: gender,
                               isEmailVerified: user.emailVerified,

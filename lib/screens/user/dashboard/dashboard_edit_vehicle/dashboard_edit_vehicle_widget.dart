@@ -1,3 +1,4 @@
+import 'package:ride_link_carpooling/screens/user/create_ride/dashboard_upload_pdf.dart';
 import 'package:ride_link_carpooling/screens/user/dashboard/dashboard_home/dashboard_home_widget.dart';
 
 import '/flutter_flow/flutter_flow_icon_button.dart';
@@ -1485,52 +1486,15 @@ class _DashboardEditVehicleWidgetState
                                                   .doc(carId)
                                                   .set(car.toJson());
 
-                                              try {
-                                                final newLicense = License(
-                                                  licenseId: '',
-                                                  vehicleId: carId,
-                                                  userId: user.uid,
-                                                  status: 'pending',
-                                                  isInformed: true,
-                                                );
-
-                                                await context
-                                                    .read<LicenseProvider>()
-                                                    .createLicense(newLicense);
-                                                print(
-                                                    'License created successfully!');
-                                              } catch (e) {
-                                                print(
-                                                    'Error creating license: $e');
-                                                // Show error message to user
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                        'Error: ${e.toString()}'),
-                                                    backgroundColor: Colors.red,
-                                                  ),
-                                                );
-                                              }
-
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                const SnackBar(
-                                                  content: Text(
-                                                      'Driver registered successfully! It might take a while for approval!'),
-                                                ),
-                                              );
-
                                               Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      NavBarPage(
-                                                    initialPage:
-                                                        'dashboardHome',
-                                                  ),
-                                                ),
-                                              );
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        DashboardUploadPdfWidget(
+                                                      vehicleId: carId,
+                                                      userId: user.uid,
+                                                    ),
+                                                  ));
                                             },
                                             text: 'Save',
                                             options: FFButtonOptions(

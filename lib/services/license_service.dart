@@ -154,20 +154,24 @@ class LicenseService {
               .get();
 
           String userName = 'Unknown User';
+          String profileURL = 'Unknown URL';
           if (userDoc.exists) {
             final userData = userDoc.data()!;
             userName = userData['name'] ?? 'Unknown User';
+            profileURL = userData['profilePictureUrl'] ?? 'Unknown URL';
           }
 
           licensesWithNames.add({
             'license': license,
             'userName': userName,
+            'profileURL': profileURL
           });
         } catch (e) {
           print('Error getting user name for license ${license.licenseId}: $e');
           licensesWithNames.add({
             'license': license,
             'userName': 'Unknown User',
+            'profileURL': 'Unknown URL'
           });
         }
       }

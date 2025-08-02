@@ -13,28 +13,30 @@ import 'package:provider/provider.dart';
 
 class DashboardProfileModel extends FlutterFlowModel<DashboardProfileWidget> {
   ///  State fields for stateful widgets in this page.
+  FocusNode? emailTextFieldFocusNode;
+  TextEditingController? emailTextFieldTextController;
+  String? Function(BuildContext, String?)?
+      emailTextFieldTextControllerValidator;
 
-  // State field(s) for emailTextField widget.
-  FocusNode? emailTextFieldFocusNode1;
-  TextEditingController? emailTextFieldTextController1;
+  FocusNode? firstNameTextFieldFocusNode;
+  TextEditingController? firstNameTextFieldTextController;
   String? Function(BuildContext, String?)?
-      emailTextFieldTextController1Validator;
-  // State field(s) for emailTextField widget.
-  FocusNode? emailTextFieldFocusNode2;
-  TextEditingController? emailTextFieldTextController2;
+      firstNameTextFieldTextControllerValidator;
+
+  FocusNode? lastNameTextFieldFocusNode;
+  TextEditingController? lastNameTextFieldController;
   String? Function(BuildContext, String?)?
-      emailTextFieldTextController2Validator;
-  // State field(s) for passwordlTextField widget.
-  FocusNode? passwordlTextFieldFocusNode1;
-  TextEditingController? passwordlTextFieldTextController1;
+      lastNameTextFieldTextControllerValidator;
+
+  FocusNode? nicTextFieldFocusNode;
+  TextEditingController? nicTextFieldTextController;
+  String? Function(BuildContext, String?)? nicTextFieldTextControllerValidator;
+
+  FocusNode? phoneTextFieldFocusNode;
+  TextEditingController? phoneTextFieldTextController2;
   String? Function(BuildContext, String?)?
-      passwordlTextFieldTextController1Validator;
-  // State field(s) for passwordlTextField widget.
-  FocusNode? passwordlTextFieldFocusNode2;
-  TextEditingController? passwordlTextFieldTextController2;
-  String? Function(BuildContext, String?)?
-      passwordlTextFieldTextController2Validator;
-  // State field(s) for DropDown widget.
+      phoneTextFieldTextControllerValidator;
+
   String? dropDownValue;
   FormFieldController<String>? dropDownValueController;
 
@@ -43,16 +45,19 @@ class DashboardProfileModel extends FlutterFlowModel<DashboardProfileWidget> {
 
   @override
   void dispose() {
-    emailTextFieldFocusNode1?.dispose();
-    emailTextFieldTextController1?.dispose();
+    emailTextFieldFocusNode?.dispose();
+    emailTextFieldTextController?.dispose();
 
-    emailTextFieldFocusNode2?.dispose();
-    emailTextFieldTextController2?.dispose();
+    firstNameTextFieldFocusNode?.dispose();
+    firstNameTextFieldTextController?.dispose();
 
-    passwordlTextFieldFocusNode1?.dispose();
-    passwordlTextFieldTextController1?.dispose();
+    lastNameTextFieldFocusNode?.dispose();
+    lastNameTextFieldController?.dispose();
 
-    passwordlTextFieldFocusNode2?.dispose();
-    passwordlTextFieldTextController2?.dispose();
+    nicTextFieldFocusNode?.dispose();
+    nicTextFieldTextController?.dispose();
+
+    phoneTextFieldFocusNode?.dispose();
+    phoneTextFieldTextController2?.dispose();
   }
 }

@@ -90,6 +90,8 @@ class _AdminDriverVerificationDetailsWidgetState
       });
 
       // Load PDF if available
+      print("heyyy");
+      print(license?.pdfUrl);
       if (license?.pdfUrl != null && license!.pdfUrl!.isNotEmpty) {
         await _loadPdfFromFirebase(license.pdfUrl!);
       }
@@ -110,26 +112,75 @@ class _AdminDriverVerificationDetailsWidgetState
 
   Future<void> _loadPdfFromFirebase(String firebasePath) async {
     try {
-      // 1. Get download URL
-      final ref = FirebaseStorage.instance.ref(firebasePath);
-      final url = await ref.getDownloadURL();
+      print('Starting PDF download for path: $firebasePath');
 
-      // 2. Get local directory
+      String url;
+
+      // Check if the path is already a full URL
+      if (firebasePath.startsWith('http://') ||
+          firebasePath.startsWith('https://')) {
+        // It's already a URL, use it directly
+        url = firebasePath;
+        print('Using direct URL: $url');
+      } else {
+        // It's a Firebase Storage path, get the download URL
+        try {
+          final ref = FirebaseStorage.instance.ref(firebasePath);
+          url = await ref.getDownloadURL();
+          print('Download URL obtained: $url');
+        } catch (e) {
+          print('Error getting download URL from Firebase: $e');
+          throw Exception(
+              'Failed to get download URL from Firebase Storage: $e');
+        }
+      }
+
+      // Get local directory
       final dir = await getApplicationDocumentsDirectory();
       final filePath = '${dir.path}/license_${widget.licenseId}.pdf';
+      print('Local file path: $filePath');
 
-      // 3. Download the file using Dio
-      await Dio().download(url, filePath);
+      // Download using Dio with timeout and progress tracking
+      final dio = Dio();
+      dio.options.connectTimeout = Duration(seconds: 30);
+      dio.options.receiveTimeout = Duration(seconds: 60);
 
-      setState(() {
-        _localPdfPath = filePath;
-        _pdfLoadError = false;
-      });
+      await dio.download(
+        url,
+        filePath,
+        onReceiveProgress: (received, total) {
+          if (total != -1) {
+            print(
+                'Download progress: ${(received / total * 100).toStringAsFixed(0)}%');
+          }
+        },
+      );
+
+      // Verify file exists
+      final file = File(filePath);
+      if (await file.exists()) {
+        print('PDF downloaded successfully to: $filePath');
+        setState(() {
+          _localPdfPath = filePath;
+          _pdfLoadError = false;
+        });
+      } else {
+        throw Exception('File was not created after download');
+      }
     } catch (e) {
       print('Error loading PDF: $e');
       setState(() {
         _pdfLoadError = true;
       });
+
+      // Show user-friendly error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to load PDF. Please try again.'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
+        ),
+      );
     }
   }
 

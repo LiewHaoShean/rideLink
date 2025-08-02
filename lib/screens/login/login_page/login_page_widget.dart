@@ -86,7 +86,7 @@ class _LoginPageWidgetState extends State<LoginPageWidget> {
                           color: Color(0xFF00265C),
                         ),
                         onPressed: () async {
-                          context.safePop();
+                          context.pushNamed(HomePageWidget.routeName);
                         },
                       ),
                     ),

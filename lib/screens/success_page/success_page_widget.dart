@@ -154,7 +154,6 @@ class _SuccessPageWidgetState extends State<SuccessPageWidget> {
                       children: [
                         FFButtonWidget(
                           onPressed: () {
-                            print("gg");
                             if (widget.title == 'Verification Passed') {
                               Navigator.push(
                                 context,
@@ -164,6 +163,9 @@ class _SuccessPageWidgetState extends State<SuccessPageWidget> {
                                   ),
                                 ),
                               );
+                            } else if (widget.title ==
+                                'Registered Successfully') {
+                              context.pushNamed(LoginPageWidget.routeName);
                             } else {
                               context.pushNamed(SearchRideHomeWidget.routeName);
                             }

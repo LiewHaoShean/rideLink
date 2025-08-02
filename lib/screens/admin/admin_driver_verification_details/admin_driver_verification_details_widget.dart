@@ -1680,8 +1680,8 @@ class _AdminDriverVerificationDetailsWidgetState
                       : Opacity(
                           opacity: 0.5,
                           child: Container(
-                            width: 270,
-                            height: 65.32,
+                            width: 350,
+                            height: 55,
                             decoration: BoxDecoration(
                               color: _license?.status == 'verified'
                                   ? Color(0xFF00265C)

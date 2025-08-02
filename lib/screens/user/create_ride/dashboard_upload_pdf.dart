@@ -50,6 +50,13 @@ class _DashboardUploadPdfWidgetState extends State<DashboardUploadPdfWidget> {
     super.dispose();
   }
 
+  void initState() {
+    super.initState();
+
+    _titleController.text = 'Driver License';
+    _descriptionController.text = 'Requesting to be a driver.';
+  }
+
   Future<void> _pickPdfFile() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(

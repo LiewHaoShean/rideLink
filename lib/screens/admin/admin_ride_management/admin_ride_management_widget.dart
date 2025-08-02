@@ -272,7 +272,12 @@ class _AdminRideManagementWidgetState extends State<AdminRideManagementWidget> {
                     child: FlutterFlowDropDown<String>(
                       controller: _model.dropDownValueController ??=
                           FormFieldController<String>(null),
-                      options: ['Ongoing', 'Upcoming', 'Finished', 'Cancel'],
+                      options: [
+                        'Scheduled',
+                        'Selecting',
+                        'Ongoing',
+                        'Finished'
+                      ],
                       onChanged: (val) =>
                           safeSetState(() => _model.dropDownValue = val),
                       width: 200.0,

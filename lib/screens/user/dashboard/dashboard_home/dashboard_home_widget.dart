@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dashboard_home_model.dart';
 export 'dashboard_home_model.dart';
+import 'package:ride_link_carpooling/providers/rating_provider.dart';
 
 class DashboardHomeWidget extends StatefulWidget {
   final String userId;
@@ -27,6 +28,7 @@ class DashboardHomeWidget extends StatefulWidget {
 class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
     with TickerProviderStateMixin {
   late DashboardHomeModel _model;
+  double _rating = 0.0;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -43,6 +45,7 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
 
     _loadProfile();
     _loadTransactions();
+    _fetchUserRating();
   }
 
   Future<void> _loadProfile() async {
@@ -56,6 +59,15 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
         .fetchAllTransactionByUserId(widget.userId);
   }
 
+  Future<void> _fetchUserRating() async {
+    final ratingProvider = context.read<RatingProvider>();
+    final rating =
+        await ratingProvider.getAverageRatingByDriverId(widget.userId);
+    setState(() {
+      _rating = rating;
+    });
+  }
+
   @override
   void dispose() {
     _model.dispose();
@@ -64,7 +76,7 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
 
   @override
   Widget build(BuildContext context) {
-    print("Belllooo");
+    // print("Belllooo");
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -227,18 +239,16 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
                                                                             mainAxisSize:
                                                                                 MainAxisSize.max,
                                                                             children: [
-                                                                              RatingBar.builder(
-                                                                                onRatingUpdate: (newValue) => safeSetState(() => _model.ratingBarValue = newValue),
+                                                                              RatingBarIndicator(
+                                                                                rating: _rating, // Make sure this is a double
                                                                                 itemBuilder: (context, index) => Icon(
                                                                                   Icons.star_rounded,
                                                                                   color: FlutterFlowTheme.of(context).warning,
                                                                                 ),
-                                                                                direction: Axis.horizontal,
-                                                                                initialRating: _model.ratingBarValue ??= 3,
-                                                                                unratedColor: FlutterFlowTheme.of(context).accent1,
                                                                                 itemCount: 5,
                                                                                 itemSize: 20,
-                                                                                glowColor: FlutterFlowTheme.of(context).warning,
+                                                                                unratedColor: FlutterFlowTheme.of(context).accent1,
+                                                                                direction: Axis.horizontal,
                                                                               ),
                                                                             ],
                                                                           ),

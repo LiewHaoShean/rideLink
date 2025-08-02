@@ -240,7 +240,7 @@ class _SearchRidePendingRideWidgetState
               Expanded(
                 flex: 0,
                 child: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(10, 0, 10, 0),
+                  padding: EdgeInsetsDirectional.fromSTEB(30, 0, 10, 0),
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
                     children: [
@@ -254,46 +254,6 @@ class _SearchRidePendingRideWidgetState
                           child: Row(
                             mainAxisSize: MainAxisSize.max,
                             children: [
-                              Column(
-                                mainAxisSize: MainAxisSize.max,
-                                children: [
-                                  Container(
-                                    width: 40,
-                                    height: 100,
-                                    decoration: BoxDecoration(
-                                      color: FlutterFlowTheme.of(context)
-                                          .secondaryBackground,
-                                    ),
-                                    child: Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          0, 0, 1, 0),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          FlutterFlowIconButton(
-                                            borderRadius: 8,
-                                            buttonSize: 40,
-                                            fillColor: Color(0xFFE5E5E5),
-                                            icon: Icon(
-                                              Icons.arrow_back_ios_new,
-                                              color: Color(0xFF00275C),
-                                              size: 24,
-                                            ),
-                                            onPressed: () {
-                                              context
-                                                  .pushNamed('dashboardHome');
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
                               Column(
                                 mainAxisSize: MainAxisSize.max,
                                 children: [

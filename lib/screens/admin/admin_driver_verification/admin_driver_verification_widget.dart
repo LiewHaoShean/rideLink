@@ -13,6 +13,7 @@ import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'admin_driver_verification_model.dart';
 export 'admin_driver_verification_model.dart';
 
@@ -90,6 +91,39 @@ class _AdminDriverVerificationWidgetState
     }
 
     return filtered;
+  }
+
+  Widget _buildUserProfilePicture(String? profilePictureUrl) {
+    return Container(
+      width: 50.0,
+      height: 50.0,
+      decoration: BoxDecoration(
+        color: Color(0xFFDDDEE0),
+        borderRadius: BorderRadius.circular(100.0),
+      ),
+      child: profilePictureUrl != null && profilePictureUrl.isNotEmpty
+          ? ClipOval(
+              child: CachedNetworkImage(
+                imageUrl: profilePictureUrl,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                  ),
+                ),
+                errorWidget: (context, url, error) => Icon(
+                  Icons.person,
+                  color: FlutterFlowTheme.of(context).primaryText,
+                  size: 30.0,
+                ),
+              ),
+            )
+          : Icon(
+              Icons.person,
+              color: FlutterFlowTheme.of(context).primaryText,
+              size: 30.0,
+            ),
+    );
   }
 
   @override
@@ -428,7 +462,7 @@ class _AdminDriverVerificationWidgetState
                                       );
                                     }
 
-                                    // print(filteredLicenses);
+                                    print(filteredLicenses);
 
                                     return Padding(
                                       padding: EdgeInsetsDirectional.fromSTEB(
@@ -482,36 +516,9 @@ class _AdminDriverVerificationWidgetState
                                                                     MainAxisAlignment
                                                                         .center,
                                                                 children: [
-                                                                  Container(
-                                                                    width: 50.0,
-                                                                    height:
-                                                                        50.0,
-                                                                    decoration:
-                                                                        BoxDecoration(
-                                                                      color: Color(
-                                                                          0xFFDDDEE0),
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              100.0),
-                                                                    ),
-                                                                    child: Row(
-                                                                      mainAxisSize:
-                                                                          MainAxisSize
-                                                                              .max,
-                                                                      mainAxisAlignment:
-                                                                          MainAxisAlignment
-                                                                              .center,
-                                                                      children: [
-                                                                        Icon(
-                                                                          Icons
-                                                                              .person,
-                                                                          color:
-                                                                              FlutterFlowTheme.of(context).primaryText,
-                                                                          size:
-                                                                              30.0,
-                                                                        ),
-                                                                      ],
-                                                                    ),
+                                                                  _buildUserProfilePicture(
+                                                                    license[
+                                                                        'profileURL'],
                                                                   ),
                                                                 ],
                                                               ),

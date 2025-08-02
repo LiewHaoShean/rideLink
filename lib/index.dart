@@ -95,3 +95,5 @@ export 'screens/user/dashboard/dashboard_top_up/dashboard_top_up_widget.dart'
 export 'screens/user/dashboard/dashboard_withdraw/dashboard_withdraw_profit_widget.dart'
     show DashboardWithdrawProfitWidget;
 export 'screens/admin/home/home_widget.dart' show HomeWidget;
+export 'screens/user/create_ride/dashboard_upload_pdf.dart'
+    show DashboardUploadPdfWidget;

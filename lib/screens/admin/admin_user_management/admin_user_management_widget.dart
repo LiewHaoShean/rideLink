@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'admin_user_management_model.dart';
 export 'admin_user_management_model.dart';
 import 'package:ride_link_carpooling/providers/user_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class AdminUserManagementWidget extends StatefulWidget {
   const AdminUserManagementWidget({super.key});
@@ -58,6 +59,39 @@ class _AdminUserManagementWidgetState extends State<AdminUserManagementWidget> {
     _model.dispose();
 
     super.dispose();
+  }
+
+  Widget _buildUserProfilePicture(String? profilePictureUrl) {
+    return Container(
+      width: 50,
+      height: 50,
+      decoration: BoxDecoration(
+        color: Color(0xFFDDDEE0),
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: profilePictureUrl != null && profilePictureUrl.isNotEmpty
+          ? ClipOval(
+              child: CachedNetworkImage(
+                imageUrl: profilePictureUrl,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                  ),
+                ),
+                errorWidget: (context, url, error) => Icon(
+                  Icons.person,
+                  color: FlutterFlowTheme.of(context).primaryText,
+                  size: 30,
+                ),
+              ),
+            )
+          : Icon(
+              Icons.person,
+              color: FlutterFlowTheme.of(context).primaryText,
+              size: 30,
+            ),
+    );
   }
 
   @override
@@ -681,9 +715,12 @@ class _AdminUserManagementWidgetState extends State<AdminUserManagementWidget> {
                                     if (_model.textController.text.isNotEmpty) {
                                       filteredUsers = userProvider.searchUsers(
                                           _model.textController.text);
-                                      print("Filtering users with query: ${_model.textController.text}");
-                                      print("Total users: ${userProvider.users.length}");
-                                      print("Filtered users: ${filteredUsers.length}");
+                                      print(
+                                          "Filtering users with query: ${_model.textController.text}");
+                                      print(
+                                          "Total users: ${userProvider.users.length}");
+                                      print(
+                                          "Filtered users: ${filteredUsers.length}");
                                     }
 
                                     return SingleChildScrollView(
@@ -779,11 +816,7 @@ class _AdminUserManagementWidgetState extends State<AdminUserManagementWidget> {
                                                                                     mainAxisSize: MainAxisSize.max,
                                                                                     mainAxisAlignment: MainAxisAlignment.center,
                                                                                     children: [
-                                                                                      Icon(
-                                                                                        Icons.person,
-                                                                                        color: FlutterFlowTheme.of(context).primaryText,
-                                                                                        size: 30,
-                                                                                      ),
+                                                                                      _buildUserProfilePicture(user.profilePictureUrl)
                                                                                     ],
                                                                                   ),
                                                                                 ),

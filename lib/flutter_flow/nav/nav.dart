@@ -156,6 +156,13 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           ),
         ),
         FFRoute(
+          name: DashboardUploadPdfWidget.routeName,
+          path: DashboardUploadPdfWidget.routePath,
+          builder: (context, params) => DashboardUploadPdfWidget(
+              userId: params.getParam('userId', ParamType.String) ?? '',
+              vehicleId: params.getParam('vehicleId', ParamType.String) ?? ''),
+        ),
+        FFRoute(
           name: MessageMainWidget.routeName,
           path: MessageMainWidget.routePath,
           builder: (context, params) => MessageMainWidget(

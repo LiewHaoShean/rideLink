@@ -10,6 +10,7 @@ class UserModel {
   double profit;
   final String? phone;
   final bool isBanned;
+  final String? profilePictureUrl;
 
   UserModel({
     required this.uid,
@@ -23,6 +24,7 @@ class UserModel {
     this.profit = 0,
     this.isEmailVerified = false,
     this.isBanned = false,
+    this.profilePictureUrl,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -35,18 +37,18 @@ class UserModel {
     }
 
     return UserModel(
-      uid: json['uid'],
-      name: json['name'],
-      email: json['email'],
-      userRole: json['userRole'],
-      nic: json['nic'],
-      phone: json['phone'],
-      gender: json['gender'],
-      credit: parseDouble(json['credit']),
-      profit: parseDouble(json['profit']),
-      isEmailVerified: json['isEmailVerified'] ?? false,
-      isBanned: json['isBanned'] ?? false,
-    );
+        uid: json['uid'],
+        name: json['name'],
+        email: json['email'],
+        userRole: json['userRole'],
+        nic: json['nic'],
+        phone: json['phone'],
+        gender: json['gender'],
+        credit: parseDouble(json['credit']),
+        profit: parseDouble(json['profit']),
+        isEmailVerified: json['isEmailVerified'] ?? false,
+        isBanned: json['isBanned'] ?? false,
+        profilePictureUrl: json['profilePictureUrl']);
   }
 
   Map<String, dynamic> toJson() {
@@ -62,6 +64,7 @@ class UserModel {
       'profit': profit,
       'isEmailVerified': isEmailVerified,
       'isBanned': isBanned,
+      'profilePictureUrl': profilePictureUrl,
     };
   }
 }

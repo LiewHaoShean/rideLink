@@ -1,5 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:io';
+import 'package:ride_link_carpooling/models/user.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
@@ -14,6 +18,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'dashboard_profile_model.dart';
 export 'dashboard_profile_model.dart';
+import 'package:ride_link_carpooling/services/storage_service.dart';
+import 'package:ride_link_carpooling/services/file_picker_service.dart';
+import 'package:ride_link_carpooling/providers/user_provider.dart';
+import 'package:image_picker/image_picker.dart';
 
 class DashboardProfileWidget extends StatefulWidget {
   const DashboardProfileWidget({super.key});
@@ -27,6 +35,12 @@ class DashboardProfileWidget extends StatefulWidget {
 
 class _DashboardProfileWidgetState extends State<DashboardProfileWidget> {
   late DashboardProfileModel _model;
+  final StorageService _storageService = StorageService();
+  final FilePickerService _filePickerService = FilePickerService();
+  final ImagePicker _imagePicker = ImagePicker();
+  UserModel? _user;
+  String? currentProfilePictureUrl;
+  bool isUploading = false;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -35,17 +49,165 @@ class _DashboardProfileWidgetState extends State<DashboardProfileWidget> {
     super.initState();
     _model = createModel(context, () => DashboardProfileModel());
 
-    _model.emailTextFieldTextController1 ??= TextEditingController();
-    _model.emailTextFieldFocusNode1 ??= FocusNode();
+    _model.emailTextFieldTextController ??= TextEditingController();
+    _model.emailTextFieldFocusNode ??= FocusNode();
 
-    _model.emailTextFieldTextController2 ??= TextEditingController();
-    _model.emailTextFieldFocusNode2 ??= FocusNode();
+    _model.firstNameTextFieldTextController ??= TextEditingController();
+    _model.firstNameTextFieldFocusNode ??= FocusNode();
 
-    _model.passwordlTextFieldTextController1 ??= TextEditingController();
-    _model.passwordlTextFieldFocusNode1 ??= FocusNode();
+    _model.lastNameTextFieldController ??= TextEditingController();
+    _model.lastNameTextFieldFocusNode ??= FocusNode();
 
-    _model.passwordlTextFieldTextController2 ??= TextEditingController();
-    _model.passwordlTextFieldFocusNode2 ??= FocusNode();
+    _model.nicTextFieldTextController ??= TextEditingController();
+    _model.nicTextFieldFocusNode ??= FocusNode();
+
+    _model.phoneTextFieldTextController2 ??= TextEditingController();
+    _model.phoneTextFieldFocusNode ??= FocusNode();
+    _fetchUser();
+  }
+
+  Future<void> _fetchUser() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      try {
+        final currentUser =
+            await context.read<UserProvider>().getUserDetails(user?.uid ?? '');
+
+        setState(() {
+          _user = currentUser;
+          currentProfilePictureUrl = _user?.profilePictureUrl;
+          _model.firstNameTextFieldTextController.text =
+              _user?.name.split(" ")[0] ?? '';
+          _model.lastNameTextFieldController.text =
+              '${_user?.name.split(" ")[1]}';
+          _model.emailTextFieldTextController.text = _user?.email ?? '';
+          _model.nicTextFieldTextController.text = _user?.nic ?? '';
+          _model.phoneTextFieldTextController2.text = _user?.phone ?? '';
+          _model.dropDownValueController?.value = _user?.gender ?? '';
+        });
+      } catch (e) {
+        print('Error loading user profile: $e');
+      }
+    }
+  }
+
+  Future<void> _uploadProfilePicture() async {
+    try {
+      setState(() {
+        isUploading = true;
+      });
+
+      // Show image picker options
+      showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.photo_library),
+                  title: const Text('Choose from Gallery'),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    await _pickAndUploadImage(ImageSource.gallery);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.camera_alt),
+                  title: const Text('Take Photo'),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    await _pickAndUploadImage(ImageSource.camera);
+                  },
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    } catch (e) {
+      setState(() {
+        isUploading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
+
+  Future<void> _pickAndUploadImage(ImageSource source) async {
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      // Pick image
+      final XFile? image = await _imagePicker.pickImage(
+        source: source,
+        imageQuality: 80,
+      );
+
+      if (image != null) {
+        final File imageFile = File(image.path);
+
+        // Upload to Firebase Storage
+        final String downloadUrl = await _storageService.uploadImage(
+          imageFile: imageFile,
+          folder: 'profile_pictures',
+          customFileName: 'user_${_user!.uid}_profile.jpg',
+        );
+
+        // Update user profile in Firestore
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(_user!.uid)
+            .update({
+          'profilePictureUrl': downloadUrl,
+        });
+
+        // Update local state
+        setState(() {
+          currentProfilePictureUrl = downloadUrl;
+        });
+
+        // Hide loading indicator
+        Navigator.of(context).pop();
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Profile picture updated successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        // Hide loading indicator if no image selected
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      // Hide loading indicator
+      Navigator.of(context).pop();
+
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to upload profile picture: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        isUploading = false;
+      });
+    }
   }
 
   @override
@@ -122,18 +284,74 @@ class _DashboardProfileWidgetState extends State<DashboardProfileWidget> {
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    FlutterFlowIconButton(
-                      borderRadius: 100.0,
-                      buttonSize: 122.9,
-                      fillColor: Color(0xFFE5E5E5),
-                      icon: Icon(
-                        Icons.camera_alt,
-                        color: FlutterFlowTheme.of(context).primaryText,
-                        size: 50.0,
-                      ),
-                      onPressed: () {
-                        print('IconButton pressed ...');
-                      },
+                    Stack(
+                      children: [
+                        // Profile Picture Container
+                        Container(
+                          width: 122.9,
+                          height: 122.9,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Color(0xFFE5E5E5),
+                          ),
+                          child: currentProfilePictureUrl != null
+                              ? ClipOval(
+                                  child: CachedNetworkImage(
+                                    imageUrl: currentProfilePictureUrl!,
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) => Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                    errorWidget: (context, url, error) => Icon(
+                                      Icons.person,
+                                      size: 50.0,
+                                      color: FlutterFlowTheme.of(context)
+                                          .primaryText,
+                                    ),
+                                  ),
+                                )
+                              : Icon(
+                                  Icons.person,
+                                  size: 50.0,
+                                  color:
+                                      FlutterFlowTheme.of(context).primaryText,
+                                ),
+                        ),
+                        // Camera Button Overlay
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: FlutterFlowTheme.of(context).primary,
+                            ),
+                            child: IconButton(
+                              icon: isUploading
+                                  ? SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                          Colors.white,
+                                        ),
+                                      ),
+                                    )
+                                  : Icon(
+                                      Icons.camera_alt,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                              onPressed:
+                                  isUploading ? null : _uploadProfilePicture,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -158,8 +376,8 @@ class _DashboardProfileWidgetState extends State<DashboardProfileWidget> {
                         child: Container(
                           width: 360.0,
                           child: TextFormField(
-                            controller: _model.emailTextFieldTextController1,
-                            focusNode: _model.emailTextFieldFocusNode1,
+                            controller: _model.firstNameTextFieldTextController,
+                            focusNode: _model.firstNameTextFieldFocusNode,
                             autofocus: false,
                             obscureText: false,
                             decoration: InputDecoration(
@@ -257,7 +475,7 @@ class _DashboardProfileWidgetState extends State<DashboardProfileWidget> {
                             cursorColor:
                                 FlutterFlowTheme.of(context).primaryText,
                             validator: _model
-                                .emailTextFieldTextController1Validator
+                                .firstNameTextFieldTextControllerValidator
                                 .asValidator(context),
                           ),
                         ),
@@ -277,8 +495,8 @@ class _DashboardProfileWidgetState extends State<DashboardProfileWidget> {
                         child: Container(
                           width: 360.0,
                           child: TextFormField(
-                            controller: _model.emailTextFieldTextController2,
-                            focusNode: _model.emailTextFieldFocusNode2,
+                            controller: _model.lastNameTextFieldController,
+                            focusNode: _model.lastNameTextFieldFocusNode,
                             autofocus: false,
                             obscureText: false,
                             decoration: InputDecoration(
@@ -376,10 +594,158 @@ class _DashboardProfileWidgetState extends State<DashboardProfileWidget> {
                             cursorColor:
                                 FlutterFlowTheme.of(context).primaryText,
                             validator: _model
-                                .emailTextFieldTextController2Validator
+                                .lastNameTextFieldTextControllerValidator
                                 .asValidator(context),
                           ),
                         ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(0.0, 15.0, 0.0, 0.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 5),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(0, 5, 0, 5),
+                            child: Container(
+                              width: 353.9,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.rectangle,
+                              ),
+                              child: Container(
+                                width: 200,
+                                child: TextFormField(
+                                  controller:
+                                      _model.emailTextFieldTextController,
+                                  focusNode: _model.emailTextFieldFocusNode,
+                                  autofocus: false,
+                                  readOnly: true,
+                                  obscureText: false,
+                                  decoration: InputDecoration(
+                                    isDense: true,
+                                    labelStyle: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          font: GoogleFonts.inter(
+                                            fontWeight:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodyMedium
+                                                    .fontWeight,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodyMedium
+                                                    .fontStyle,
+                                          ),
+                                          letterSpacing: 0.0,
+                                          fontWeight:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontWeight,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontStyle,
+                                        ),
+                                    hintText: 'email',
+                                    hintStyle: FlutterFlowTheme.of(context)
+                                        .labelMedium
+                                        .override(
+                                          font: GoogleFonts.inter(
+                                            fontWeight:
+                                                FlutterFlowTheme.of(context)
+                                                    .labelMedium
+                                                    .fontWeight,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .labelMedium
+                                                    .fontStyle,
+                                          ),
+                                          fontSize: 18,
+                                          letterSpacing: 0.0,
+                                          fontWeight:
+                                              FlutterFlowTheme.of(context)
+                                                  .labelMedium
+                                                  .fontWeight,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .labelMedium
+                                                  .fontStyle,
+                                        ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Color(0x00000000),
+                                        width: 1,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Color(0x00000000),
+                                        width: 1,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    errorBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color:
+                                            FlutterFlowTheme.of(context).error,
+                                        width: 1,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    focusedErrorBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color:
+                                            FlutterFlowTheme.of(context).error,
+                                        width: 1,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    filled: true,
+                                    fillColor: Color(0xFFE5E5E5),
+                                  ),
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .override(
+                                        font: GoogleFonts.inter(
+                                          fontWeight:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontWeight,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontStyle,
+                                        ),
+                                        letterSpacing: 0.0,
+                                        fontWeight: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontWeight,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontStyle,
+                                      ),
+                                  textAlign: TextAlign.start,
+                                  cursorColor:
+                                      FlutterFlowTheme.of(context).primaryText,
+                                  validator: _model
+                                      .emailTextFieldTextControllerValidator
+                                      .asValidator(context),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -402,8 +768,8 @@ class _DashboardProfileWidgetState extends State<DashboardProfileWidget> {
                       child: Container(
                         width: 360.0,
                         child: TextFormField(
-                          controller: _model.passwordlTextFieldTextController1,
-                          focusNode: _model.passwordlTextFieldFocusNode1,
+                          controller: _model.nicTextFieldTextController,
+                          focusNode: _model.nicTextFieldFocusNode,
                           autofocus: false,
                           obscureText: false,
                           decoration: InputDecoration(
@@ -498,8 +864,7 @@ class _DashboardProfileWidgetState extends State<DashboardProfileWidget> {
                                         .fontStyle,
                                   ),
                           cursorColor: FlutterFlowTheme.of(context).primaryText,
-                          validator: _model
-                              .passwordlTextFieldTextController1Validator
+                          validator: _model.nicTextFieldTextControllerValidator
                               .asValidator(context),
                         ),
                       ),
@@ -524,8 +889,8 @@ class _DashboardProfileWidgetState extends State<DashboardProfileWidget> {
                       child: Container(
                         width: 360.0,
                         child: TextFormField(
-                          controller: _model.passwordlTextFieldTextController2,
-                          focusNode: _model.passwordlTextFieldFocusNode2,
+                          controller: _model.phoneTextFieldTextController2,
+                          focusNode: _model.phoneTextFieldFocusNode,
                           autofocus: false,
                           obscureText: false,
                           decoration: InputDecoration(
@@ -621,7 +986,7 @@ class _DashboardProfileWidgetState extends State<DashboardProfileWidget> {
                                   ),
                           cursorColor: FlutterFlowTheme.of(context).primaryText,
                           validator: _model
-                              .passwordlTextFieldTextController2Validator
+                              .phoneTextFieldTextControllerValidator
                               .asValidator(context),
                         ),
                       ),
@@ -705,15 +1070,33 @@ class _DashboardProfileWidgetState extends State<DashboardProfileWidget> {
                       children: [
                         FFButtonWidget(
                           onPressed: () async {
-                            final firstName = _model.emailTextFieldTextController1?.text.trim() ?? '';
-                            final lastName = _model.emailTextFieldTextController2?.text.trim() ?? '';
-                            final nic = _model.passwordlTextFieldTextController1?.text.trim() ?? '';
-                            final phone = _model.passwordlTextFieldTextController2?.text.trim() ?? '';
-                            final gender = _model.dropDownValueController?.value ?? _model.dropDownValue;
+                            final firstName = _model
+                                    .firstNameTextFieldTextController?.text
+                                    .trim() ??
+                                '';
+                            final lastName = _model
+                                    .lastNameTextFieldController?.text
+                                    .trim() ??
+                                '';
+                            final nic = _model.nicTextFieldTextController?.text
+                                    .trim() ??
+                                '';
+                            final phone = _model
+                                    .phoneTextFieldTextController2?.text
+                                    .trim() ??
+                                '';
+                            final gender =
+                                _model.dropDownValueController?.value ??
+                                    _model.dropDownValue;
 
-                            if (firstName.isEmpty || lastName.isEmpty || nic.isEmpty || phone.isEmpty || gender == null) {
+                            if (firstName.isEmpty ||
+                                lastName.isEmpty ||
+                                nic.isEmpty ||
+                                phone.isEmpty ||
+                                gender == null) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Please fill in all fields')),
+                                const SnackBar(
+                                    content: Text('Please fill in all fields')),
                               );
                               return;
                             }
@@ -724,9 +1107,12 @@ class _DashboardProfileWidgetState extends State<DashboardProfileWidget> {
                                 throw Exception('User not logged in');
                               }
 
-                              final fullName = '$firstName $lastName'; // Combine them
+                              final fullName =
+                                  '$firstName $lastName'; // Combine them
 
-                              final userDoc = FirebaseFirestore.instance.collection('users').doc(user.uid);
+                              final userDoc = FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(user.uid);
                               await userDoc.update({
                                 'name': fullName, // ✅ store combined
                                 'nic': nic,
@@ -749,7 +1135,8 @@ class _DashboardProfileWidgetState extends State<DashboardProfileWidget> {
                               );
                             } catch (e) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Error: ${e.toString()}')),
+                                SnackBar(
+                                    content: Text('Error: ${e.toString()}')),
                               );
                             }
                           },

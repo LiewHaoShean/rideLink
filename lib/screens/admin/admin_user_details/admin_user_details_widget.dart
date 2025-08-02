@@ -16,6 +16,7 @@ import 'package:ride_link_carpooling/providers/user_provider.dart';
 import 'package:ride_link_carpooling/providers/vehicle_provider.dart';
 import 'package:ride_link_carpooling/models/car_information.dart';
 import 'package:ride_link_carpooling/providers/rating_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class AdminUserDetailsWidget extends StatefulWidget {
   final String userId;
@@ -69,10 +70,44 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
     super.dispose();
   }
 
+  Widget _buildUserProfilePicture(String? profilePictureUrl,
+      {double size = 100}) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Color(0xFFDDDEE0),
+        borderRadius: BorderRadius.circular(size / 2),
+      ),
+      child: profilePictureUrl != null && profilePictureUrl.isNotEmpty
+          ? ClipOval(
+              child: CachedNetworkImage(
+                imageUrl: profilePictureUrl,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                  ),
+                ),
+                errorWidget: (context, url, error) => Icon(
+                  Icons.person,
+                  color: FlutterFlowTheme.of(context).primaryText,
+                  size: size * 0.6,
+                ),
+              ),
+            )
+          : Icon(
+              Icons.person,
+              color: FlutterFlowTheme.of(context).primaryText,
+              size: size * 0.6,
+            ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    print("heyyy");
-    print(_rating);
+    // print("heyyy");
+    // print(_rating);
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -378,13 +413,9 @@ class _AdminUserDetailsWidgetState extends State<AdminUserDetailsWidget> {
                                                                         mainAxisAlignment:
                                                                             MainAxisAlignment.center,
                                                                         children: [
-                                                                          Icon(
-                                                                            Icons.person,
-                                                                            color:
-                                                                                FlutterFlowTheme.of(context).primaryText,
-                                                                            size:
-                                                                                40,
-                                                                          ),
+                                                                          _buildUserProfilePicture(
+                                                                              user.profilePictureUrl,
+                                                                              size: 70),
                                                                         ],
                                                                       ),
                                                                     ),

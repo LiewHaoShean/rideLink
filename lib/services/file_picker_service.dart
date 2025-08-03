@@ -5,12 +5,12 @@ import 'package:image_picker/image_picker.dart';
 class FilePickerService {
   final ImagePicker _imagePicker = ImagePicker();
 
-  /// Pick image from gallery
+  ///pick image from gallery
   Future<File?> pickImageFromGallery() async {
     try {
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.gallery,
-        imageQuality: 80, // Compress image
+        imageQuality: 80,
       );
 
       return image != null ? File(image.path) : null;
@@ -19,7 +19,7 @@ class FilePickerService {
     }
   }
 
-  /// Take photo with camera
+  ///camera take photo
   Future<File?> takePhotoWithCamera() async {
     try {
       final XFile? image = await _imagePicker.pickImage(
@@ -33,7 +33,7 @@ class FilePickerService {
     }
   }
 
-  /// Get image as bytes (useful for camera captures)
+  /// get image as byte
   Future<Uint8List?> getImageBytes(File imageFile) async {
     try {
       return await imageFile.readAsBytes();

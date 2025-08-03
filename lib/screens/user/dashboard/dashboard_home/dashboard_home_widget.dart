@@ -13,6 +13,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'dashboard_home_model.dart';
 export 'dashboard_home_model.dart';
 import 'package:ride_link_carpooling/providers/rating_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class DashboardHomeWidget extends StatefulWidget {
   final String userId;
@@ -72,6 +73,39 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
   void dispose() {
     _model.dispose();
     super.dispose();
+  }
+
+  Widget _buildUserProfilePicture(String? profilePictureUrl) {
+    return Container(
+      width: 50,
+      height: 50,
+      decoration: BoxDecoration(
+        color: Color(0xFFDDDEE0),
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: profilePictureUrl != null && profilePictureUrl.isNotEmpty
+          ? ClipOval(
+              child: CachedNetworkImage(
+                imageUrl: profilePictureUrl,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                  ),
+                ),
+                errorWidget: (context, url, error) => Icon(
+                  Icons.person,
+                  color: FlutterFlowTheme.of(context).primaryText,
+                  size: 30,
+                ),
+              ),
+            )
+          : Icon(
+              Icons.person,
+              color: FlutterFlowTheme.of(context).primaryText,
+              size: 30,
+            ),
+    );
   }
 
   @override
@@ -189,8 +223,8 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
                                                                               MainAxisAlignment.center,
                                                                           children: [
                                                                             Container(
-                                                                              width: 40,
-                                                                              height: 40,
+                                                                              width: 50,
+                                                                              height: 50,
                                                                               decoration: BoxDecoration(
                                                                                 color: FlutterFlowTheme.of(context).secondaryText,
                                                                                 borderRadius: BorderRadius.circular(100),
@@ -199,11 +233,7 @@ class _DashboardHomeWidgetState extends State<DashboardHomeWidget>
                                                                                 mainAxisSize: MainAxisSize.max,
                                                                                 mainAxisAlignment: MainAxisAlignment.center,
                                                                                 children: [
-                                                                                  Icon(
-                                                                                    Icons.person,
-                                                                                    color: FlutterFlowTheme.of(context).primaryBackground,
-                                                                                    size: 20,
-                                                                                  ),
+                                                                                  _buildUserProfilePicture(_model.currentUserProfile?.profilePictureUrl)
                                                                                 ],
                                                                               ),
                                                                             ),

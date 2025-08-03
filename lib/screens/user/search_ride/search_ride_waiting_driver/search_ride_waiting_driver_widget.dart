@@ -19,6 +19,7 @@ import 'package:ride_link_carpooling/providers/user_provider.dart';
 import 'package:ride_link_carpooling/providers/chat_provider.dart';
 import 'package:ride_link_carpooling/providers/trip_provider.dart';
 import '../../../../models/trip.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class PassengerInfo {
   final String passengerId;
@@ -85,6 +86,39 @@ class _SearchRideWaitingDriverWidgetState
     _model.dispose();
     _mapController?.dispose();
     super.dispose();
+  }
+
+  Widget _buildUserProfilePicture(String? profilePictureUrl) {
+    return Container(
+      width: 55,
+      height: 55,
+      decoration: BoxDecoration(
+        color: Color(0xFFDDDEE0),
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: profilePictureUrl != null && profilePictureUrl.isNotEmpty
+          ? ClipOval(
+              child: CachedNetworkImage(
+                imageUrl: profilePictureUrl,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                  ),
+                ),
+                errorWidget: (context, url, error) => Icon(
+                  Icons.person,
+                  color: FlutterFlowTheme.of(context).primaryText,
+                  size: 30,
+                ),
+              ),
+            )
+          : Icon(
+              Icons.person,
+              color: FlutterFlowTheme.of(context).primaryText,
+              size: 30,
+            ),
+    );
   }
 
   Future<void> loadTrips() async {
@@ -535,7 +569,8 @@ class _SearchRideWaitingDriverWidgetState
           child: Column(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 10.0, vertical: 10.0),
                 color: FlutterFlowTheme.of(context).secondaryBackground,
                 child: Row(
                   children: [
@@ -646,20 +681,8 @@ class _SearchRideWaitingDriverWidgetState
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Container(
-                                width: 55.0,
-                                height: 55.0,
-                                decoration: BoxDecoration(
-                                  color: FlutterFlowTheme.of(context)
-                                      .secondaryText,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.person,
-                                  color: Colors.white,
-                                  size: 35.0,
-                                ),
-                              ),
+                              _buildUserProfilePicture(
+                                  _currentUserData?['profilePictureUrl']),
                               const SizedBox(width: 10.0),
                               Expanded(
                                 child: Column(
@@ -728,25 +751,22 @@ class _SearchRideWaitingDriverWidgetState
                                                     _userTrips[0]['car'] != null
                                                         ? '${_userTrips[0]['car']['plateNumber']}, ${_userTrips[0]['car']['brand']} ${_userTrips[0]['car']['model']}, ${_userTrips[0]['car']['color']}'
                                                         : 'Car info unavailable',
-                                                    style:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .bodyMedium
-                                                            .override(
-                                                              fontFamily:
-                                                                  'Inter',
-                                                              fontSize: 14.0,
-                                                              color:
-                                                                  FlutterFlowTheme
-                                                                          .of(
-                                                                              context)
-                                                                      .secondaryText,
-                                                              letterSpacing: 0.0,
-                                                            ),
+                                                    style: FlutterFlowTheme.of(
+                                                            context)
+                                                        .bodyMedium
+                                                        .override(
+                                                          fontFamily: 'Inter',
+                                                          fontSize: 14.0,
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .secondaryText,
+                                                          letterSpacing: 0.0,
+                                                        ),
                                                   ),
                                                 ],
                                               )
-                                            : const Text('No trip data available'),
+                                            : const Text(
+                                                'No trip data available'),
                                   ],
                                 ),
                               ),

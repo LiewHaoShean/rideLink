@@ -62,48 +62,6 @@ class RatingService {
     }
   }
 
-  // Get average ratings by trip ID
-  Future<double> getAverageRatingsByTripId(String tripId) async {
-    try {
-      final querySnapshot =
-          await ratingsCollection.where('tripId', isEqualTo: tripId).get();
-
-      if (querySnapshot.docs.isEmpty) {
-        return 0.0; // No ratings found
-      }
-
-      double totalRating = 0.0;
-      int count = 0;
-
-      for (var doc in querySnapshot.docs) {
-        final data = doc.data() as Map<String, dynamic>;
-        totalRating += (data['rating'] ?? 0.0).toDouble();
-        count++;
-      }
-
-      return count > 0 ? totalRating / count : 0.0;
-    } catch (e) {
-      print('Error getting average ratings by trip ID: $e');
-      return 0.0;
-    }
-  }
-
-  // Get rating by rating ID
-  Future<Rating?> getRatingById(String ratingId) async {
-    try {
-      final doc = await ratingsCollection.doc(ratingId).get();
-      if (!doc.exists) {
-        return null;
-      }
-      final data = doc.data() as Map<String, dynamic>;
-      data['ratingId'] = doc.id;
-      return Rating.fromJson(data);
-    } catch (e) {
-      print('Error getting rating by ID: $e');
-      return null;
-    }
-  }
-
   // Get all ratings
   Future<List<Rating>> getAllRatings() async {
     try {
@@ -118,29 +76,6 @@ class RatingService {
     } catch (e) {
       print('Error getting all ratings: $e');
       return [];
-    }
-  }
-
-  // Update rating
-  Future<void> updateRating(String ratingId, double newRating) async {
-    try {
-      await ratingsCollection.doc(ratingId).update({
-        'rating': newRating,
-        'datetime': Timestamp.fromDate(DateTime.now()),
-      });
-    } catch (e) {
-      print('Error updating rating: $e');
-      rethrow;
-    }
-  }
-
-  // Delete rating
-  Future<void> deleteRating(String ratingId) async {
-    try {
-      await ratingsCollection.doc(ratingId).delete();
-    } catch (e) {
-      print('Error deleting rating: $e');
-      rethrow;
     }
   }
 }

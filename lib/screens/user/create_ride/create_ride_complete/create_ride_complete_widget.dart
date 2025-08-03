@@ -19,6 +19,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:ride_link_carpooling/models/user.dart';
 import 'package:ride_link_carpooling/models/car_information.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class CreateRideCompleteWidget extends StatefulWidget {
   final String rideId;
@@ -65,6 +66,39 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
     });
 
     print('Rating selected: $rating');
+  }
+
+  Widget _buildUserProfilePicture(String? profilePictureUrl) {
+    return Container(
+      width: 55,
+      height: 55,
+      decoration: BoxDecoration(
+        color: Color(0xFFDDDEE0),
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: profilePictureUrl != null && profilePictureUrl.isNotEmpty
+          ? ClipOval(
+              child: CachedNetworkImage(
+                imageUrl: profilePictureUrl,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                  ),
+                ),
+                errorWidget: (context, url, error) => Icon(
+                  Icons.person,
+                  color: FlutterFlowTheme.of(context).primaryText,
+                  size: 30,
+                ),
+              ),
+            )
+          : Icon(
+              Icons.person,
+              color: FlutterFlowTheme.of(context).primaryText,
+              size: 30,
+            ),
+    );
   }
 
   Future<void> fetchTrip() async {
@@ -801,15 +835,8 @@ class _CreateRideCompleteWidgetState extends State<CreateRideCompleteWidget> {
                                                                       ),
                                                                       child:
                                                                           Center(
-                                                                        child:
-                                                                            Icon(
-                                                                          Icons
-                                                                              .person,
-                                                                          color:
-                                                                              FlutterFlowTheme.of(context).primaryBackground,
-                                                                          size:
-                                                                              35,
-                                                                        ),
+                                                                        child: _buildUserProfilePicture(
+                                                                            driver?.profilePictureUrl),
                                                                       ),
                                                                     ),
                                                                   ],

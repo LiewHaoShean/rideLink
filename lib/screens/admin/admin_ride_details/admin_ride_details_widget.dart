@@ -5,6 +5,7 @@ import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -48,6 +49,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
     final userProvider = context.read<UserProvider>();
     final user = userProvider.getUserById(passenger.passengerId);
     final userName = user?.name ?? 'Unknown User';
+    final userProfileURL = user?.profilePictureUrl ?? '';
 
     return Container(
       width: 406.6,
@@ -85,12 +87,7 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
                             mainAxisSize: MainAxisSize.max,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
-                                Icons.person,
-                                color: FlutterFlowTheme.of(context)
-                                    .primaryBackground,
-                                size: 30,
-                              ),
+                              _buildUserProfilePicture(userProfileURL)
                             ],
                           ),
                         ),
@@ -181,6 +178,39 @@ class _AdminRideDetailsWidgetState extends State<AdminRideDetailsWidget> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildUserProfilePicture(String? profilePictureUrl) {
+    return Container(
+      width: 55,
+      height: 55,
+      decoration: BoxDecoration(
+        color: Color(0xFFDDDEE0),
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: profilePictureUrl != null && profilePictureUrl.isNotEmpty
+          ? ClipOval(
+              child: CachedNetworkImage(
+                imageUrl: profilePictureUrl,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                  ),
+                ),
+                errorWidget: (context, url, error) => Icon(
+                  Icons.person,
+                  color: FlutterFlowTheme.of(context).primaryText,
+                  size: 30,
+                ),
+              ),
+            )
+          : Icon(
+              Icons.person,
+              color: FlutterFlowTheme.of(context).primaryText,
+              size: 30,
+            ),
     );
   }
 

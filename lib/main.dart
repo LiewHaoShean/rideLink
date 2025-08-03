@@ -353,9 +353,6 @@ class _NavBarPageState extends State<NavBarPage> {
                         ),
                       }.withoutNulls,
                     );
-                    // await context
-                    //     .read<LicenseProvider>()
-                    //     .changeLicenseInformedStatus(user.uid, true);
                   }
                   Navigator.push(
                     context,

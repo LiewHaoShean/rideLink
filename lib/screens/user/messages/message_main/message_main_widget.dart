@@ -7,6 +7,7 @@ import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:ui';
 import '/index.dart';
 import 'package:flutter/material.dart';
@@ -70,6 +71,39 @@ class _MessageMainWidgetState extends State<MessageMainWidget>
     _model.dispose();
 
     super.dispose();
+  }
+
+  Widget _buildUserProfilePicture(String? profilePictureUrl) {
+    return Container(
+      width: 55,
+      height: 55,
+      decoration: BoxDecoration(
+        color: Color(0xFFDDDEE0),
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: profilePictureUrl != null && profilePictureUrl.isNotEmpty
+          ? ClipOval(
+              child: CachedNetworkImage(
+                imageUrl: profilePictureUrl,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                  ),
+                ),
+                errorWidget: (context, url, error) => Icon(
+                  Icons.person,
+                  color: FlutterFlowTheme.of(context).primaryText,
+                  size: 30,
+                ),
+              ),
+            )
+          : Icon(
+              Icons.person,
+              color: FlutterFlowTheme.of(context).primaryText,
+              size: 30,
+            ),
+    );
   }
 
   @override
@@ -243,7 +277,6 @@ class _MessageMainWidgetState extends State<MessageMainWidget>
                                                     mainAxisSize:
                                                         MainAxisSize.max,
                                                     children: [
-                                                      // ... your unchanged UI ...
                                                       Expanded(
                                                           child: Container(
                                                         width: 100,
@@ -455,7 +488,6 @@ class _MessageMainWidgetState extends State<MessageMainWidget>
                                                                   ),
                                                                 ],
                                                               ),
-                                                              // ... arrow column unchanged ...
                                                               Column(
                                                                 mainAxisSize:
                                                                     MainAxisSize
@@ -572,6 +604,10 @@ class _MessageMainWidgetState extends State<MessageMainWidget>
                                                         receiver?.name ??
                                                             'Unknown';
 
+                                                    final receiverProfileURL =
+                                                        receiver?.profilePictureUrl ??
+                                                            '';
+
                                                     final formattedDate = chat
                                                                 .lastUpdated !=
                                                             null
@@ -669,11 +705,7 @@ class _MessageMainWidgetState extends State<MessageMainWidget>
                                                                                   mainAxisSize: MainAxisSize.max,
                                                                                   mainAxisAlignment: MainAxisAlignment.center,
                                                                                   children: [
-                                                                                    Icon(
-                                                                                      Icons.person,
-                                                                                      color: FlutterFlowTheme.of(context).primaryBackground,
-                                                                                      size: 35,
-                                                                                    ),
+                                                                                    _buildUserProfilePicture(receiverProfileURL)
                                                                                   ],
                                                                                 ),
                                                                               ),

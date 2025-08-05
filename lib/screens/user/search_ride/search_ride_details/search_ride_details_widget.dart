@@ -16,6 +16,7 @@ export 'search_ride_details_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ride_link_carpooling/models/trip.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class SearchRideDetailsWidget extends StatefulWidget {
   final String? rideId;
@@ -53,6 +54,39 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
     _loadRideDetails();
   }
 
+  Widget _buildUserProfilePicture(String? profilePictureUrl) {
+    return Container(
+      width: 55,
+      height: 55,
+      decoration: BoxDecoration(
+        color: Color(0xFFDDDEE0),
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: profilePictureUrl != null && profilePictureUrl.isNotEmpty
+          ? ClipOval(
+              child: CachedNetworkImage(
+                imageUrl: profilePictureUrl,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                  ),
+                ),
+                errorWidget: (context, url, error) => Icon(
+                  Icons.person,
+                  color: FlutterFlowTheme.of(context).primaryText,
+                  size: 30,
+                ),
+              ),
+            )
+          : Icon(
+              Icons.person,
+              color: FlutterFlowTheme.of(context).primaryText,
+              size: 30,
+            ),
+    );
+  }
+
   /// Load the ride + driver + car in one go
   Future<void> _loadRideDetails() async {
     if (widget.rideId == null) return;
@@ -71,6 +105,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
       final creatorUid = ride['creatorId'] as String?;
       String creatorName = 'Unknown';
       String creatorGender = 'male';
+      String profilePictureUrl = '';
 
       if (creatorUid != null) {
         final userDoc = await FirebaseFirestore.instance
@@ -79,8 +114,10 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
             .get();
 
         if (userDoc.exists) {
+          print(userDoc);
           creatorName = userDoc['name'] ?? 'Unknown';
           creatorGender = userDoc['gender'] ?? 'male';
+          profilePictureUrl = userDoc['profilePictureUrl'] ?? '';
         }
       }
 
@@ -137,6 +174,7 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
           'uid': creatorUid,
           'name': creatorName,
           'gender': creatorGender,
+          'profilePictureUrl': profilePictureUrl
         };
         carData = carInfo;
       });
@@ -1028,36 +1066,10 @@ class _SearchRideDetailsWidgetState extends State<SearchRideDetailsWidget> {
                                                                         mainAxisAlignment:
                                                                             MainAxisAlignment.center,
                                                                         children: [
-                                                                          Padding(
-                                                                            padding: EdgeInsetsDirectional.fromSTEB(
-                                                                                0,
-                                                                                0,
-                                                                                5,
-                                                                                0),
-                                                                            child:
-                                                                                FaIcon(
-                                                                              FontAwesomeIcons.userCircle,
-                                                                              color: FlutterFlowTheme.of(context).secondaryText,
-                                                                              size: 44,
-                                                                            ),
-                                                                          ),
+                                                                          _buildUserProfilePicture(creatorData?['profilePictureUrl'] ??
+                                                                              '')
                                                                         ],
-                                                                      ),
-                                                                      Column(
-                                                                        mainAxisSize:
-                                                                            MainAxisSize.max,
-                                                                        mainAxisAlignment:
-                                                                            MainAxisAlignment.center,
-                                                                        children: [
-                                                                          Icon(
-                                                                            Icons.arrow_forward_ios_sharp,
-                                                                            color:
-                                                                                FlutterFlowTheme.of(context).secondaryText,
-                                                                            size:
-                                                                                28,
-                                                                          ),
-                                                                        ],
-                                                                      ),
+                                                                      )
                                                                     ],
                                                                   ),
                                                                 ),

@@ -13,6 +13,7 @@ export 'create_ride_waiting_list_model.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class CreateRideWaitingListWidget extends StatefulWidget {
   final String rideId;
@@ -70,6 +71,39 @@ class _CreateRideWaitingListWidgetState
       matchedTrips = trips;
       isLoading = false;
     });
+  }
+
+  Widget _buildUserProfilePicture(String? profilePictureUrl) {
+    return Container(
+      width: 55,
+      height: 55,
+      decoration: BoxDecoration(
+        color: Color(0xFFDDDEE0),
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: profilePictureUrl != null && profilePictureUrl.isNotEmpty
+          ? ClipOval(
+              child: CachedNetworkImage(
+                imageUrl: profilePictureUrl,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                  ),
+                ),
+                errorWidget: (context, url, error) => Icon(
+                  Icons.person,
+                  color: FlutterFlowTheme.of(context).primaryText,
+                  size: 30,
+                ),
+              ),
+            )
+          : Icon(
+              Icons.person,
+              color: FlutterFlowTheme.of(context).primaryText,
+              size: 30,
+            ),
+    );
   }
 
   Future<List<Map<String, dynamic>>> _fetchUserTrips() async {
@@ -607,9 +641,13 @@ class _CreateRideWaitingListWidgetState
                                   }
 
                                   String name = 'Unknown';
+                                  String profileURL = '';
                                   if (userSnapshot.hasData &&
                                       userSnapshot.data!.exists) {
                                     name = userSnapshot.data!.data()?['name'] ??
+                                        'Unknown';
+                                    profileURL = userSnapshot.data!
+                                            .data()?['profilePictureUrl'] ??
                                         'Unknown';
                                   }
 
@@ -631,21 +669,7 @@ class _CreateRideWaitingListWidgetState
                                           MainAxisAlignment.center,
                                       children: [
                                         // Avatar/Icon
-                                        Container(
-                                          width: 55,
-                                          height: 55,
-                                          decoration: BoxDecoration(
-                                            color: FlutterFlowTheme.of(context)
-                                                .secondaryText,
-                                            borderRadius:
-                                                BorderRadius.circular(100),
-                                          ),
-                                          child: const Icon(
-                                            Icons.person,
-                                            color: Colors.white,
-                                            size: 35,
-                                          ),
-                                        ),
+                                        _buildUserProfilePicture(profileURL),
                                         // Info
                                         Padding(
                                           padding:

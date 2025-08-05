@@ -165,11 +165,11 @@ class LicenseProvider with ChangeNotifier {
 
     try {
       await _licenseService.changeLicenseInformedStatus(userId, status);
-      await getAllLicense(); // Refresh the list
+      await getAllLicense();
     } catch (e) {
       _error = e.toString();
       notifyListeners();
-      throw e; // Re-throw so the calling code can handle the error
+      throw e;
     } finally {
       _isLoading = false;
       notifyListeners();
